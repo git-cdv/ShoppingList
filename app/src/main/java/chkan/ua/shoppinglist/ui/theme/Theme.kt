@@ -1,6 +1,5 @@
-package chkan.example.shoppinglist.ui.theme
+package chkan.ua.shoppinglist.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

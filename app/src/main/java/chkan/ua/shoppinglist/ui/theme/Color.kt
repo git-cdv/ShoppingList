@@ -1,4 +1,4 @@
-package chkan.example.shoppinglist.ui.theme
+package chkan.ua.shoppinglist.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
