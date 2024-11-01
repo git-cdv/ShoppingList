@@ -1,17 +1,20 @@
 [versions]
 agp = "8.5.1"
-kotlin = "1.9.0"
+kotlin = "1.9.22"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.6"
 activityCompose = "1.9.3"
-composeBom = "2024.04.01"
+composeBom = "2024.10.01"
 jetbrainsKotlinJvm = "1.9.0"
 roomRuntime = "2.6.1"
 ksp = "1.9.22-1.0.17"
 hilt = "2.51.1"
+appcompat = "1.7.0"
+material = "1.12.0"
+navigation = "2.8.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -33,6 +36,9 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+nav-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
 
 [plugins]
 hilt = {id = "com.google.dagger.hilt.android", version.ref = "hilt"}
