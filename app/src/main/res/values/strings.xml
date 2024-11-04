@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ShoppingList</string>
+    <string name="first_list_text_placeholder">e.g grocery list or weekly</string>
+    <string name="first_list_text_title">What title would you like for the list?</string>
 </resources>

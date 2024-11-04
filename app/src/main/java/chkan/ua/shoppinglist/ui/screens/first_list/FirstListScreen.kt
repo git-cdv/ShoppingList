@@ -1,20 +1,24 @@
 package chkan.ua.shoppinglist.ui.screens.first_list
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
+import chkan.ua.shoppinglist.ui.kit.RoundedTextField
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 
 @Composable
@@ -27,19 +31,38 @@ fun FirstListScreen(){
 
 @Composable
 fun FirstListContent(navigateToItems: ()-> Unit){
-    Box(modifier = Modifier.fillMaxSize()){
-        Text(text = "FirstListScreen", modifier = Modifier.align(Alignment.Center))
-        FloatingActionButton(
-            onClick = { navigateToItems.invoke() },
+
+    var listNameText by remember { mutableStateOf("") }
+
+    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+        val (textField, textTitle) = createRefs()
+        val centerLine = createGuidelineFromTop(0.5f)
+
+        RoundedTextField(
+            value = listNameText,
+            onValueChange = {newText -> listNameText = newText},
+            roundedCornerRes = R.dimen.rounded_corner,
+            placeholderTextRes = R.string.first_list_text_placeholder,
             modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add"
-            )
-        }
+                .fillMaxWidth()
+                .padding(horizontal = dimensionResource(id = R.dimen.horizontal_root_padding))
+                .constrainAs(textField) {
+                    bottom.linkTo(centerLine)
+                }
+        )
+
+        Text(
+            text = stringResource(id = R.string.first_list_text_title),
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(horizontal = dimensionResource(id = R.dimen.horizontal_root_padding), vertical = dimensionResource(id = R.dimen.vertical_inner_padding))
+                .constrainAs(textTitle) {
+                    bottom.linkTo(textField.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                })
+
     }
 }
 

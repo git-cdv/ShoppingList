@@ -8,4 +8,5 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="secondary">#FFFFFFFF</color>
+    <color name="hint">#A0A0A0</color>
 </resources>
