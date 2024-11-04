@@ -3,6 +3,11 @@ package chkan.ua.shoppinglist.ui.screens.first_list
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +48,7 @@ fun FirstListContent(navigateToItems: ()-> Unit){
             onValueChange = {newText -> listNameText = newText},
             roundedCornerRes = R.dimen.rounded_corner,
             placeholderTextRes = R.string.first_list_text_placeholder,
+            onDone = { navigateToItems.invoke() },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = dimensionResource(id = R.dimen.horizontal_root_padding))
