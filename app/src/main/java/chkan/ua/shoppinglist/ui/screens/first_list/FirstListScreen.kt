@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -14,12 +15,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.constraintlayout.compose.ConstraintLayout
+import chkan.ua.core.services.DateService
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.core.services.SuggestionsService
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
 import chkan.ua.shoppinglist.ui.kit.RoundedTextField
@@ -29,20 +33,27 @@ import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 @Composable
 fun FirstListScreen(){
     val navController = localNavController.current
-    FirstListContent{
+    val today = DateService().getTodayByPattern("dd.MM.yy")
+    val suggestions = SuggestionsService().withToday(today,LocalContext.current)
+
+    FirstListContent(suggestions){
         navController.navigate(ItemsRoute)
     }
 }
 
 @Composable
-fun FirstListContent(navigateToItems: ()-> Unit){
+fun FirstListContent(suggestions: List<String>, navigateToItems: () -> Unit){
 
     var listNameText by rememberSaveable { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-        val (textField, textTitle, suggestions) = createRefs()
+        val (textField, textTitle, suggestionsView) = createRefs()
         val centerLine = createGuidelineFromTop(0.5f)
 
         RoundedTextField(
@@ -73,7 +84,7 @@ fun FirstListContent(navigateToItems: ()-> Unit){
                 })
 
         SuggestionsHorizontalList(
-            suggestions = listOf("Products", "Today", "05.11.24", "AtHome","Products", "Today", "05.11.24", "AtHome"),
+            suggestions = suggestions,
             onSuggestionChoose = {
                 suggestion -> listNameText = suggestion
                 focusManager.clearFocus()
@@ -81,7 +92,7 @@ fun FirstListContent(navigateToItems: ()-> Unit){
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = dimensionResource(id = R.dimen.vertical_inner_padding))
-                .constrainAs(suggestions) {
+                .constrainAs(suggestionsView) {
                     top.linkTo(textField.bottom)
                 }
         )
@@ -93,6 +104,6 @@ fun FirstListContent(navigateToItems: ()-> Unit){
 @Composable
 fun FirstListPreview() {
     ShoppingListTheme {
-        FirstListContent {}
+        FirstListContent(listOf("Products", "Today", "05.11.24", "Home")) {}
     }
 }

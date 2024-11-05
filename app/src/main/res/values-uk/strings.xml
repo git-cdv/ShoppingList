@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">ShoppingList</string>
+    <string name="first_list_text_placeholder">напр. продукти або вихідні</string>
+    <string name="first_list_text_title">Як назвати ваш список?</string>
+    <string name="groceries">Продукти</string>
+    <string name="shopping">Покупки</string>
+    <string name="weekend">Вихідні</string>
+    <string name="urgently">Терміново</string>
+    <string name="food">Їжа</string>
+    <string name="trip">Поїздка</string>
+    <string name="home">Дім</string>
+    <string name="drug">Ліки</string>
+    <string name="supermarket">Супермаркет</string>
+</resources>

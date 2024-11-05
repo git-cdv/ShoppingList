@@ -1,5 +1,14 @@
 <resources>
     <string name="app_name">ShoppingList</string>
     <string name="first_list_text_placeholder">e.g grocery list or weekly</string>
-    <string name="first_list_text_title">What title would you like for the list?</string>
+    <string name="first_list_text_title">What should you name your list?</string>
+    <string name="groceries">Groceries</string>
+    <string name="shopping">Shopping</string>
+    <string name="weekend">Weekend</string>
+    <string name="urgently">Urgently</string>
+    <string name="food">Food</string>
+    <string name="trip">Trip</string>
+    <string name="home">Home</string>
+    <string name="drug">Drug</string>
+    <string name="supermarket">Supermarket</string>
 </resources>
