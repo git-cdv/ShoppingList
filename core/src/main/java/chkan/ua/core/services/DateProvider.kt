@@ -4,8 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class DateService {
-
+class DateProvider {
     /**
      * Returns the current date as a formatted string based on the specified pattern.
      *

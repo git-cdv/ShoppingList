@@ -21,7 +21,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.constraintlayout.compose.ConstraintLayout
-import chkan.ua.core.services.DateService
+import chkan.ua.core.services.DateProvider
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.core.services.SuggestionsService
 import chkan.ua.shoppinglist.navigation.ItemsRoute
@@ -33,16 +33,17 @@ import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 @Composable
 fun FirstListScreen(){
     val navController = localNavController.current
-    val today = DateService().getTodayByPattern("dd.MM.yy")
+    val today = DateProvider().getTodayByPattern("dd.MM.yy")
     val suggestions = SuggestionsService().withToday(today,LocalContext.current)
 
-    FirstListContent(suggestions){
+    FirstListContent(suggestions){ name ->
+
         navController.navigate(ItemsRoute)
     }
 }
 
 @Composable
-fun FirstListContent(suggestions: List<String>, navigateToItems: () -> Unit){
+fun FirstListContent(suggestions: List<String>, addListWithName: (String) -> Unit){
 
     var listNameText by rememberSaveable { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
@@ -61,7 +62,7 @@ fun FirstListContent(suggestions: List<String>, navigateToItems: () -> Unit){
             onValueChange = {newText -> listNameText = newText},
             roundedCornerRes = R.dimen.rounded_corner,
             placeholderTextRes = R.string.first_list_text_placeholder,
-            onDone = { navigateToItems.invoke() },
+            onDone = { addListWithName.invoke(listNameText) },
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(focusRequester)
