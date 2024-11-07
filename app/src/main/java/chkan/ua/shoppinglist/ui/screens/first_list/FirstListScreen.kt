@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.constraintlayout.compose.ConstraintLayout
 import chkan.ua.core.services.DateProvider
 import chkan.ua.shoppinglist.R
-import chkan.ua.shoppinglist.core.services.SuggestionsService
+import chkan.ua.shoppinglist.core.services.SuggestionsProvider
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
 import chkan.ua.shoppinglist.ui.kit.RoundedTextField
@@ -34,7 +34,7 @@ import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 fun FirstListScreen(){
     val navController = localNavController.current
     val today = DateProvider().getTodayByPattern("dd.MM.yy")
-    val suggestions = SuggestionsService().withToday(today,LocalContext.current)
+    val suggestions = SuggestionsProvider().withToday(today,LocalContext.current)
 
     FirstListContent(suggestions){ name ->
 

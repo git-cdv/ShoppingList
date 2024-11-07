@@ -3,7 +3,7 @@ package chkan.ua.shoppinglist.core.services
 import android.content.Context
 import chkan.ua.shoppinglist.R
 
-class SuggestionsService {
+class SuggestionsProvider {
 
     fun withToday(today: String, context: Context): List<String> {
         return listOf(

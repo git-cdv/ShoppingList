@@ -1,4 +1,4 @@
-package chkan.ua.core.services
+package chkan.ua.shoppinglist.core.services
 
 import chkan.ua.core.interfaces.ErrorReasonGenerator
 
