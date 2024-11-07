@@ -3,12 +3,12 @@ package chkan.ua.shoppinglist.core.services
 import chkan.ua.core.interfaces.ErrorReasonGenerator
 
 interface ErrorHandler {
-    fun handle(e:Exception, reason: ErrorReasonGenerator)
+    fun handle(e:Exception, reason: String)
 }
 
 class ErrorHandlerBase : ErrorHandler {
 
-    override fun handle(e: Exception, reason: ErrorReasonGenerator) {
+    override fun handle(e: Exception, reason: String) {
 
     }
 

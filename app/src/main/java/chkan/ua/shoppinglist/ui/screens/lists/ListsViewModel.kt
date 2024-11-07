@@ -37,7 +37,7 @@ class ListsViewModel @Inject constructor(
             try {
                 addList.run(name)
             } catch (e: Exception){
-                errorHandler.handle(e,addList)
+                errorHandler.handle(e,addList.getErrorReason())
             }
         }
     }
