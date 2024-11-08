@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen().apply {
             setKeepOnScreenCondition {
-                listsViewModel.isListsExist.value is ListsExistResult.Result
+                listsViewModel.isListsExist.value !is ListsExistResult.Result
             }
         }
         enableEdgeToEdge()

@@ -1,4 +1,4 @@
-package chkan.ua.domain.usecases
+package chkan.ua.domain.usecases.lists
 
 import chkan.ua.core.interfaces.FlowUseCase
 import chkan.ua.domain.repos.ListsRepository

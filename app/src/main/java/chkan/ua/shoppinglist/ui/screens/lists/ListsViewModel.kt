@@ -4,10 +4,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import chkan.ua.domain.usecases.AddListConfig
-import chkan.ua.domain.usecases.AddListUseCase
-import chkan.ua.domain.usecases.GetListsCountUseCase
-import chkan.ua.domain.usecases.GetListsFlowUseCase
+import chkan.ua.domain.usecases.lists.AddListConfig
+import chkan.ua.domain.usecases.lists.AddListUseCase
+import chkan.ua.domain.usecases.lists.DeleteListUseCase
+import chkan.ua.domain.usecases.lists.GetListsCountUseCase
+import chkan.ua.domain.usecases.lists.GetListsFlowUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +20,7 @@ class ListsViewModel @Inject constructor(
     getListsFlow: GetListsFlowUseCase,
     private val addList: AddListUseCase,
     private val getListsCount: GetListsCountUseCase,
+    private val deleteList: DeleteListUseCase,
     private val errorHandler: ErrorHandler,
 ) : ViewModel() {
 
@@ -41,6 +43,16 @@ class ListsViewModel @Inject constructor(
                 addList.run(AddListConfig(title,count + 1))
             } catch (e: Exception){
                 errorHandler.handle(e,addList.getErrorReason())
+            }
+        }
+    }
+
+    fun deleteList(id: Int) {
+        viewModelScope.launch (Dispatchers.IO) {
+            try {
+                deleteList.run(id)
+            } catch (e: Exception){
+                errorHandler.handle(e,deleteList.getErrorReason())
             }
         }
     }
