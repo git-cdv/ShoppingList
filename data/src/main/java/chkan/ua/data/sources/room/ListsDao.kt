@@ -1,6 +1,5 @@
 package chkan.ua.data.sources.room
 
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
@@ -19,4 +18,7 @@ interface ListsDao {
     @Transaction
     @Query("SELECT * FROM lists")
     fun getListsWithItemsFlow(): Flow<List<ListWithItems>>
+
+    @Query("SELECT COUNT(*) FROM lists")
+    suspend fun getListCount(): Int
 }

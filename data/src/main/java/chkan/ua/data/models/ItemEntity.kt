@@ -3,6 +3,7 @@ package chkan.ua.data.models
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import chkan.ua.domain.models.Item
 
 @Entity(
     tableName = "items",
@@ -23,3 +24,7 @@ data class ItemEntity(
     val position: Int,
     val isReady: Boolean
 )
+
+fun List<ItemEntity>.mapToItems() : List<Item>{
+    return this.map { Item(it.itemId, content = it.content, position = it.position, isReady = it.isReady) }
+}

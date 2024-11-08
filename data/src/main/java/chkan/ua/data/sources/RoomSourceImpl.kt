@@ -23,4 +23,6 @@ class RoomSourceImpl @Inject constructor (
     override suspend fun deleteList(listId: Int) {
         listsDao.deleteListById(listId)
     }
+
+    override suspend fun getListCount() = listsDao.getListCount()
 }

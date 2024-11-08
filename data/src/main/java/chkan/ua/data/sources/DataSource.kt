@@ -8,4 +8,5 @@ interface DataSource {
     fun getListsWithItemsFlow(): Flow<List<ListWithItems>>
     suspend fun addList(list: ListEntity)
     suspend fun deleteList(listId: Int)
+    suspend fun getListCount(): Int
 }
