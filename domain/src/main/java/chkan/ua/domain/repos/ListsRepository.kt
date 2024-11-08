@@ -1,5 +1,7 @@
 package chkan.ua.domain.repos
 
 interface ListsRepository {
-    suspend fun addList(name: String)
+    fun getListsWithItemsFlow(): Flow<List<ListWithItems>>
+    suspend fun addList(list: ListEntity)
+    suspend fun deleteList(listId: Int)
 }
