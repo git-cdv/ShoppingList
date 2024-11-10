@@ -1,5 +1,6 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -34,10 +35,12 @@ fun ListsScreenContent(
     )
 
     LazyColumn(
-        Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background)
+        Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
     ){
         items(lists, key = {it.id}){ list ->
-            ListItem(text = list.title){
+            ListItem(text = list.title, modifier = Modifier.animateItem()){
                 listsViewModel.deleteList(list.id)
             }
         }
@@ -45,12 +48,15 @@ fun ListsScreenContent(
 }
 
 @Composable
-fun ListItem(text: String, onCardClick: () -> Unit){
+fun ListItem(
+    text: String,
+    modifier: Modifier,
+    onCardClick: () -> Unit){
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp, pressedElevation = 2.dp),
         shape = RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)),
         onClick = {onCardClick.invoke()},
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(
                 vertical = dimensionResource(id = R.dimen.vertical_inner_padding),
