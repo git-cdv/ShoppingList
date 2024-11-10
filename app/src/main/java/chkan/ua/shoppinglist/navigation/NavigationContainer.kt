@@ -1,5 +1,6 @@
 package chkan.ua.shoppinglist.navigation
 
+import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,7 +13,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import chkan.ua.shoppinglist.ui.screens.first_list.FirstListScreen
 import chkan.ua.shoppinglist.ui.screens.items.ItemsScreen
-import chkan.ua.shoppinglist.ui.screens.lists.ListsExistResult
 import chkan.ua.shoppinglist.ui.screens.lists.ListsScreen
 import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 
@@ -22,8 +22,8 @@ fun NavigationContainer(
     listsViewModel: ListsViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
-    val isListsExist = (listsViewModel.isListsExist.value as? ListsExistResult.Result)?.isExist
-    val startDestination = if (isListsExist == true) ListsRoute else FirstListRoute
+    Log.d("CHKAN", "isListsExist: ${listsViewModel.isListExist()}")
+    val startDestination = if (listsViewModel.isListExist()) ListsRoute else FirstListRoute
 
     CompositionLocalProvider(
         localNavController provides navController
@@ -31,7 +31,9 @@ fun NavigationContainer(
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)) {
             composable(FirstListRoute) { FirstListScreen() }
             composable(ItemsRoute) { ItemsScreen() }
             composable(ListsRoute) { ListsScreen() }

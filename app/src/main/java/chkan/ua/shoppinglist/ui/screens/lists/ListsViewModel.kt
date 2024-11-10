@@ -27,14 +27,16 @@ class ListsViewModel @Inject constructor(
     init {
         viewModelScope.launch (Dispatchers.IO) {
             val count = getListsCount.run(Unit)
-            _isListsExist.value = ListsExistResult.Result(count > 0)
+            isListsExist = count > 0
+            _isLoadReady.value = true
         }
     }
 
     val listsFlow = getListsFlow.run()
+    private var isListsExist = false
 
-    private val _isListsExist = mutableStateOf<ListsExistResult>(ListsExistResult.Checking)
-    val isListsExist: State<ListsExistResult> = _isListsExist
+    private val _isLoadReady = mutableStateOf(false)
+    val isLoadReady: State<Boolean> = _isLoadReady
 
     fun addList(title: String){
         viewModelScope.launch (Dispatchers.IO) {
@@ -56,9 +58,6 @@ class ListsViewModel @Inject constructor(
             }
         }
     }
-}
 
-sealed class ListsExistResult{
-    data object Checking : ListsExistResult()
-    data class Result (val isExist: Boolean) : ListsExistResult()
+    fun isListExist() = isListsExist
 }

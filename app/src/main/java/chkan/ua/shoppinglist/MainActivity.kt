@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import chkan.ua.shoppinglist.navigation.NavigationContainer
-import chkan.ua.shoppinglist.ui.screens.lists.ListsExistResult
 import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,14 +25,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen().apply {
             setKeepOnScreenCondition {
-                listsViewModel.isListsExist.value !is ListsExistResult.Result
+                !listsViewModel.isLoadReady.value
             }
         }
         enableEdgeToEdge()
         setContent {
             ShoppingListTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NavigationContainer(innerPadding,listsViewModel)
+                    if (listsViewModel.isLoadReady.value) {
+                        NavigationContainer(innerPadding, listsViewModel)
+                    }
                 }
             }
         }
