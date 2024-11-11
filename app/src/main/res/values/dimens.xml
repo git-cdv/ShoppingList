@@ -4,8 +4,8 @@
     <dimen name="normal_border_width">2dp</dimen>
     <dimen name="card_border_width">6dp</dimen>
     <dimen name="rounded_corner">16dp</dimen>
-    <dimen name="horizontal_root_padding">16dp</dimen>
-    <dimen name="vertical_outer_padding">16dp</dimen>
-    <dimen name="vertical_inner_padding">8dp</dimen>
+    <dimen name="root_padding">16dp</dimen>
+    <dimen name="inner_padding">8dp</dimen>
     <dimen name="card_elevation">4dp</dimen>
+    <dimen name="height_progress">4dp</dimen>
 </resources>

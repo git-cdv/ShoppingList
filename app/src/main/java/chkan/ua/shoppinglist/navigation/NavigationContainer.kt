@@ -1,6 +1,5 @@
 package chkan.ua.shoppinglist.navigation
 
-import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,7 +21,6 @@ fun NavigationContainer(
     listsViewModel: ListsViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
-    Log.d("CHKAN", "isListsExist: ${listsViewModel.isListExist()}")
     val startDestination = if (listsViewModel.isListExist()) ListsRoute else FirstListRoute
 
     CompositionLocalProvider(

@@ -26,7 +26,6 @@ import chkan.ua.core.services.DateProvider
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.core.services.SuggestionsProvider
 import chkan.ua.shoppinglist.navigation.FirstListRoute
-import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.ListsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
 import chkan.ua.shoppinglist.ui.kit.RoundedTextField
@@ -74,7 +73,7 @@ fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Un
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(focusRequester)
-                .padding(horizontal = dimensionResource(id = R.dimen.horizontal_root_padding))
+                .padding(horizontal = dimensionResource(id = R.dimen.root_padding))
                 .constrainAs(textField) {
                     bottom.linkTo(centerLine)
                 }
@@ -85,7 +84,7 @@ fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Un
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
-                .padding(horizontal = dimensionResource(id = R.dimen.horizontal_root_padding), vertical = dimensionResource(id = R.dimen.vertical_outer_padding))
+                .padding(horizontal = dimensionResource(id = R.dimen.root_padding), vertical = dimensionResource(id = R.dimen.root_padding))
                 .constrainAs(textTitle) {
                     bottom.linkTo(textField.top)
                     start.linkTo(parent.start)
@@ -100,7 +99,7 @@ fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Un
                                  },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = dimensionResource(id = R.dimen.vertical_inner_padding))
+                .padding(vertical = dimensionResource(id = R.dimen.inner_padding))
                 .constrainAs(suggestionsView) {
                     top.linkTo(textField.bottom)
                 }

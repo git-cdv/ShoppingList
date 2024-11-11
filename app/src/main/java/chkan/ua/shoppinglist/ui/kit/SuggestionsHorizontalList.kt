@@ -53,7 +53,7 @@ fun SuggestionsHorizontalList(suggestions: List<String>, onSuggestionChoose: (St
     }
 
     LazyRow(
-        contentPadding = PaddingValues(horizontal = dimensionResource(id = R.dimen.horizontal_root_padding)),
+        contentPadding = PaddingValues(horizontal = dimensionResource(id = R.dimen.root_padding)),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = modifier.offset(x = animatedOffsetX.value.dp)
     ) {

@@ -1,24 +1,30 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 
 @Composable
 fun ListsScreen(){
@@ -59,14 +65,58 @@ fun ListItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(
-                vertical = dimensionResource(id = R.dimen.vertical_inner_padding),
-                horizontal = dimensionResource(id = R.dimen.vertical_outer_padding)
+                vertical = dimensionResource(id = R.dimen.inner_padding),
+                horizontal = dimensionResource(id = R.dimen.root_padding)
             )
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(16.dp))
+        ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
+            val (textTitle, textCounter, progress, menuIcon) = createRefs()
+
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .padding(top = dimensionResource(id = R.dimen.root_padding), start = dimensionResource(id = R.dimen.root_padding))
+                    .constrainAs(textTitle) {
+                        start.linkTo(parent.start)
+                    }
+            )
+
+            Text(
+                text = "1/4",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .constrainAs(textCounter) {
+                        end.linkTo(parent.end, 16.dp)
+                        top.linkTo(progress.top)
+                        bottom.linkTo(progress.bottom)
+                    }
+            )
+
+            LinearProgressIndicator(
+                progress = { 0.5f } ,
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier
+                    .height(dimensionResource(id = R.dimen.height_progress))
+                    .constrainAs(progress) {
+                        start.linkTo(parent.start, 16.dp)
+                        top.linkTo(textTitle.bottom, 8.dp)
+                        end.linkTo(textCounter.start, 16.dp)
+                        bottom.linkTo(parent.bottom, 16.dp)
+                        width = Dimension.fillToConstraints
+                    }
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ListItemPreview() {
+    ShoppingListTheme {
+        ListItem(text = "Main List", modifier = Modifier) {}
     }
 }
