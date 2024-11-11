@@ -25,6 +25,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import chkan.ua.core.services.DateProvider
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.core.services.SuggestionsProvider
+import chkan.ua.shoppinglist.navigation.FirstListRoute
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.ListsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
@@ -43,7 +44,9 @@ fun FirstListScreen(
 
     FirstListContent(suggestions){ title ->
         listsViewModel.addList(title)
-        navController.navigate(ListsRoute)
+        navController.navigate(ListsRoute){
+            popUpTo(FirstListRoute) { inclusive = true }
+        }
     }
 }
 
