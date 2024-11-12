@@ -11,4 +11,6 @@
     <string name="home">Дом</string>
     <string name="drug">Лекарства</string>
     <string name="supermarket">Супермаркет</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
 </resources>

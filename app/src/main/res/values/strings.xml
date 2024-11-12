@@ -11,4 +11,6 @@
     <string name="home">Home</string>
     <string name="drug">Drug</string>
     <string name="supermarket">Supermarket</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
 </resources>

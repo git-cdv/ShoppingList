@@ -2,58 +2,72 @@ package chkan.ua.shoppinglist.ui.screens.lists
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import chkan.ua.domain.models.ListItems
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.core.models.MenuItem
+import chkan.ua.shoppinglist.navigation.ItemsRoute
+import chkan.ua.shoppinglist.navigation.localNavController
+import chkan.ua.shoppinglist.ui.kit.BaseDropdownMenu
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 
 @Composable
-fun ListsScreen(){
-    ListsScreenContent()
+fun ListsScreen(
+    listsViewModel: ListsViewModel = hiltViewModel()
+){
+    val navController = localNavController.current
+    val lists by listsViewModel.listsFlow.collectAsStateWithLifecycle(initialValue = listOf())
+
+    ListsScreenContent(lists,
+        onDeleteList = { id -> listsViewModel.deleteList(id) },
+        goToItems = {navController.navigate(ItemsRoute)})
 }
 
 @Composable
 fun ListsScreenContent(
-    listsViewModel: ListsViewModel = hiltViewModel()
+    lists: List<ListItems>,
+    onDeleteList: (Int) -> Unit,
+    goToItems: (Int) -> Unit
 ) {
-
-    val lists by listsViewModel.listsFlow.collectAsStateWithLifecycle(
-        initialValue = listOf()
-    )
-
     LazyColumn(
         Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
     ){
         items(lists, key = {it.id}){ list ->
-            ListItem(text = list.title, modifier = Modifier.animateItem()){
-                //listsViewModel.deleteList(list.id)
-            }
+            ListItem(
+                text = list.title,
+                modifier = Modifier.animateItem(),
+                onDeleteList = { onDeleteList.invoke(list.id) },
+                onCardClick = {goToItems.invoke(list.id)} )
         }
     }
 }
@@ -62,8 +76,11 @@ fun ListsScreenContent(
 fun ListItem(
     text: String,
     modifier: Modifier,
-    onCardClick: () -> Unit){
+    onDeleteList: () -> Unit,
+    onCardClick: () -> Unit)
+{
     Card(
+        onClick = { onCardClick.invoke() },
         shape = RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)),
         modifier = modifier
             .fillMaxWidth()
@@ -74,13 +91,17 @@ fun ListItem(
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
             val (textTitle, textCounter, progress, menuIcon) = createRefs()
+            var isMenuExpanded by remember { mutableStateOf(false) }
 
             Text(
                 text = text,
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
-                    .padding(top = dimensionResource(id = R.dimen.root_padding), start = dimensionResource(id = R.dimen.root_padding))
+                    .padding(
+                        top = dimensionResource(id = R.dimen.root_padding),
+                        start = dimensionResource(id = R.dimen.root_padding)
+                    )
                     .constrainAs(textTitle) {
                         start.linkTo(parent.start)
                     }
@@ -114,19 +135,31 @@ fun ListItem(
                     }
             )
 
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "More options",
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .constrainAs(menuIcon) {
-                        top.linkTo(parent.top, 6.dp)
-                        end.linkTo(parent.end, 8.dp)
-                    }
-                    .padding(6.dp)
-                    .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
-                    .clickable { onCardClick.invoke() }
-            )
+            //box needed to open menu under icon
+            Box(modifier = Modifier
+                .constrainAs(menuIcon) {
+                    top.linkTo(parent.top, 6.dp)
+                    end.linkTo(parent.end, 8.dp)
+                }){
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "More options",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
+                        .clickable { isMenuExpanded = true }
+                )
+
+                BaseDropdownMenu(
+                    isMenuExpanded = isMenuExpanded,
+                    onDismissRequest = { isMenuExpanded = false },
+                    listItems = listOf(
+                        MenuItem(title = stringResource(id = R.string.delete), onClick = { onDeleteList.invoke()}),
+                        MenuItem(title = stringResource(id = R.string.edit), onClick = { }),
+                    )
+                )
+            }
         }
     }
 }
@@ -135,6 +168,6 @@ fun ListItem(
 @Composable
 fun ListItemPreview() {
     ShoppingListTheme {
-        ListItem(text = "Main List", modifier = Modifier) {}
+        ListItem(text = "Main List", modifier = Modifier,{},{})
     }
 }
