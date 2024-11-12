@@ -1,7 +1,9 @@
 package chkan.ua.data.repos
 
 import chkan.ua.data.models.ListEntity
+import chkan.ua.data.models.mapToItems
 import chkan.ua.data.sources.DataSource
+import chkan.ua.domain.models.Item
 import chkan.ua.domain.models.ListItems
 import chkan.ua.domain.repos.ListsRepository
 import kotlinx.coroutines.flow.Flow
@@ -11,6 +13,10 @@ import javax.inject.Inject
 class ListsRepositoryImpl @Inject constructor (private val dataSource: DataSource) : ListsRepository {
     override fun getListsWithItemsFlow(): Flow<List<ListItems>> {
         return dataSource.getListsWithItemsFlow().map { it.map { it.mapToListItem() } }
+    }
+
+    override fun getListWithItemsFlowById(listId: Int): Flow<List<Item>> {
+        return dataSource.getItemsFlowByListId(listId).map { it.mapToItems() }
     }
 
     override suspend fun addList(title: String, position: Int) {

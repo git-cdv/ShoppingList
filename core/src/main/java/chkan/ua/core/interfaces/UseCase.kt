@@ -9,7 +9,7 @@ interface SuspendUseCase<T> : UseCase {
     override fun getErrorReason() : String
 }
 
-interface FlowUseCase : UseCase {
-    fun run() : Any
+interface FlowUseCase<T> : UseCase {
+    fun run(config: T) : Any
     override fun getErrorReason() : String
 }

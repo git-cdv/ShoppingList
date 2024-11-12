@@ -21,6 +21,7 @@ class ListsViewModel @Inject constructor(
     private val addList: AddListUseCase,
     private val getListsCount: GetListsCountUseCase,
     private val deleteList: DeleteListUseCase,
+    private val getListFlow: GetListFlowUseCase,
     private val errorHandler: ErrorHandler,
 ) : ViewModel() {
 

@@ -4,11 +4,11 @@ import chkan.ua.core.interfaces.FlowUseCase
 import chkan.ua.domain.repos.ListsRepository
 import javax.inject.Inject
 
-class GetListsFlowUseCase @Inject constructor(
+class GetListFlowUseCase @Inject constructor(
     private val listsRepository: ListsRepository
-) : FlowUseCase<Unit> {
+) : FlowUseCase<Int> {
 
-    override fun run(config: Unit) = listsRepository.getListsWithItemsFlow()
+    override fun run(config: Int) = listsRepository.getListWithItemsFlowById(config)
 
     override fun getErrorReason() = "Failed to get lists"
 }

@@ -1,5 +1,6 @@
 package chkan.ua.data.sources
 
+import chkan.ua.data.models.ItemEntity
 import chkan.ua.data.models.ListEntity
 import chkan.ua.data.models.ListWithItems
 import chkan.ua.data.sources.room.ItemsDao
@@ -15,6 +16,8 @@ class RoomSourceImpl @Inject constructor (
 ) : DataSource {
 
     override fun getListsWithItemsFlow(): Flow<List<ListWithItems>> = listsDao.getListsWithItemsFlow()
+
+    override fun getItemsFlowByListId(listId: Int): Flow<List<ItemEntity>> = itemsDao.getItemsFlowByListId(listId)
 
     override suspend fun addList(list: ListEntity) {
         listsDao.addList(list)
