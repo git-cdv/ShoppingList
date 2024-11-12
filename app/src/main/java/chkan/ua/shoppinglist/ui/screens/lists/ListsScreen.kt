@@ -1,6 +1,7 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -8,14 +9,18 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,7 +52,7 @@ fun ListsScreenContent(
     ){
         items(lists, key = {it.id}){ list ->
             ListItem(text = list.title, modifier = Modifier.animateItem()){
-                listsViewModel.deleteList(list.id)
+                //listsViewModel.deleteList(list.id)
             }
         }
     }
@@ -59,9 +64,7 @@ fun ListItem(
     modifier: Modifier,
     onCardClick: () -> Unit){
     Card(
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp, pressedElevation = 2.dp),
         shape = RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)),
-        onClick = {onCardClick.invoke()},
         modifier = modifier
             .fillMaxWidth()
             .padding(
@@ -74,7 +77,7 @@ fun ListItem(
 
             Text(
                 text = text,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .padding(top = dimensionResource(id = R.dimen.root_padding), start = dimensionResource(id = R.dimen.root_padding))
@@ -89,7 +92,8 @@ fun ListItem(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .constrainAs(textCounter) {
-                        end.linkTo(parent.end, 16.dp)
+                        start.linkTo(menuIcon.start)
+                        end.linkTo(menuIcon.end)
                         top.linkTo(progress.top)
                         bottom.linkTo(progress.bottom)
                     }
@@ -103,11 +107,25 @@ fun ListItem(
                     .height(dimensionResource(id = R.dimen.height_progress))
                     .constrainAs(progress) {
                         start.linkTo(parent.start, 16.dp)
-                        top.linkTo(textTitle.bottom, 8.dp)
+                        top.linkTo(textTitle.bottom, 16.dp)
                         end.linkTo(textCounter.start, 16.dp)
                         bottom.linkTo(parent.bottom, 16.dp)
                         width = Dimension.fillToConstraints
                     }
+            )
+
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "More options",
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .constrainAs(menuIcon) {
+                        top.linkTo(parent.top, 6.dp)
+                        end.linkTo(parent.end, 8.dp)
+                    }
+                    .padding(6.dp)
+                    .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
+                    .clickable { onCardClick.invoke() }
             )
         }
     }
