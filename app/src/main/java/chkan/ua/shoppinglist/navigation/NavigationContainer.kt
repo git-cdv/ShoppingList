@@ -10,6 +10,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import chkan.ua.shoppinglist.ui.screens.first_list.FirstListScreen
 import chkan.ua.shoppinglist.ui.screens.items.ItemsScreen
 import chkan.ua.shoppinglist.ui.screens.lists.ListsScreen
@@ -21,7 +22,7 @@ fun NavigationContainer(
     listsViewModel: ListsViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
-    val startDestination = if (listsViewModel.isListExist()) ListsRoute else FirstListRoute
+    val startDestination: Any = if (listsViewModel.isListExist()) ListsRoute else FirstListRoute
 
     CompositionLocalProvider(
         localNavController provides navController
@@ -32,9 +33,12 @@ fun NavigationContainer(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)) {
-            composable(FirstListRoute) { FirstListScreen() }
-            composable(ItemsRoute) { ItemsScreen() }
-            composable(ListsRoute) { ListsScreen() }
+            composable<FirstListRoute> { FirstListScreen() }
+            composable<ItemsRoute> { backStackEntry ->
+                val args: ItemsRoute = backStackEntry.toRoute()
+                ItemsScreen(args)
+            }
+            composable<ListsRoute> { ListsScreen() }
         }
     }
 }

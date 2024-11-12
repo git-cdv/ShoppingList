@@ -6,10 +6,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import chkan.ua.shoppinglist.navigation.ItemsRoute
 
 @Composable
-fun ItemsScreen (){
+fun ItemsScreen(args: ItemsRoute) {
     Box(modifier = Modifier.fillMaxSize()){
-        Text(text = "ItemsScreen", modifier = Modifier.align(Alignment.Center))
+        Text(text = "ItemsScreen - ${args.listId}", modifier = Modifier.align(Alignment.Center))
     }
 }

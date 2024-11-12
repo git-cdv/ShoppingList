@@ -21,6 +21,7 @@ appcompat = "1.7.0"
 material = "1.12.0"
 navigation = "2.8.3"
 constraintlayout = "2.2.0"
+serialization = "2.0.21"
 
 
 [libraries]
@@ -28,6 +29,7 @@ androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constr
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxCoroutinesCore" }
 splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
@@ -61,5 +63,6 @@ jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = 
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serialization" }
 
 

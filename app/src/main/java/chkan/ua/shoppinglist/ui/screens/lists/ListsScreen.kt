@@ -48,7 +48,7 @@ fun ListsScreen(
 
     ListsScreenContent(lists,
         onDeleteList = { id -> listsViewModel.deleteList(id) },
-        goToItems = {navController.navigate(ItemsRoute)})
+        goToItems = {id -> navController.navigate(ItemsRoute(id))})
 }
 
 @Composable
