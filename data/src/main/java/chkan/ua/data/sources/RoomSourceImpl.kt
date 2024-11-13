@@ -28,4 +28,8 @@ class RoomSourceImpl @Inject constructor (
     }
 
     override suspend fun getListCount() = listsDao.getListCount()
+
+    override suspend fun addItem(item: ItemEntity) {
+        itemsDao.addItem(item)
+    }
 }

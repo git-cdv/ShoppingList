@@ -21,7 +21,6 @@ class ListsViewModel @Inject constructor(
     private val addList: AddListUseCase,
     private val getListsCount: GetListsCountUseCase,
     private val deleteList: DeleteListUseCase,
-    private val getListFlow: GetListFlowUseCase,
     private val errorHandler: ErrorHandler,
 ) : ViewModel() {
 
@@ -33,7 +32,7 @@ class ListsViewModel @Inject constructor(
         }
     }
 
-    val listsFlow = getListsFlow.run()
+    val listsFlow = getListsFlow.run(Unit)
     private var isListsExist = false
 
     private val _isLoadReady = mutableStateOf(false)

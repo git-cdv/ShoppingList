@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import chkan.ua.shoppinglist.navigation.NavigationContainer
+import chkan.ua.shoppinglist.ui.screens.items.ItemsViewModel
 import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,6 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val listsViewModel: ListsViewModel by viewModels()
+    private val itemsViewModel: ItemsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +35,7 @@ class MainActivity : ComponentActivity() {
             ShoppingListTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     if (listsViewModel.isLoadReady.value) {
-                        NavigationContainer(innerPadding, listsViewModel)
+                        NavigationContainer(innerPadding)
                     }
                 }
             }

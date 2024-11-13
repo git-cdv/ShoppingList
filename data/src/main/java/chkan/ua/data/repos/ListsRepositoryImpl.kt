@@ -15,10 +15,6 @@ class ListsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
         return dataSource.getListsWithItemsFlow().map { it.map { it.mapToListItem() } }
     }
 
-    override fun getListWithItemsFlowById(listId: Int): Flow<List<Item>> {
-        return dataSource.getItemsFlowByListId(listId).map { it.mapToItems() }
-    }
-
     override suspend fun addList(title: String, position: Int) {
         dataSource.addList(ListEntity(title = title,position = position))
     }
