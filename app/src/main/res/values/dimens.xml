@@ -8,4 +8,5 @@
     <dimen name="inner_padding">8dp</dimen>
     <dimen name="card_elevation">4dp</dimen>
     <dimen name="height_progress">4dp</dimen>
+    <dimen name="min_padding">4dp</dimen>
 </resources>

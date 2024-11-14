@@ -32,4 +32,8 @@ class RoomSourceImpl @Inject constructor (
     override suspend fun addItem(item: ItemEntity) {
         itemsDao.addItem(item)
     }
+
+    override suspend fun deleteItem(itemId: Int) {
+        itemsDao.deleteById(itemId)
+    }
 }

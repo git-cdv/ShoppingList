@@ -12,4 +12,5 @@ interface DataSource {
     suspend fun deleteList(listId: Int)
     suspend fun getListCount(): Int
     suspend fun addItem(item: ItemEntity)
+    suspend fun deleteItem(itemId: Int)
 }

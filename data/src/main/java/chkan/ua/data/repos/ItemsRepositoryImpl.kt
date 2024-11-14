@@ -15,7 +15,11 @@ class ItemsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
         return dataSource.getItemsFlowByListId(listId).map { it.mapToItems() }
     }
 
-    override suspend fun addItem(config: Item) {
-        dataSource.addItem(config.toEntity())
+    override suspend fun addItem(item: Item) {
+        dataSource.addItem(item.toEntity())
+    }
+
+    override suspend fun deleteItem(itemId: Int) {
+        dataSource.deleteItem(itemId)
     }
 }

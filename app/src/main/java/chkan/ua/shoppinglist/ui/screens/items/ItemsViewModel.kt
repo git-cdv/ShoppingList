@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.usecases.items.AddItemUseCase
+import chkan.ua.domain.usecases.items.DeleteItemUseCase
 import chkan.ua.domain.usecases.items.GetItemsFlowUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +17,7 @@ import javax.inject.Inject
 class ItemsViewModel @Inject constructor(
     private val getItemsFlow: GetItemsFlowUseCase,
     private val addItem: AddItemUseCase,
+    private val deleteItem: DeleteItemUseCase,
     private val errorHandler: ErrorHandler,
 ) : ViewModel() {
 
@@ -29,6 +31,16 @@ class ItemsViewModel @Inject constructor(
                 addItem.run(item)
             } catch (e: Exception){
                 errorHandler.handle(e,addItem.getErrorReason())
+            }
+        }
+    }
+
+    fun deleteItem(id: Int) {
+        viewModelScope.launch (Dispatchers.IO) {
+            try {
+                deleteItem.run(id)
+            } catch (e: Exception){
+                errorHandler.handle(e,deleteItem.getErrorReason())
             }
         }
     }
