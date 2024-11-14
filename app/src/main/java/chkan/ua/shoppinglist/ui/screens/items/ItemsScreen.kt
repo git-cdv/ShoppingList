@@ -1,26 +1,41 @@
 package chkan.ua.shoppinglist.ui.screens.items
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.dimensionResource
@@ -37,6 +52,7 @@ import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.ui.kit.BaseDropdownMenu
 import chkan.ua.shoppinglist.ui.kit.RoundedTextField
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun ItemsScreen(
@@ -51,6 +67,7 @@ fun ItemsScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemsScreenContent(
     lists: List<Item>,
@@ -58,30 +75,61 @@ fun ItemsScreenContent(
     addItem: (String) -> Unit
 ) {
     var listNameText by rememberSaveable { mutableStateOf("") }
+    val sheetState = rememberModalBottomSheetState()
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
-    Column {
+    Box {
         LazyColumn(
             Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-        ){
-            items(lists, key = {it.itemId}){ item ->
+        ) {
+            items(lists, key = { it.itemId }) { item ->
                 ItemItem(
                     text = item.content,
                     modifier = Modifier.animateItem(),
                     onDeleteList = { onDeleteItem.invoke(item.itemId) })
             }
         }
-        RoundedTextField(
-            value = listNameText,
-            onValueChange = { newText -> listNameText = newText },
-            roundedCornerRes = R.dimen.rounded_corner,
-            placeholderTextRes = R.string.first_list_text_placeholder,
-            onDone = { addItem.invoke(listNameText) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = dimensionResource(id = R.dimen.root_padding))
-        )
+
+        FloatingActionButton(
+            onClick = {
+                showBottomSheet = true
+                scope.launch { sheetState.show() }
+            },
+            modifier = Modifier.align(Alignment.BottomEnd)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Открыть BottomSheet")
+        }
+
+        if (showBottomSheet){
+            ModalBottomSheet(
+                sheetState = sheetState,
+                onDismissRequest = {  scope.launch { sheetState.hide() }.invokeOnCompletion {
+                    if (!sheetState.isVisible) {
+                        showBottomSheet = false
+                    }
+                } }
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    RoundedTextField(
+                        value = listNameText,
+                        onValueChange = { newText -> listNameText = newText },
+                        roundedCornerRes = R.dimen.rounded_corner,
+                        placeholderTextRes = R.string.first_list_text_placeholder,
+                        onDone = { addItem.invoke(listNameText) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .imePadding()
+                            .padding(horizontal = dimensionResource(id = R.dimen.root_padding))
+                    )
+                }
+            }
+        }
     }
 }
 
