@@ -69,6 +69,7 @@ fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Un
             onValueChange = {newText -> listNameText = newText},
             roundedCornerRes = R.dimen.rounded_corner,
             placeholderTextRes = R.string.first_list_text_placeholder,
+            focusRequester = focusRequester,
             onDone = { addListWithTitle.invoke(listNameText) },
             modifier = Modifier
                 .fillMaxWidth()

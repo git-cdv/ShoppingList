@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.core.models.MenuItem
 import chkan.ua.shoppinglist.ui.kit.BaseDropdownMenu
@@ -57,8 +58,8 @@ fun ItemItem(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(
-                    top = dimensionResource(id = R.dimen.inner_padding),
-                    bottom = dimensionResource(id = R.dimen.inner_padding),
+                    top = dimensionResource(id = R.dimen.min_padding),
+                    bottom = dimensionResource(id = R.dimen.min_padding),
                     end = dimensionResource(id = R.dimen.root_padding)
                 )
         ) {
@@ -67,7 +68,7 @@ fun ItemItem(
                 var isMenuExpanded by remember { mutableStateOf(false) }
 
                 Text(
-                    text = text,
+                    text = text.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Start,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -78,6 +79,7 @@ fun ItemItem(
                             end.linkTo(menuIcon.start,8.dp)
                             top.linkTo(parent.top)
                             bottom.linkTo(parent.bottom)
+                            width = Dimension.fillToConstraints
                         }
 
                 )

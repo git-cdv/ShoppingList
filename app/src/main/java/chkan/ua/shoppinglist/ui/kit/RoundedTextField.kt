@@ -13,8 +13,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -31,6 +34,7 @@ fun RoundedTextField(
     onValueChange: (String) -> Unit,
     roundedCornerRes: Int,
     placeholderTextRes: Int,
+    focusRequester: FocusRequester? = null,
     onDone: () -> Unit,
     modifier: Modifier
 ) {
@@ -63,6 +67,10 @@ fun RoundedTextField(
             }
         ),
         modifier = modifier
+            .then(
+                if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier
+            )
+
     )
 }
 
@@ -75,6 +83,7 @@ fun RoundedTextFieldPreview() {
             onValueChange ={},
             roundedCornerRes = R.dimen.rounded_corner,
             placeholderTextRes = R.string.first_list_text_placeholder,
+            focusRequester = null,
             onDone = {},
             modifier = Modifier.fillMaxWidth()
         )
