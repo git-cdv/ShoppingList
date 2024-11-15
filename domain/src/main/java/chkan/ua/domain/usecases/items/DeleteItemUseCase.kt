@@ -12,5 +12,5 @@ class DeleteItemUseCase @Inject constructor(
         itemsRepository.deleteItem(config)
     }
 
-    override fun getErrorReason() = "Failed to delete item"
+    override fun getErrorReason(config: Int?) = "Failed to delete itemId: $config"
 }

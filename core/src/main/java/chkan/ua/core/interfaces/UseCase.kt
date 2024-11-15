@@ -1,15 +1,15 @@
 package chkan.ua.core.interfaces
 
-interface UseCase {
-    fun getErrorReason() : String
+interface UseCase<T> {
+    fun getErrorReason(config: T? = null): String
 }
 
-interface SuspendUseCase<T> : UseCase {
+interface SuspendUseCase<T> : UseCase<T> {
     suspend fun run(config: T) : Any
-    override fun getErrorReason() : String
+    override fun getErrorReason(config: T?) : String
 }
 
-interface FlowUseCase<T> : UseCase {
+interface FlowUseCase<T> : UseCase<T> {
     fun run(config: T) : Any
-    override fun getErrorReason() : String
+    override fun getErrorReason(config: T?) : String
 }

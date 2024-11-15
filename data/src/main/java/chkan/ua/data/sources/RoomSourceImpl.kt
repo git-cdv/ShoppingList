@@ -38,4 +38,9 @@ class RoomSourceImpl @Inject constructor (
     override suspend fun deleteItem(itemId: Int) {
         itemsDao.deleteById(itemId)
     }
+
+    override suspend fun markItemReady(itemId: Int, state: Boolean) {
+        val stateAsInt = if (state) 1 else 0
+        itemsDao.markItemReady(itemId,stateAsInt)
+    }
 }

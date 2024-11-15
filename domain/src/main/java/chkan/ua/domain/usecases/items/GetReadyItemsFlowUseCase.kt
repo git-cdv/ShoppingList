@@ -10,5 +10,5 @@ class GetReadyItemsFlowUseCase @Inject constructor(
 
     override fun run(config: Int) = itemsRepository.getReadyItemsFlowByListId(config)
 
-    override fun getErrorReason() = "Failed to get ready lists"
+    override fun getErrorReason(config: Int?) = "Failed to get ready lists"
 }

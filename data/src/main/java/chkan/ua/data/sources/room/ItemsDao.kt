@@ -21,5 +21,8 @@ interface ItemsDao {
     fun getReadyItemsFlowByListId(listId: Int): Flow<List<ItemEntity>>
 
     @Query("DELETE FROM items WHERE itemId = :itemId")
-    fun deleteById(itemId: Int)
+    suspend fun deleteById(itemId: Int)
+
+    @Query("UPDATE items SET isReady = :state WHERE itemId = :itemId")
+    suspend fun markItemReady(itemId: Int, state: Int)
 }

@@ -12,7 +12,7 @@ class AddListUseCase @Inject constructor(
         listsRepository.addList(config.title, config.position)
     }
 
-    override fun getErrorReason() = "Failed to add list"
+    override fun getErrorReason(config: AddListConfig?) = "Failed to add list"
 }
 
 data class AddListConfig (val title: String, val position: Int)

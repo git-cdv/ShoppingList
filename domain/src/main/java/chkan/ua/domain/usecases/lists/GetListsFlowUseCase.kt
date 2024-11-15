@@ -10,5 +10,5 @@ class GetListsFlowUseCase @Inject constructor(
 
     override fun run(config: Unit) = listsRepository.getListsWithItemsFlow()
 
-    override fun getErrorReason() = "Failed to get lists"
+    override fun getErrorReason(config: Unit?) = "Failed to get lists"
 }

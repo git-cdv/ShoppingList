@@ -10,5 +10,5 @@ class GetListsCountUseCase @Inject constructor(
 
     override suspend fun run(config: Unit) = listsRepository.getListCount()
 
-    override fun getErrorReason() = "Failed to get list count"
+    override fun getErrorReason(config: Unit?) = "Failed to get list count"
 }

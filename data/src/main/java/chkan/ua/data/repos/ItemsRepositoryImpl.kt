@@ -26,4 +26,8 @@ class ItemsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
     override suspend fun deleteItem(itemId: Int) {
         dataSource.deleteItem(itemId)
     }
+
+    override suspend fun markItemReady(itemId: Int, state: Boolean) {
+        dataSource.markItemReady(itemId,state)
+    }
 }

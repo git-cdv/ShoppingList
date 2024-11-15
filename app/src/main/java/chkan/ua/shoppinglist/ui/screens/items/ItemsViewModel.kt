@@ -7,6 +7,8 @@ import chkan.ua.domain.usecases.items.AddItemUseCase
 import chkan.ua.domain.usecases.items.DeleteItemUseCase
 import chkan.ua.domain.usecases.items.GetItemsFlowUseCase
 import chkan.ua.domain.usecases.items.GetReadyItemsFlowUseCase
+import chkan.ua.domain.usecases.items.MarkReadyConfig
+import chkan.ua.domain.usecases.items.MarkReadyItemUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +21,7 @@ class ItemsViewModel @Inject constructor(
     private val getItemsFlow: GetItemsFlowUseCase,
     private val getReadyItemsFlow: GetReadyItemsFlowUseCase,
     private val addItem: AddItemUseCase,
+    private val markReady: MarkReadyItemUseCase,
     private val deleteItem: DeleteItemUseCase,
     private val errorHandler: ErrorHandler,
 ) : ViewModel() {
@@ -30,7 +33,6 @@ class ItemsViewModel @Inject constructor(
     fun getFlowReadyItemsByListId(listId: Int): Flow<List<Item>> {
         return getReadyItemsFlow.run(listId)
     }
-
 
     fun addItem(item: Item) {
         viewModelScope.launch (Dispatchers.IO) {
@@ -48,6 +50,17 @@ class ItemsViewModel @Inject constructor(
                 deleteItem.run(id)
             } catch (e: Exception){
                 errorHandler.handle(e,deleteItem.getErrorReason())
+            }
+        }
+    }
+
+    fun changeReadyInItem(id: Int, state: Boolean) {
+        viewModelScope.launch (Dispatchers.IO) {
+            val config = MarkReadyConfig(id,state)
+            try {
+                markReady.run(config)
+            } catch (e: Exception){
+                errorHandler.handle(e,markReady.getErrorReason(config))
             }
         }
     }

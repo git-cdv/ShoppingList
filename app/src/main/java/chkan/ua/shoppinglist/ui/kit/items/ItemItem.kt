@@ -39,6 +39,7 @@ import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 fun ItemItem(
     text: String,
     modifier: Modifier,
+    onReady: () -> Unit,
     onDeleteList: () -> Unit)
 {
     Row {
@@ -47,13 +48,12 @@ fun ItemItem(
             contentDescription = "Drag handle",
             tint = Color.Gray,
             modifier = Modifier
-                .size(28.dp)
+                .padding(start = dimensionResource(id = R.dimen.root_padding), end = dimensionResource(id = R.dimen.min_padding))
+                .size(20.dp)
                 .align(Alignment.CenterVertically)
-                .padding(horizontal = dimensionResource(id = R.dimen.min_padding))
-                .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
         )
         Card(
-            onClick = {},
+            onClick = {onReady.invoke()},
             shape = RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)),
             modifier = modifier
                 .fillMaxWidth()
@@ -117,6 +117,6 @@ fun ItemItem(
 @Composable
 fun ItemPreview() {
     ShoppingListTheme {
-        ItemItem("Products",Modifier,{})
+        ItemItem("Products",Modifier,{},{})
     }
 }

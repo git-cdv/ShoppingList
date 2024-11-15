@@ -12,5 +12,5 @@ class DeleteListUseCase @Inject constructor(
         listsRepository.deleteList(config)
     }
 
-    override fun getErrorReason() = "Failed to delete list"
+    override fun getErrorReason(config: Int?) = "Failed to delete list"
 }

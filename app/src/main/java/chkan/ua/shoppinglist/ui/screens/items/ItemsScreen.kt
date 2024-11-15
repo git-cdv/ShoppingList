@@ -8,13 +8,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,6 +33,7 @@ import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.ui.kit.AddItemBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ItemItem
+import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
@@ -46,16 +45,19 @@ fun ItemsScreen(
     val items by itemsViewModel.getFlowItemsByListId(args.listId).collectAsStateWithLifecycle(initialValue = listOf())
     val readyItems by itemsViewModel.getFlowReadyItemsByListId(args.listId).collectAsStateWithLifecycle(initialValue = listOf())
 
-    ItemsScreenContent(items,
+    ItemsScreenContent(items,readyItems,
         onDeleteItem = { id -> itemsViewModel.deleteItem(id) },
-        addItem = { title -> itemsViewModel.addItem(Item(content = title, listId = args.listId))}
+        addItem = { title -> itemsViewModel.addItem(Item(content = title, listId = args.listId))},
+        onMarkReady = { id, state -> itemsViewModel.changeReadyInItem(id, state) }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemsScreenContent(
-    lists: List<Item>,
+    items: List<Item>,
+    readyItems: List<Item>,
+    onMarkReady: (Int, Boolean) -> Unit,
     onDeleteItem: (Int) -> Unit,
     addItem: (String) -> Unit
 ) {
@@ -69,25 +71,29 @@ fun ItemsScreenContent(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            items(lists, key = { it.itemId }) { item ->
+            items(items, key = { it.itemId }) { item ->
                 ItemItem(
                     text = item.content,
                     modifier = Modifier.animateItem(),
+                    onReady = { onMarkReady.invoke(item.itemId, true) },
                     onDeleteList = { onDeleteItem.invoke(item.itemId) })
             }
-            item {
-                HorizontalDivider(
-                    color = Color.Gray,
-                    thickness = 1.dp,
-                    modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.root_padding))
-                )
-            }
-            
-            items(10) { index ->
-                Text(
-                    text = "Элемент второго списка $index",
-                    modifier = Modifier.padding(16.dp)
-                )
+            if (readyItems.isNotEmpty()){
+                item {
+                    HorizontalDivider(
+                        color = Color.LightGray,
+                        thickness = 1.dp,
+                        modifier = Modifier.padding(dimensionResource(id = R.dimen.root_padding))
+                    )
+                }
+
+                items(readyItems, key = { it.itemId }) { item ->
+                    ReadyItem(
+                        text = item.content,
+                        modifier = Modifier.animateItem(),
+                        onNotReady = {onMarkReady.invoke(item.itemId, false)},
+                        onDeleteItem = { onDeleteItem.invoke(item.itemId) })
+                }
             }
         }
 
@@ -117,9 +123,11 @@ fun ItemsScreenContentPreview() {
     ShoppingListTheme {
         ItemsScreenContent(listOf(
             Item(333,"Item 1", 0,0, false),
-            Item(444,"Item 2", 0,1, false),
-            Item(555,"Item 3", 0,2, false)
+            Item(444,"Item 2", 0,1, false)
+        ), listOf(
+            Item(333,"Item 1", 0,0, false),
+            Item(444,"Item 2", 0,1, false)
         ),
-            {}, {})
+            {_,_ -> }, {}, {})
     }
 }

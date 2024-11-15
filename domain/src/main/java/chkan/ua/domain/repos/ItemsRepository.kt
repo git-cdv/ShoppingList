@@ -8,4 +8,5 @@ interface ItemsRepository {
     fun getReadyItemsFlowByListId(listId: Int): Flow<List<Item>>
     suspend fun addItem(item: Item)
     suspend fun deleteItem(itemId: Int)
+    suspend fun markItemReady(itemId: Int, state: Boolean)
 }
