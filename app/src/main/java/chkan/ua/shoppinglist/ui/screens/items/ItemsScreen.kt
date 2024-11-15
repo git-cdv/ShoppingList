@@ -43,9 +43,9 @@ fun ItemsScreen(
     itemsViewModel: ItemsViewModel = hiltViewModel()
 ) {
     val items by itemsViewModel.getFlowItemsByListId(args.listId).collectAsStateWithLifecycle(initialValue = listOf())
-    val readyItems by itemsViewModel.getFlowReadyItemsByListId(args.listId).collectAsStateWithLifecycle(initialValue = listOf())
+    val (readyItems, notReadyItems) = items.partition { it.isReady }
 
-    ItemsScreenContent(items,readyItems,
+    ItemsScreenContent(notReadyItems,readyItems,
         onDeleteItem = { id -> itemsViewModel.deleteItem(id) },
         addItem = { title -> itemsViewModel.addItem(Item(content = title, listId = args.listId))},
         onMarkReady = { id, state -> itemsViewModel.changeReadyInItem(id, state) }

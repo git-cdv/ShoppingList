@@ -6,32 +6,30 @@ import chkan.ua.domain.models.Item
 import chkan.ua.domain.usecases.items.AddItemUseCase
 import chkan.ua.domain.usecases.items.DeleteItemUseCase
 import chkan.ua.domain.usecases.items.GetItemsFlowUseCase
-import chkan.ua.domain.usecases.items.GetReadyItemsFlowUseCase
 import chkan.ua.domain.usecases.items.MarkReadyConfig
 import chkan.ua.domain.usecases.items.MarkReadyItemUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import java.util.concurrent.Executors
 import javax.inject.Inject
 
 @HiltViewModel
 class ItemsViewModel @Inject constructor(
     private val getItemsFlow: GetItemsFlowUseCase,
-    private val getReadyItemsFlow: GetReadyItemsFlowUseCase,
     private val addItem: AddItemUseCase,
     private val markReady: MarkReadyItemUseCase,
     private val deleteItem: DeleteItemUseCase,
     private val errorHandler: ErrorHandler,
 ) : ViewModel() {
 
+    private val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+
     fun getFlowItemsByListId(listId: Int): Flow<List<Item>> {
         return getItemsFlow.run(listId)
-    }
-
-    fun getFlowReadyItemsByListId(listId: Int): Flow<List<Item>> {
-        return getReadyItemsFlow.run(listId)
     }
 
     fun addItem(item: Item) {
@@ -55,7 +53,7 @@ class ItemsViewModel @Inject constructor(
     }
 
     fun changeReadyInItem(id: Int, state: Boolean) {
-        viewModelScope.launch (Dispatchers.IO) {
+        viewModelScope.launch (singleThreadDispatcher) {
             val config = MarkReadyConfig(id,state)
             try {
                 markReady.run(config)
