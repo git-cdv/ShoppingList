@@ -6,6 +6,7 @@ import chkan.ua.domain.models.Item
 import chkan.ua.domain.usecases.items.AddItemUseCase
 import chkan.ua.domain.usecases.items.DeleteItemUseCase
 import chkan.ua.domain.usecases.items.GetItemsFlowUseCase
+import chkan.ua.domain.usecases.items.GetReadyItemsFlowUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ItemsViewModel @Inject constructor(
     private val getItemsFlow: GetItemsFlowUseCase,
+    private val getReadyItemsFlow: GetReadyItemsFlowUseCase,
     private val addItem: AddItemUseCase,
     private val deleteItem: DeleteItemUseCase,
     private val errorHandler: ErrorHandler,
@@ -24,6 +26,11 @@ class ItemsViewModel @Inject constructor(
     fun getFlowItemsByListId(listId: Int): Flow<List<Item>> {
         return getItemsFlow.run(listId)
     }
+
+    fun getFlowReadyItemsByListId(listId: Int): Flow<List<Item>> {
+        return getReadyItemsFlow.run(listId)
+    }
+
 
     fun addItem(item: Item) {
         viewModelScope.launch (Dispatchers.IO) {

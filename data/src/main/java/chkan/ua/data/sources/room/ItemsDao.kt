@@ -13,8 +13,12 @@ interface ItemsDao {
     suspend fun addItem(item: ItemEntity)
 
     @Transaction
-    @Query("SELECT * FROM items WHERE listId = :listId")
+    @Query("SELECT * FROM items WHERE listId = :listId AND isReady = 0")
     fun getItemsFlowByListId(listId: Int): Flow<List<ItemEntity>>
+
+    @Transaction
+    @Query("SELECT * FROM items WHERE listId = :listId AND isReady = 1")
+    fun getReadyItemsFlowByListId(listId: Int): Flow<List<ItemEntity>>
 
     @Query("DELETE FROM items WHERE itemId = :itemId")
     fun deleteById(itemId: Int)

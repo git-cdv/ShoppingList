@@ -19,6 +19,8 @@ class RoomSourceImpl @Inject constructor (
 
     override fun getItemsFlowByListId(listId: Int): Flow<List<ItemEntity>> = itemsDao.getItemsFlowByListId(listId)
 
+    override fun getReadyItemsFlowByListId(listId: Int): Flow<List<ItemEntity>> = itemsDao.getReadyItemsFlowByListId(listId)
+
     override suspend fun addList(list: ListEntity) {
         listsDao.addList(list)
     }

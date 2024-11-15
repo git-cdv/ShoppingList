@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 interface DataSource {
     fun getListsWithItemsFlow(): Flow<List<ListWithItems>>
     fun getItemsFlowByListId(listId: Int): Flow<List<ItemEntity>>
+    fun getReadyItemsFlowByListId(listId: Int): Flow<List<ItemEntity>>
     suspend fun addList(list: ListEntity)
     suspend fun deleteList(listId: Int)
     suspend fun getListCount(): Int
