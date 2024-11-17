@@ -9,4 +9,4 @@ object FirstListRoute
 object ListsRoute
 
 @Serializable
-data class ItemsRoute(val listId: Int)
+data class ItemsRoute(val listId: Int, val listTitle: String)

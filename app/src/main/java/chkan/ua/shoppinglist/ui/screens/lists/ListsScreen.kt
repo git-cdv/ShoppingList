@@ -31,6 +31,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import chkan.ua.domain.models.Item
 import chkan.ua.domain.models.ListItems
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.core.models.MenuItem
@@ -48,14 +49,14 @@ fun ListsScreen(
 
     ListsScreenContent(lists,
         onDeleteList = { id -> listsViewModel.deleteList(id) },
-        goToItems = {id -> navController.navigate(ItemsRoute(id))})
+        goToItems = {list -> navController.navigate(ItemsRoute(list.id, list.title))})
 }
 
 @Composable
 fun ListsScreenContent(
     lists: List<ListItems>,
     onDeleteList: (Int) -> Unit,
-    goToItems: (Int) -> Unit
+    goToItems: (ListItems) -> Unit
 ) {
     LazyColumn(
         Modifier
@@ -67,7 +68,7 @@ fun ListsScreenContent(
                 text = list.title,
                 modifier = Modifier.animateItem(),
                 onDeleteList = { onDeleteList.invoke(list.id) },
-                onCardClick = {goToItems.invoke(list.id)} )
+                onCardClick = {goToItems.invoke(list)} )
         }
     }
 }
@@ -166,8 +167,19 @@ fun ListItem(
 
 @Preview(showBackground = true)
 @Composable
-fun ListItemPreview() {
+fun ListsScreenContentPreview() {
     ShoppingListTheme {
-        ListItem(text = "Main List", modifier = Modifier,{},{})
+        ListsScreenContent(listOf(ListItems(
+            id = 6187,
+            title = "Commodo",
+            position = 1,
+            items = listOf(Item(
+                itemId = 5847,
+                content = "senserit",
+                listId = 8123,
+                position = 7555,
+                isReady = false
+            ))
+        )),{},{})
     }
 }
