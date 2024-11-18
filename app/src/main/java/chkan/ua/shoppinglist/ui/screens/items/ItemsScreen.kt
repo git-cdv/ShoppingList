@@ -3,6 +3,7 @@ package chkan.ua.shoppinglist.ui.screens.items
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -89,7 +90,8 @@ fun ItemsScreenContent(
         TopBar(title = title, onBackClick = { })
         Box {
             LazyColumn(
-                Modifier
+                contentPadding = PaddingValues(bottom = 64.dp),
+                modifier = Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
             ) {
