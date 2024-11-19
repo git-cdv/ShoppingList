@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -68,16 +70,20 @@ fun ListsScreenContent(
     onDeleteList: (Int) -> Unit,
     goToItems: (ListItems) -> Unit
 ) {
-    Scaffold(modifier = Modifier.fillMaxSize(),
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+    Scaffold(modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(title = { Text(text = stringResource(id = R.string.lists), color = Color.Gray) })
+            TopAppBar(
+                title = { Text(text = stringResource(id = R.string.lists), color = Color.Gray) },
+                scrollBehavior = scrollBehavior)
         }
     ) { paddingValue ->
 
         LazyColumn(
             Modifier
                 .fillMaxWidth()
-                .padding(paddingValue)
+                .padding(top = paddingValue.calculateTopPadding())
                 .background(MaterialTheme.colorScheme.background)
         ){
             items(lists, key = {it.id}){ list ->
