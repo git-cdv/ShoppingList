@@ -22,16 +22,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import chkan.ua.domain.models.ListItemsUi
+import chkan.ua.domain.models.ListProgress
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.core.models.MenuItem
 import chkan.ua.shoppinglist.ui.kit.BaseDropdownMenu
+import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 
 @Composable
 fun ListItem(
-    text: String,
+    list: ListItemsUi,
     modifier: Modifier,
     onDeleteList: () -> Unit,
     onCardClick: () -> Unit)
@@ -51,7 +55,7 @@ fun ListItem(
             var isMenuExpanded by remember { mutableStateOf(false) }
 
             Text(
-                text = text,
+                text = list.title,
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
@@ -65,7 +69,7 @@ fun ListItem(
             )
 
             Text(
-                text = "1/4",
+                text = "${list.readyCount}/${list.count}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
@@ -78,7 +82,7 @@ fun ListItem(
             )
 
             LinearProgressIndicator(
-                progress = { 0.5f } ,
+                progress = { list.progress.get() } ,
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.secondaryContainer,
                 modifier = Modifier
@@ -118,5 +122,21 @@ fun ListItem(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ListItemPreview() {
+    ShoppingListTheme {
+        ListItem(ListItemsUi(
+            id = 2138,
+            title = "Item",
+            position = 2,
+            count = 5,
+            readyCount = 2,
+            progress = ListProgress(count = 5, readyCount = 2),
+            items = listOf()
+        ), Modifier,{},{})
     }
 }
