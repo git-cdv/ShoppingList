@@ -3,19 +3,26 @@ package chkan.ua.shoppinglist.ui.screens.lists
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,6 +46,7 @@ import chkan.ua.shoppinglist.core.models.MenuItem
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
 import chkan.ua.shoppinglist.ui.kit.BaseDropdownMenu
+import chkan.ua.shoppinglist.ui.kit.items.ListItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 
 @Composable
@@ -52,114 +61,31 @@ fun ListsScreen(
         goToItems = {list -> navController.navigate(ItemsRoute(list.id, list.title))})
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListsScreenContent(
     lists: List<ListItems>,
     onDeleteList: (Int) -> Unit,
     goToItems: (ListItems) -> Unit
 ) {
-    LazyColumn(
-        Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
-    ){
-        items(lists, key = {it.id}){ list ->
-            ListItem(
-                text = list.title,
-                modifier = Modifier.animateItem(),
-                onDeleteList = { onDeleteList.invoke(list.id) },
-                onCardClick = {goToItems.invoke(list)} )
+    Scaffold(modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(title = { Text(text = stringResource(id = R.string.lists), color = Color.Gray) })
         }
-    }
-}
+    ) { paddingValue ->
 
-@Composable
-fun ListItem(
-    text: String,
-    modifier: Modifier,
-    onDeleteList: () -> Unit,
-    onCardClick: () -> Unit)
-{
-    Card(
-        onClick = { onCardClick.invoke() },
-        shape = RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)),
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(
-                vertical = dimensionResource(id = R.dimen.inner_padding),
-                horizontal = dimensionResource(id = R.dimen.root_padding)
-            )
-    ) {
-        ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
-            val (textTitle, textCounter, progress, menuIcon) = createRefs()
-            var isMenuExpanded by remember { mutableStateOf(false) }
-
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .padding(
-                        top = dimensionResource(id = R.dimen.root_padding),
-                        start = dimensionResource(id = R.dimen.root_padding)
-                    )
-                    .constrainAs(textTitle) {
-                        start.linkTo(parent.start)
-                    }
-            )
-
-            Text(
-                text = "1/4",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .constrainAs(textCounter) {
-                        start.linkTo(menuIcon.start)
-                        end.linkTo(menuIcon.end)
-                        top.linkTo(progress.top)
-                        bottom.linkTo(progress.bottom)
-                    }
-            )
-
-            LinearProgressIndicator(
-                progress = { 0.5f } ,
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.secondaryContainer,
-                modifier = Modifier
-                    .height(dimensionResource(id = R.dimen.height_progress))
-                    .constrainAs(progress) {
-                        start.linkTo(parent.start, 16.dp)
-                        top.linkTo(textTitle.bottom, 16.dp)
-                        end.linkTo(textCounter.start, 16.dp)
-                        bottom.linkTo(parent.bottom, 16.dp)
-                        width = Dimension.fillToConstraints
-                    }
-            )
-
-            //box needed to open menu under icon
-            Box(modifier = Modifier
-                .constrainAs(menuIcon) {
-                    top.linkTo(parent.top, 6.dp)
-                    end.linkTo(parent.end, 8.dp)
-                }){
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More options",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
-                        .clickable { isMenuExpanded = true }
-                )
-
-                BaseDropdownMenu(
-                    isMenuExpanded = isMenuExpanded,
-                    onDismissRequest = { isMenuExpanded = false },
-                    listItems = listOf(
-                        MenuItem(title = stringResource(id = R.string.delete), onClick = { onDeleteList.invoke()}),
-                        MenuItem(title = stringResource(id = R.string.edit), onClick = { }),
-                    )
-                )
+        LazyColumn(
+            Modifier
+                .fillMaxWidth()
+                .padding(paddingValue)
+                .background(MaterialTheme.colorScheme.background)
+        ){
+            items(lists, key = {it.id}){ list ->
+                ListItem(
+                    text = list.title,
+                    modifier = Modifier.animateItem(),
+                    onDeleteList = { onDeleteList.invoke(list.id) },
+                    onCardClick = {goToItems.invoke(list)} )
             }
         }
     }

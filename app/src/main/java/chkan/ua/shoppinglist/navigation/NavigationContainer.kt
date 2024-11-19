@@ -18,7 +18,6 @@ import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 
 @Composable
 fun NavigationContainer(
-    innerPadding: PaddingValues,
     listsViewModel: ListsViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
@@ -30,9 +29,8 @@ fun NavigationContainer(
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)) {
+            modifier = Modifier.fillMaxSize()
+        ) {
             composable<FirstListRoute> { FirstListScreen() }
             composable<ItemsRoute> { backStackEntry ->
                 val args: ItemsRoute = backStackEntry.toRoute()

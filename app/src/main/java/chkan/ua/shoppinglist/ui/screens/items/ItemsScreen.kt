@@ -19,13 +19,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -45,8 +50,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.domain.models.Item
+import chkan.ua.domain.models.ListItems
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
+import chkan.ua.shoppinglist.navigation.localNavController
 import chkan.ua.shoppinglist.ui.kit.AddItemBottomSheet
 import chkan.ua.shoppinglist.ui.kit.TopBar
 import chkan.ua.shoppinglist.ui.kit.items.ItemItem
@@ -59,16 +66,17 @@ fun ItemsScreen(
     args: ItemsRoute,
     itemsViewModel: ItemsViewModel = hiltViewModel()
 ) {
+    val navController = localNavController.current
     val listId = args.listId
     val listTitle = args.listTitle
     val items by itemsViewModel.getFlowItemsByListId(listId).collectAsStateWithLifecycle(initialValue = listOf())
     val (readyItems, notReadyItems) = items.partition { it.isReady }
 
-
     ItemsScreenContent(listTitle, notReadyItems,readyItems,
         onDeleteItem = { id -> itemsViewModel.deleteItem(id) },
         addItem = { title -> itemsViewModel.addItem(Item(content = title, listId = listId))},
-        onMarkReady = { id, state -> itemsViewModel.changeReadyInItem(id, state) }
+        onMarkReady = { id, state -> itemsViewModel.changeReadyInItem(id, state) },
+        goToBack = {navController.popBackStack()}
     )
 }
 
@@ -80,64 +88,78 @@ fun ItemsScreenContent(
     readyItems: List<Item>,
     onMarkReady: (Int, Boolean) -> Unit,
     onDeleteItem: (Int) -> Unit,
-    addItem: (String) -> Unit
+    addItem: (String) -> Unit,
+    goToBack: () -> Unit
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopBar(title = title, onBackClick = { })
-        Box {
-            LazyColumn(
-                contentPadding = PaddingValues(bottom = 64.dp),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-            ) {
-                items(items, key = { it.itemId }) { item ->
-                    ItemItem(
-                        text = item.content,
-                        modifier = Modifier.animateItem(),
-                        onReady = { onMarkReady.invoke(item.itemId, true) },
-                        onDeleteList = { onDeleteItem.invoke(item.itemId) })
-                }
-                if (readyItems.isNotEmpty()) {
-                    item {
-                        HorizontalDivider(
-                            color = Color.LightGray,
-                            thickness = 1.dp,
-                            modifier = Modifier.padding(dimensionResource(id = R.dimen.root_padding))
-                        )
+    Scaffold(modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = { Text(text = title, color = Color.Gray) },
+                navigationIcon = {
+                    IconButton(onClick = { goToBack.invoke() }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            tint = Color.Gray,
+                            contentDescription = "Back")
                     }
-
-                    items(readyItems, key = { it.itemId }) { item ->
-                        ReadyItem(
-                            text = item.content,
-                            modifier = Modifier.animateItem(),
-                            onNotReady = { onMarkReady.invoke(item.itemId, false) },
-                            onDeleteItem = { onDeleteItem.invoke(item.itemId) })
-                    }
-                }
-            }
-
+                },)
+        },
+        floatingActionButton = {
             FloatingActionButton(
                 onClick = {
                     showBottomSheet = true
                     scope.launch { sheetState.show() }
                 },
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
                     .padding(dimensionResource(id = R.dimen.root_padding))
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Item")
             }
+        },
+        floatingActionButtonPosition = FabPosition.End
+    ) { paddingValue ->
 
-            if (showBottomSheet){
-                AddItemBottomSheet(sheetState,
-                    onDismiss = { showBottomSheet = false },
-                    addItem = { text -> addItem.invoke(text)})
+        LazyColumn(
+            contentPadding = PaddingValues(bottom = 64.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValue)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            items(items, key = { it.itemId }) { item ->
+                ItemItem(
+                    text = item.content,
+                    modifier = Modifier.animateItem(),
+                    onReady = { onMarkReady.invoke(item.itemId, true) },
+                    onDeleteList = { onDeleteItem.invoke(item.itemId) })
             }
+            if (readyItems.isNotEmpty()) {
+                item {
+                    HorizontalDivider(
+                        color = Color.LightGray,
+                        thickness = 1.dp,
+                        modifier = Modifier.padding(dimensionResource(id = R.dimen.root_padding))
+                    )
+                }
+
+                items(readyItems, key = { it.itemId }) { item ->
+                    ReadyItem(
+                        text = item.content,
+                        modifier = Modifier.animateItem(),
+                        onNotReady = { onMarkReady.invoke(item.itemId, false) },
+                        onDeleteItem = { onDeleteItem.invoke(item.itemId) })
+                }
+            }
+        }
+
+        if (showBottomSheet){
+            AddItemBottomSheet(sheetState,
+                onDismiss = { showBottomSheet = false },
+                addItem = { text -> addItem.invoke(text)})
         }
     }
 }
@@ -153,6 +175,6 @@ fun ItemsScreenContentPreview() {
             Item(55,"Item 1", 0,0, false),
             Item(44774,"Item 2", 0,1, false)
         ),
-            {_,_ -> }, {}, {})
+            {_,_ -> }, {}, {},{})
     }
 }
