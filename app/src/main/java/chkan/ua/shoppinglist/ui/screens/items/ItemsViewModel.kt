@@ -1,5 +1,7 @@
 package chkan.ua.shoppinglist.ui.screens.items
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import chkan.ua.domain.models.Item
@@ -13,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 import javax.inject.Inject
@@ -28,8 +31,13 @@ class ItemsViewModel @Inject constructor(
 
     private val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
+    private val _isEmpty = mutableStateOf(false)
+    val isEmpty: State<Boolean> = _isEmpty
+
     fun getFlowItemsByListId(listId: Int): Flow<List<Item>> {
-        return getItemsFlow.run(listId)
+        return getItemsFlow.run(listId).onEach { items ->
+            _isEmpty.value = items.isEmpty()
+        }
     }
 
     fun addItem(item: Item) {

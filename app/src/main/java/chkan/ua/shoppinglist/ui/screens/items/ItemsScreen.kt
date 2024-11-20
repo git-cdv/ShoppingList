@@ -22,6 +22,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,10 +54,11 @@ fun ItemsScreen(
     val navController = localNavController.current
     val listId = args.listId
     val listTitle = args.listTitle
+    val isEmptyState by itemsViewModel.isEmpty
     val items by itemsViewModel.getFlowItemsByListId(listId).collectAsStateWithLifecycle(initialValue = listOf())
     val (readyItems, notReadyItems) = items.partition { it.isReady }
 
-    ItemsScreenContent(listTitle, notReadyItems,readyItems,
+    ItemsScreenContent(listTitle, notReadyItems,readyItems, isEmptyState,
         onDeleteItem = { id -> itemsViewModel.deleteItem(id) },
         addItem = { title -> itemsViewModel.addItem(Item(content = title, listId = listId))},
         onMarkReady = { id, state -> itemsViewModel.changeReadyInItem(id, state) },
@@ -70,6 +72,7 @@ fun ItemsScreenContent(
     title: String,
     items: List<Item>,
     readyItems: List<Item>,
+    isEmptyState: Boolean,
     onMarkReady: (Int, Boolean) -> Unit,
     onDeleteItem: (Int) -> Unit,
     addItem: (String) -> Unit,
@@ -112,6 +115,13 @@ fun ItemsScreenContent(
         },
         floatingActionButtonPosition = FabPosition.End
     ) { paddingValue ->
+
+        LaunchedEffect(isEmptyState) {
+            if (isEmptyState){
+                showBottomSheet = true
+                scope.launch { sheetState.show() }
+            }
+        }
 
         LazyColumn(
             contentPadding = PaddingValues(bottom = 64.dp),
@@ -164,7 +174,7 @@ fun ItemsScreenContentPreview() {
         ), listOf(
             Item(55,"Item 1", 0,0, false),
             Item(44774,"Item 2", 0,1, false)
-        ),
+        ), false,
             {_,_ -> }, {}, {},{})
     }
 }
