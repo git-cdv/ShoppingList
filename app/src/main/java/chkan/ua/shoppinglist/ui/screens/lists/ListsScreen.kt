@@ -7,17 +7,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,8 +39,10 @@ import chkan.ua.domain.models.ListProgress
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
+import chkan.ua.shoppinglist.ui.kit.AddItemBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ListItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun ListsScreen(
@@ -40,6 +53,7 @@ fun ListsScreen(
 
     ListsScreenContent(lists,
         onDeleteList = { id -> listsViewModel.deleteList(id) },
+        onCreateList = { title -> listsViewModel.addList(title) },
         goToItems = {list -> navController.navigate(ItemsRoute(list.id, list.title))})
 }
 
@@ -48,8 +62,12 @@ fun ListsScreen(
 fun ListsScreenContent(
     lists: List<ListItemsUi>,
     onDeleteList: (Int) -> Unit,
+    onCreateList: (String) -> Unit,
     goToItems: (ListItemsUi) -> Unit
 ) {
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(modifier = Modifier
@@ -59,7 +77,20 @@ fun ListsScreenContent(
             TopAppBar(
                 title = { Text(text = stringResource(id = R.string.lists), color = Color.Gray) },
                 scrollBehavior = scrollBehavior)
-        }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    showBottomSheet = true
+                    scope.launch { sheetState.show() }
+                },
+                modifier = Modifier
+                    .padding(dimensionResource(id = R.dimen.root_padding))
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add List")
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End
     ) { paddingValue ->
 
         LazyColumn(
@@ -76,6 +107,12 @@ fun ListsScreenContent(
                     onDeleteList = { onDeleteList.invoke(list.id) },
                     onCardClick = {goToItems.invoke(list)} )
             }
+        }
+
+        if (showBottomSheet){
+            AddItemBottomSheet(sheetState,
+                onDismiss = { showBottomSheet = false },
+                addItem = { text -> onCreateList.invoke(text)})
         }
     }
 }
@@ -97,6 +134,6 @@ fun ListsScreenContentPreview() {
                 position = 7555,
                 isReady = false
             )), progress = ListProgress(count = 4, readyCount = 2)
-        )),{},{})
+        )),{},{},{})
     }
 }
