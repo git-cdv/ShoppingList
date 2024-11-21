@@ -157,9 +157,12 @@ fun ItemsScreenContent(
         }
 
         if (showBottomSheet){
-            AddItemBottomSheet(sheetState,
+            AddItemBottomSheet(
+                sheetState,
                 onDismiss = { showBottomSheet = false },
-                addItem = { text -> addItem.invoke(text)})
+                addItem = { text -> addItem.invoke(text)},
+                R.string.items_text_placeholder
+            )
         }
     }
 }

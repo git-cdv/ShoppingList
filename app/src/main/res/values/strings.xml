@@ -14,4 +14,5 @@
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
     <string name="lists">Lists</string>
+    <string name="items_text_placeholder">e.g milk or bread</string>
 </resources>

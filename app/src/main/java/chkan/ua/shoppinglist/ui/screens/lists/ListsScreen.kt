@@ -112,7 +112,8 @@ fun ListsScreenContent(
         if (showBottomSheet){
             AddItemBottomSheet(sheetState,
                 onDismiss = { showBottomSheet = false },
-                addItem = { text -> onCreateList.invoke(text)})
+                addItem = { text -> onCreateList.invoke(text)},
+                R.string.first_list_text_placeholder)
         }
     }
 }

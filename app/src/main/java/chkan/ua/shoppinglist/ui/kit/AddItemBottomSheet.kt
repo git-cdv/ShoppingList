@@ -24,7 +24,12 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddItemBottomSheet(sheetState: SheetState,onDismiss: () -> Unit, addItem: (String) -> Unit ){
+fun AddItemBottomSheet(
+    sheetState: SheetState,
+    onDismiss: () -> Unit,
+    addItem: (String) -> Unit,
+    placeholderResId: Int
+){
     val scope = rememberCoroutineScope()
     var text by rememberSaveable { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
@@ -54,7 +59,7 @@ fun AddItemBottomSheet(sheetState: SheetState,onDismiss: () -> Unit, addItem: (S
                 value = text,
                 onValueChange = { newText -> text = newText },
                 roundedCornerRes = R.dimen.rounded_corner,
-                placeholderTextRes = R.string.first_list_text_placeholder,
+                placeholderTextRes = placeholderResId,
                 focusRequester,
                 onDone = {
                     addItem.invoke(text)
