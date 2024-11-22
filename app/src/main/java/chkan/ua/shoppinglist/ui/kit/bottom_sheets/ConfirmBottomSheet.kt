@@ -11,15 +11,23 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import chkan.ua.domain.models.Item
+import chkan.ua.domain.models.ListItemsUi
+import chkan.ua.domain.models.ListProgress
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.ui.screens.lists.ListsScreenContent
+import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,5 +89,21 @@ fun ConfirmBottomSheet(
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@Composable
+fun ConfirmBottomSheetPreview() {
+    ShoppingListTheme {
+        ConfirmBottomSheet(
+            sheetState = rememberStandardBottomSheetState(
+                initialValue = SheetValue.Expanded
+            ),
+            question = stringResource(id = R.string.sure_clear_everything),
+            onConfirm = { },
+            onDismiss = {}
+        )
     }
 }
