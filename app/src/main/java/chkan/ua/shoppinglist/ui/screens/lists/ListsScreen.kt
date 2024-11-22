@@ -39,7 +39,7 @@ import chkan.ua.domain.models.ListProgress
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
-import chkan.ua.shoppinglist.ui.kit.AddItemBottomSheet
+import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ListItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch

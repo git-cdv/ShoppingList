@@ -16,4 +16,7 @@
     <string name="lists">Lists</string>
     <string name="items_text_placeholder">напр. молоко або хліб</string>
     <string name="clear">Очистити</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="sure_clear_everything">Ви впевнені, що хочете очистити все?</string>
 </resources>

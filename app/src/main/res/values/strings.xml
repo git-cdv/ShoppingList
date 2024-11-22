@@ -16,4 +16,7 @@
     <string name="lists">Lists</string>
     <string name="items_text_placeholder">e.g milk or bread</string>
     <string name="clear">Clear</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="sure_clear_everything">Are you sure you want to clear everything?</string>
 </resources>

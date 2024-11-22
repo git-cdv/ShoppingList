@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,18 +39,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.domain.models.Item
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
-import chkan.ua.shoppinglist.ui.kit.AddItemBottomSheet
+import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheet
+import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ItemItem
 import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
@@ -73,8 +70,7 @@ fun ItemsScreen(
         onDeleteItem = { id -> itemsViewModel.deleteItem(id) },
         addItem = { title -> itemsViewModel.addItem(Item(content = title, listId = listId))},
         onMarkReady = { id, state -> itemsViewModel.changeReadyInItem(id, state) },
-        goToBack = {navController.popBackStack()},
-        clearAllReady = {}
+        goToBack = {navController.popBackStack()}
     )
 }
 
@@ -88,11 +84,12 @@ fun ItemsScreenContent(
     onMarkReady: (Int, Boolean) -> Unit,
     onDeleteItem: (Int) -> Unit,
     addItem: (String) -> Unit,
-    goToBack: () -> Unit,
-    clearAllReady: () -> Unit
+    goToBack: () -> Unit
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+    var showConfirmBottomSheet by remember { mutableStateOf(false) }
+    val confirmSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -171,8 +168,11 @@ fun ItemsScreenContent(
                                 color = Color.Gray,
                                 modifier = Modifier
                                     .align(Alignment.CenterEnd)
-                                    .clip(RoundedCornerShape(dimensionResource(id = R.dimen.inner_padding)))
-                                    .clickable { clearAllReady.invoke() }
+                                    .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
+                                    .clickable {
+                                        showConfirmBottomSheet = true
+                                        scope.launch { confirmSheetState.show() }
+                                    }
                                     .padding(dimensionResource(id = R.dimen.inner_padding))
 
                             )
@@ -197,6 +197,14 @@ fun ItemsScreenContent(
                 R.string.items_text_placeholder
             )
         }
+        if (showConfirmBottomSheet){
+            ConfirmBottomSheet(
+                confirmSheetState,
+                question = stringResource(id = R.string.sure_clear_everything),
+                onConfirm = {},
+                onDismiss = { showConfirmBottomSheet = false }
+            )
+        }
     }
 }
 
@@ -211,6 +219,6 @@ fun ItemsScreenContentPreview() {
             Item(55,"Item 1", 0,0, false),
             Item(44774,"Item 2", 0,1, false)
         ), false,
-            {_,_ -> }, {}, {},{},{})
+            {_,_ -> }, {}, {},{})
     }
 }

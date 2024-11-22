@@ -1,4 +1,4 @@
-package chkan.ua.shoppinglist.ui.kit
+package chkan.ua.shoppinglist.ui.kit.bottom_sheets
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.dimensionResource
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.ui.kit.RoundedTextField
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
