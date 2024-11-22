@@ -15,4 +15,5 @@
     <string name="edit">Edit</string>
     <string name="lists">Lists</string>
     <string name="items_text_placeholder">напр. молоко или хлеб</string>
+    <string name="clear">Очистить</string>
 </resources>
