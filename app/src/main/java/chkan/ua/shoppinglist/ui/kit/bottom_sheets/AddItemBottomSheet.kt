@@ -1,8 +1,11 @@
 package chkan.ua.shoppinglist.ui.kit.bottom_sheets
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -23,7 +26,7 @@ import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.ui.kit.RoundedTextField
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddItemBottomSheet(
     sheetState: SheetState,
@@ -34,6 +37,8 @@ fun AddItemBottomSheet(
     val scope = rememberCoroutineScope()
     var text by rememberSaveable { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
+    var wasKeyboardVisible by remember { mutableStateOf(false) }
+    val isKeyboardVisible = WindowInsets.isImeVisible
 
     ModalBottomSheet(
         sheetState = sheetState,
@@ -44,12 +49,20 @@ fun AddItemBottomSheet(
             }
         }})
     {
+        //focus after first show
         LaunchedEffect(sheetState.currentValue) {
             if (sheetState.currentValue == SheetValue.Expanded ||
                 sheetState.currentValue == SheetValue.PartiallyExpanded
             ) {
                 focusRequester.requestFocus()
             }
+        }
+        //dismiss after hide keyboard
+        LaunchedEffect(isKeyboardVisible) {
+            if (wasKeyboardVisible && !isKeyboardVisible && sheetState.currentValue == SheetValue.Expanded) {
+                scope.launch { sheetState.hide() }.invokeOnCompletion { onDismiss.invoke() }
+            }
+            wasKeyboardVisible = isKeyboardVisible
         }
 
         Column(
