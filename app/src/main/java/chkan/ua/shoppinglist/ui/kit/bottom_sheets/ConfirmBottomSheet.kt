@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -18,15 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import chkan.ua.domain.models.Item
-import chkan.ua.domain.models.ListItemsUi
-import chkan.ua.domain.models.ListProgress
 import chkan.ua.shoppinglist.R
-import chkan.ua.shoppinglist.ui.screens.lists.ListsScreenContent
+import chkan.ua.shoppinglist.ui.kit.buttons.MyButton
+import chkan.ua.shoppinglist.ui.kit.buttons.MyOutlinedButton
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
@@ -51,7 +47,7 @@ fun ConfirmBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = dimensionResource(id = R.dimen.root_padding)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -59,33 +55,23 @@ fun ConfirmBottomSheet(
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .padding(bottom = 24.dp)
+                    .padding(bottom = dimensionResource(id = R.dimen.root_padding))
                     .fillMaxWidth()
             )
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = dimensionResource(id = R.dimen.inner_padding)),
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.inner_padding))
             ) {
-                Button(
-                    onClick = { scope.launch {
+                MyButton(stringResource(id = R.string.confirm), Modifier.weight(1f)) { onConfirm.invoke() }
+
+                MyOutlinedButton(stringResource(id = R.string.confirm), Modifier.weight(1f)) {
+                    scope.launch {
                         sheetState.hide()
                         onDismiss.invoke()
-                    } },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text(text = stringResource(id = R.string.cancel))
-                }
-
-                Button(
-                    onClick = { onConfirm() },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Text(text = stringResource(id = R.string.confirm))
+                    }
                 }
             }
         }
