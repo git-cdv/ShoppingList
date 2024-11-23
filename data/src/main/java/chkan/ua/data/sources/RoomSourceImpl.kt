@@ -41,4 +41,8 @@ class RoomSourceImpl @Inject constructor (
         val stateAsInt = if (state) 1 else 0
         itemsDao.markItemReady(itemId,stateAsInt)
     }
+
+    override suspend fun clearReadyItems(listId: Int) {
+        itemsDao.clearReadyItems(listId)
+    }
 }

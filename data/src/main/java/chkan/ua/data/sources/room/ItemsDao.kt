@@ -19,6 +19,9 @@ interface ItemsDao {
     @Query("DELETE FROM items WHERE itemId = :itemId")
     suspend fun deleteById(itemId: Int)
 
+    @Query("DELETE FROM items WHERE listId = :listId AND isReady = 1")
+    suspend fun clearReadyItems(listId: Int)
+
     @Query("UPDATE items SET isReady = :state WHERE itemId = :itemId")
     suspend fun markItemReady(itemId: Int, state: Int)
 }

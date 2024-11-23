@@ -35,12 +35,8 @@ fun ConfirmBottomSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ){
-    val scope = rememberCoroutineScope()
     ModalBottomSheet(
-        onDismissRequest = { scope.launch {
-            sheetState.hide()
-            onDismiss.invoke()
-        }},
+        onDismissRequest = { onDismiss.invoke()},
         sheetState = sheetState,
         modifier = modifier
     ) {
@@ -66,13 +62,7 @@ fun ConfirmBottomSheet(
                 horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.inner_padding))
             ) {
                 MyButton(stringResource(id = R.string.confirm), Modifier.weight(1f)) { onConfirm.invoke() }
-
-                MyOutlinedButton(stringResource(id = R.string.confirm), Modifier.weight(1f)) {
-                    scope.launch {
-                        sheetState.hide()
-                        onDismiss.invoke()
-                    }
-                }
+                MyOutlinedButton(stringResource(id = R.string.cancel), Modifier.weight(1f)) { onDismiss.invoke() }
             }
         }
     }

@@ -70,7 +70,8 @@ fun ItemsScreen(
         onDeleteItem = { id -> itemsViewModel.deleteItem(id) },
         addItem = { title -> itemsViewModel.addItem(Item(content = title, listId = listId))},
         onMarkReady = { id, state -> itemsViewModel.changeReadyInItem(id, state) },
-        goToBack = {navController.popBackStack()}
+        goToBack = {navController.popBackStack()},
+        clearReadyItems = {itemsViewModel.clearReadyItems(listId)}
     )
 }
 
@@ -84,7 +85,8 @@ fun ItemsScreenContent(
     onMarkReady: (Int, Boolean) -> Unit,
     onDeleteItem: (Int) -> Unit,
     addItem: (String) -> Unit,
-    goToBack: () -> Unit
+    goToBack: () -> Unit,
+    clearReadyItems: () -> Unit,
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -201,8 +203,15 @@ fun ItemsScreenContent(
             ConfirmBottomSheet(
                 confirmSheetState,
                 question = stringResource(id = R.string.sure_clear_everything),
-                onConfirm = {},
-                onDismiss = { showConfirmBottomSheet = false }
+                onConfirm = { scope.launch {
+                    clearReadyItems.invoke()
+                    confirmSheetState.hide()
+                    showConfirmBottomSheet = false
+                    } },
+                onDismiss = { scope.launch {
+                    confirmSheetState.hide()
+                    showConfirmBottomSheet = false
+                } }
             )
         }
     }
@@ -219,6 +228,6 @@ fun ItemsScreenContentPreview() {
             Item(55,"Item 1", 0,0, false),
             Item(44774,"Item 2", 0,1, false)
         ), false,
-            {_,_ -> }, {}, {},{})
+            {_,_ -> }, {}, {},{},{})
     }
 }

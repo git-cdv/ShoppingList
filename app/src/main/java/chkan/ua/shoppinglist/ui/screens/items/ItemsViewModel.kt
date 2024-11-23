@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.usecases.items.AddItemUseCase
+import chkan.ua.domain.usecases.items.ClearReadyItemsUseCase
 import chkan.ua.domain.usecases.items.DeleteItemUseCase
 import chkan.ua.domain.usecases.items.GetItemsFlowUseCase
 import chkan.ua.domain.usecases.items.MarkReadyConfig
@@ -26,6 +27,7 @@ class ItemsViewModel @Inject constructor(
     private val addItem: AddItemUseCase,
     private val markReady: MarkReadyItemUseCase,
     private val deleteItem: DeleteItemUseCase,
+    private val clearReadyItems: ClearReadyItemsUseCase,
     private val errorHandler: ErrorHandler,
 ) : ViewModel() {
 
@@ -67,6 +69,16 @@ class ItemsViewModel @Inject constructor(
                 markReady.run(config)
             } catch (e: Exception){
                 errorHandler.handle(e,markReady.getErrorReason(config))
+            }
+        }
+    }
+
+    fun clearReadyItems(listId: Int) {
+        viewModelScope.launch (Dispatchers.IO) {
+            try {
+                clearReadyItems.run(listId)
+            } catch (e: Exception){
+                errorHandler.handle(e,deleteItem.getErrorReason())
             }
         }
     }

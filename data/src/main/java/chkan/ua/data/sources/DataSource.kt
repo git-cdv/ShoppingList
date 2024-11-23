@@ -14,4 +14,5 @@ interface DataSource {
     suspend fun addItem(item: ItemEntity)
     suspend fun deleteItem(itemId: Int)
     suspend fun markItemReady(itemId: Int, state: Boolean)
+    suspend fun clearReadyItems(listId: Int)
 }
