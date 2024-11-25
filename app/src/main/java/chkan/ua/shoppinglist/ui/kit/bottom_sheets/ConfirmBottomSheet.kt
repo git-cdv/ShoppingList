@@ -13,7 +13,6 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
@@ -24,7 +23,6 @@ import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.ui.kit.buttons.MyButton
 import chkan.ua.shoppinglist.ui.kit.buttons.MyOutlinedButton
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
