@@ -49,6 +49,7 @@ import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
+import chkan.ua.shoppinglist.ui.kit.empty_state.CenteredTextScreen
 import chkan.ua.shoppinglist.ui.kit.items.ItemItem
 import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
@@ -135,58 +136,62 @@ fun ItemsScreenContent(
             }
         }
 
-        LazyColumn(
-            contentPadding = PaddingValues(bottom = 64.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValue.calculateTopPadding())
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            items(items, key = { it.itemId }) { item ->
-                ItemItem(
-                    text = item.content,
-                    modifier = Modifier.animateItem(),
-                    onReady = { onMarkReady.invoke(item.itemId, true) },
-                    onDeleteList = { onDeleteItem.invoke(item.itemId) })
-            }
-            if (readyItems.isNotEmpty()) {
-                item {
-                    HorizontalDivider(
-                        color = Color.LightGray,
-                        thickness = 1.dp,
-                        modifier = Modifier.padding(dimensionResource(id = R.dimen.root_padding))
-                    )
-                }
-                if (readyItems.size > 3) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = dimensionResource(id = R.dimen.root_padding))
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.clear),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = Color.Gray,
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
-                                    .clickable {
-                                        showConfirmBottomSheet = true
-                                        scope.launch { confirmSheetState.show() }
-                                    }
-                                    .padding(dimensionResource(id = R.dimen.inner_padding))
-
-                            )
-                        }
-                    }
-                }
-                items(readyItems, key = { it.itemId }) { item ->
-                    ReadyItem(
+        if (isEmptyState){
+            CenteredTextScreen(stringResource(id = R.string.text_empty_items))
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(bottom = 64.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValue.calculateTopPadding())
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
+                items(items, key = { it.itemId }) { item ->
+                    ItemItem(
                         text = item.content,
                         modifier = Modifier.animateItem(),
-                        onNotReady = { onMarkReady.invoke(item.itemId, false) },
-                        onDeleteItem = { onDeleteItem.invoke(item.itemId) })
+                        onReady = { onMarkReady.invoke(item.itemId, true) },
+                        onDeleteList = { onDeleteItem.invoke(item.itemId) })
+                }
+                if (readyItems.isNotEmpty()) {
+                    item {
+                        HorizontalDivider(
+                            color = Color.LightGray,
+                            thickness = 1.dp,
+                            modifier = Modifier.padding(dimensionResource(id = R.dimen.root_padding))
+                        )
+                    }
+                    if (readyItems.size > 3) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = dimensionResource(id = R.dimen.root_padding))
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.clear),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Color.Gray,
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
+                                        .clickable {
+                                            showConfirmBottomSheet = true
+                                            scope.launch { confirmSheetState.show() }
+                                        }
+                                        .padding(dimensionResource(id = R.dimen.inner_padding))
+
+                                )
+                            }
+                        }
+                    }
+                    items(readyItems, key = { it.itemId }) { item ->
+                        ReadyItem(
+                            text = item.content,
+                            modifier = Modifier.animateItem(),
+                            onNotReady = { onMarkReady.invoke(item.itemId, false) },
+                            onDeleteItem = { onDeleteItem.invoke(item.itemId) })
+                    }
                 }
             }
         }
