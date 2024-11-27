@@ -3,6 +3,7 @@ package chkan.ua.data.sources
 import chkan.ua.data.models.ItemEntity
 import chkan.ua.data.models.ListEntity
 import chkan.ua.data.models.ListWithItems
+import chkan.ua.data.sources.room.HistoryItemDao
 import chkan.ua.data.sources.room.ItemsDao
 import chkan.ua.data.sources.room.ListsDao
 import kotlinx.coroutines.flow.Flow
@@ -13,6 +14,7 @@ import javax.inject.Singleton
 class RoomSourceImpl @Inject constructor (
     private val listsDao: ListsDao,
     private val itemsDao: ItemsDao,
+    private val historyDao: HistoryItemDao
 ) : DataSource {
 
     override fun getListsWithItemsFlow(): Flow<List<ListWithItems>> = listsDao.getListsWithItemsFlow()
@@ -44,5 +46,11 @@ class RoomSourceImpl @Inject constructor (
 
     override suspend fun clearReadyItems(listId: Int) {
         itemsDao.clearReadyItems(listId)
+    }
+
+    override fun getHistory() = historyDao.getHistory()
+
+    override suspend fun incrementOrInsertInHistory(name: String) {
+        historyDao.incrementOrInsertInHistory(name)
     }
 }

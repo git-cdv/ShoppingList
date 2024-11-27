@@ -1,4 +1,4 @@
-package chkan.ua.shoppinglist.core.components
+package chkan.ua.core.components
 
 open class ComponentStore {
 

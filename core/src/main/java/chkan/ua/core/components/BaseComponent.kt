@@ -1,4 +1,4 @@
-package chkan.ua.shoppinglist.core.components
+package chkan.ua.core.components
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
