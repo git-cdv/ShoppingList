@@ -24,6 +24,9 @@ android {
                 "proguard-rules.pro"
             )
         }
+        create("stage") {
+            initWith(getByName("release"))
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8

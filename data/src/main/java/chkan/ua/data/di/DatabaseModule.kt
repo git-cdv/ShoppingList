@@ -2,6 +2,7 @@ package chkan.ua.data.di
 
 import android.content.Context
 import androidx.room.Room
+import chkan.ua.data.sources.room.HistoryItemDao
 import chkan.ua.data.sources.room.ItemsDao
 import chkan.ua.data.sources.room.ListsDao
 import chkan.ua.data.sources.room.RoomDatabase
@@ -35,6 +36,11 @@ object DatabaseModule {
     @Provides
     fun provideItemsDao(db: RoomDatabase): ItemsDao {
         return db.itemsDao
+    }
+
+    @Provides
+    fun provideHistoryDao(db: RoomDatabase): HistoryItemDao {
+        return db.historyDao
     }
 
 }
