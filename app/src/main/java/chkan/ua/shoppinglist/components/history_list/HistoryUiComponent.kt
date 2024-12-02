@@ -4,9 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
+import chkan.ua.shoppinglist.core.components.Component
+import chkan.ua.shoppinglist.core.components.StateComponent
 
 @Composable
-fun HistoryUiComponent(component: PreviewStubComponent) {
+fun HistoryUiComponent(component: StateComponent<HistoryComponentState>) {
     val state by component.stateFlow.collectAsState()
     HistoryComponentContent(state)
 }

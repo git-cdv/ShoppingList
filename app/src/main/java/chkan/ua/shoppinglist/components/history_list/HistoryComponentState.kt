@@ -7,5 +7,5 @@ import chkan.ua.domain.models.HistoryItem
 data class HistoryComponentState(
     val isShow: Boolean = false,
     val isShort: Boolean = false,
-    val list: List<HistoryItem>
+    val list: List<HistoryItem> = listOf()
 )

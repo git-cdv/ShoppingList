@@ -2,7 +2,6 @@ package chkan.ua.shoppinglist.ui.screens.items
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.usecases.items.AddItemUseCase
@@ -11,6 +10,8 @@ import chkan.ua.domain.usecases.items.DeleteItemUseCase
 import chkan.ua.domain.usecases.items.GetItemsFlowUseCase
 import chkan.ua.domain.usecases.items.MarkReadyConfig
 import chkan.ua.domain.usecases.items.MarkReadyItemUseCase
+import chkan.ua.shoppinglist.components.history_list.HistoryComponent
+import chkan.ua.shoppinglist.core.components.ComponentsViewModel
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +30,12 @@ class ItemsViewModel @Inject constructor(
     private val deleteItem: DeleteItemUseCase,
     private val clearReadyItems: ClearReadyItemsUseCase,
     private val errorHandler: ErrorHandler,
-) : ViewModel() {
+    private val historyComponent: HistoryComponent,
+) : ComponentsViewModel() {
+
+    init {
+        attachComponent(historyComponent)
+    }
 
     private val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
