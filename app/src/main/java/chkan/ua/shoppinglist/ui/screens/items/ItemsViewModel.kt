@@ -89,4 +89,6 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
+    fun getHistoryComponent() = historyComponent
+
 }
