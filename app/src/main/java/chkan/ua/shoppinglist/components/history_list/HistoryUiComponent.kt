@@ -28,7 +28,7 @@ fun HistoryUiComponent(component: StateComponent<HistoryComponentState>) {
 @Composable
 fun HistoryComponentContent(state: HistoryComponentState) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize=80.dp),
+        columns = GridCells.Adaptive(minSize=100.dp),
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Absolute.Left
     ){
@@ -42,11 +42,11 @@ fun HistoryComponentContent(state: HistoryComponentState) {
 @Composable
 private fun ComponentPreview() {
     val state = HistoryComponentState(isShow = true, isShort = true, list = listOf(
-        HistoryItem(1,"Product 1"),
-        HistoryItem(2,"Product 2"),
-        HistoryItem(3,"Product 3"),
+        HistoryItem(1,"Product1"),
+        HistoryItem(2,"Product2"),
+        HistoryItem(3,"Product 3555"),
         HistoryItem(4,"Product 4"),
-        HistoryItem(5,"Product 5"))
+        HistoryItem(5,"Product 5jijij nijioj"))
     )
     HistoryComponentContent(state= state)
 }
