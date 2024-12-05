@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import chkan.ua.domain.models.HistoryItem
 import chkan.ua.shoppinglist.core.components.StateComponent
+import chkan.ua.shoppinglist.ui.kit.items.SuggestionItemCard
 
 @Composable
 fun HistoryUiComponent(component: StateComponent<HistoryComponentState>) {
@@ -27,14 +28,12 @@ fun HistoryUiComponent(component: StateComponent<HistoryComponentState>) {
 @Composable
 fun HistoryComponentContent(state: HistoryComponentState) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize=120.dp),
+        columns = GridCells.Adaptive(minSize=80.dp),
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.Absolute.Left
     ){
         items(state.list, key = { it.id }) { item ->
-            Column(Modifier.padding(7.dp), horizontalAlignment = Alignment.CenterHorizontally){
-                Text(item.name)
-            }
+            SuggestionItemCard(item.name){}
         }
     }
 }
