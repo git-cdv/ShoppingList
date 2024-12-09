@@ -42,7 +42,7 @@ private fun ComponentPreview() {
         HistoryItem(2,"Product2"),
         HistoryItem(3,"Product 3555"),
         HistoryItem(4,"Product 4"),
-        HistoryItem(5,"Product 5jijij nijioj"))
+        HistoryItem(5,"Product nijioj"))
     )
     HistoryComponentContent(state= state)
 }
