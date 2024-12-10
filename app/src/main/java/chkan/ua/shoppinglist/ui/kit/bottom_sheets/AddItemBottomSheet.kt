@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.dimensionResource
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.components.history_list.HistoryComponent
 import chkan.ua.shoppinglist.ui.kit.RoundedTextField
 import kotlinx.coroutines.launch
 
@@ -30,6 +31,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AddItemBottomSheet(
     sheetState: SheetState,
+    historyComponent: HistoryComponent,
     onDismiss: () -> Unit,
     addItem: (String) -> Unit,
     placeholderResId: Int

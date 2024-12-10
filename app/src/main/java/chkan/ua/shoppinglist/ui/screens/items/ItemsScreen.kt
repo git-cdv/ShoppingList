@@ -45,6 +45,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.domain.models.Item
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.components.history_list.HistoryComponent
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheet
@@ -66,8 +67,14 @@ fun ItemsScreen(
     val isEmptyState by itemsViewModel.isEmpty
     val items by itemsViewModel.getFlowItemsByListId(listId).collectAsStateWithLifecycle(initialValue = listOf())
     val (readyItems, notReadyItems) = items.partition { it.isReady }
+    val historyComponent = itemsViewModel.getHistoryComponent()
 
-    ItemsScreenContent(listTitle, notReadyItems,readyItems, isEmptyState,
+    ItemsScreenContent(
+        title = listTitle,
+        items = notReadyItems,
+        readyItems = readyItems,
+        isEmptyState = isEmptyState,
+        historyComponent = historyComponent,
         onDeleteItem = { id -> itemsViewModel.deleteItem(id) },
         addItem = { title -> itemsViewModel.addItem(Item(content = title, listId = listId))},
         onMarkReady = { id, state -> itemsViewModel.changeReadyInItem(id, state) },
@@ -83,6 +90,7 @@ fun ItemsScreenContent(
     items: List<Item>,
     readyItems: List<Item>,
     isEmptyState: Boolean,
+    historyComponent: HistoryComponent,
     onMarkReady: (Int, Boolean) -> Unit,
     onDeleteItem: (Int) -> Unit,
     addItem: (String) -> Unit,
@@ -199,6 +207,7 @@ fun ItemsScreenContent(
         if (showBottomSheet){
             AddItemBottomSheet(
                 sheetState,
+                historyComponent,
                 onDismiss = { showBottomSheet = false },
                 addItem = { text -> addItem.invoke(text)},
                 R.string.items_text_placeholder
