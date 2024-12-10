@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import chkan.ua.core.extensions.firstAsTitle
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.core.models.MenuItem
 import chkan.ua.shoppinglist.ui.kit.BaseDropdownMenu
@@ -68,7 +69,7 @@ fun ItemItem(
                 var isMenuExpanded by remember { mutableStateOf(false) }
 
                 Text(
-                    text = text.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+                    text = text.firstAsTitle(),
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Start,
                     color = MaterialTheme.colorScheme.onSurface,
