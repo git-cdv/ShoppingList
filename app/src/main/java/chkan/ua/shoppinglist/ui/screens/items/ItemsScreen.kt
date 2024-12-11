@@ -236,7 +236,7 @@ fun ItemsScreenContent(
 fun ItemsScreenContentPreview() {
     ShoppingListTheme {
         ItemsScreenContent("Title", listOf(
-            Item(333,"Item 1", 0,0, false),
+            Item(333,"Item 777", 0,0, false),
             Item(444,"Item 2", 0,1, false)
         ), listOf(
             Item(55,"Item 1", 0,0, false),
