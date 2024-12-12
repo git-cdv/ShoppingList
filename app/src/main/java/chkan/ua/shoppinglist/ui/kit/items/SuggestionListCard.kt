@@ -2,8 +2,8 @@ package chkan.ua.shoppinglist.ui.kit.items
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
@@ -17,10 +17,10 @@ import androidx.compose.ui.unit.dp
 import chkan.ua.shoppinglist.R
 
 @Composable
-fun SuggestionItemCard(suggestion: String, onSuggestionChoose: (String) -> Unit) {
+fun SuggestionListCard(suggestion: String, onSuggestionChoose: (String) -> Unit) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
+            .wrapContentSize()
             .padding(4.dp)
             .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
             .clickable { onSuggestionChoose.invoke(suggestion) },

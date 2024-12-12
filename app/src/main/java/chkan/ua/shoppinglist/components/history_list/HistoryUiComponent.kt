@@ -10,26 +10,47 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import chkan.ua.domain.models.HistoryItem
-import chkan.ua.shoppinglist.core.components.StateComponent
+import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.ui.kit.bottom_sheets.StubHistoryComponent
+import chkan.ua.shoppinglist.ui.kit.items.ToggleCard
 import chkan.ua.shoppinglist.ui.kit.items.SuggestionItemCard
 
 @Composable
-fun HistoryUiComponent(component: StateComponent<HistoryComponentState>) {
+fun HistoryUiComponent(component: StubHistoryComponent, modifier: Modifier) {
     val state by component.stateFlow.collectAsState()
-    HistoryComponentContent(state)
+    HistoryComponentContent(
+        state,
+        modifier,
+        onToggle = { component.updateState { copy(isShort = it) } }
+    )
 }
 
 @Composable
-fun HistoryComponentContent(state: HistoryComponentState) {
+fun HistoryComponentContent(
+    state: HistoryComponentState,
+    modifier: Modifier,
+    onToggle: (Boolean)-> Unit) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize=100.dp),
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Absolute.Left
+        columns = GridCells.Fixed(3),
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Top,
+        horizontalArrangement = Arrangement.Start
     ){
-        items(state.list, key = { it.id }) { item ->
+        val list = if (state.isShort) {
+            if (state.list.size >= 9){
+                state.list.take(8)
+            } else state.list
+        } else state.list
+        items(list, key = { it.id }) { item ->
             SuggestionItemCard(item.name){}
+        }
+        if (state.list.size >= 9){
+            if (state.isShort){
+                item { ToggleCard(R.string.more){ onToggle.invoke(false) } }
+            } else {
+                item { ToggleCard(R.string.less){ onToggle.invoke(true) } }
+            }
         }
     }
 }
@@ -44,6 +65,6 @@ private fun ComponentPreview() {
         HistoryItem(4,"Product 4"),
         HistoryItem(5,"Product nijioj"))
     )
-    HistoryComponentContent(state= state)
+    HistoryComponentContent(state= state, modifier = Modifier,{})
 }
 

@@ -24,8 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
+import chkan.ua.domain.models.HistoryItem
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.components.history_list.HistoryComponentState
+import chkan.ua.shoppinglist.components.history_list.HistoryUiComponent
 import chkan.ua.shoppinglist.core.components.StateDelegate
 import chkan.ua.shoppinglist.ui.kit.RoundedTextField
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
@@ -33,13 +35,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-interface PreviewStubHistoryComponent : StateDelegate<HistoryComponentState>
+interface StubHistoryComponent : StateDelegate<HistoryComponentState>
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddItemBottomSheet(
     sheetState: SheetState,
-    historyComponent: PreviewStubHistoryComponent,
+    historyComponent: StubHistoryComponent,
     onDismiss: () -> Unit,
     addItem: (String) -> Unit,
     placeholderResId: Int
@@ -79,6 +81,12 @@ fun AddItemBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
+            HistoryUiComponent(
+                historyComponent,
+                Modifier
+                .fillMaxWidth()
+                .padding(start = dimensionResource(id = R.dimen.root_padding), end = dimensionResource(id = R.dimen.root_padding), bottom = dimensionResource(id = R.dimen.inner_padding)))
+
             RoundedTextField(
                 value = text,
                 onValueChange = { newText -> text = newText },
@@ -103,12 +111,20 @@ fun AddItemBottomSheet(
 @Composable
 fun AddItemBottomSheetPreview() {
     ShoppingListTheme {
+        val state = HistoryComponentState(isShow = true, isShort = true, list = listOf(
+            HistoryItem(1,"Product1"),
+            HistoryItem(2,"Product2"),
+            HistoryItem(3,"Product 3555"),
+            HistoryItem(4,"Product 4"),
+            HistoryItem(5,"Product nijioj")
+        )
+        )
         AddItemBottomSheet(
             sheetState = rememberStandardBottomSheetState(
                 initialValue = SheetValue.Expanded
             ),
-            historyComponent = object : PreviewStubHistoryComponent {
-                override val stateFlow: StateFlow<HistoryComponentState> = MutableStateFlow(HistoryComponentState())
+            historyComponent = object : StubHistoryComponent {
+                override val stateFlow: StateFlow<HistoryComponentState> = MutableStateFlow(state)
                 override fun updateState(reducer: HistoryComponentState.() -> HistoryComponentState) {}
             },
             onDismiss = {},

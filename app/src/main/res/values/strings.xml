@@ -20,4 +20,6 @@
     <string name="confirm">Confirm</string>
     <string name="sure_clear_everything">Are you sure you want to clear everything?</string>
     <string name="text_empty_items">Start planning your shopping – add an item to the list!</string>
+    <string name="more">More</string>
+    <string name="less">Less</string>
 </resources>

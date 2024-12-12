@@ -20,4 +20,6 @@
     <string name="confirm">Подтвердить</string>
     <string name="sure_clear_everything">Вы уверены, что хотите очистить все?</string>
     <string name="text_empty_items">Начните планировать покупки – добавьте товар в список!</string>
+    <string name="more">Еще</string>
+    <string name="less">Меньше</string>
 </resources>
