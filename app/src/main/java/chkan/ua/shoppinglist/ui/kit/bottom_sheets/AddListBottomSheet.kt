@@ -25,21 +25,14 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import chkan.ua.shoppinglist.R
-import chkan.ua.shoppinglist.components.history_list.HistoryComponentState
-import chkan.ua.shoppinglist.core.components.StateDelegate
 import chkan.ua.shoppinglist.ui.kit.RoundedTextField
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
-interface PreviewStubHistoryComponent : StateDelegate<HistoryComponentState>
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun AddItemBottomSheet(
+fun AddListBottomSheet(
     sheetState: SheetState,
-    historyComponent: PreviewStubHistoryComponent,
     onDismiss: () -> Unit,
     addItem: (String) -> Unit,
     placeholderResId: Int
@@ -88,7 +81,7 @@ fun AddItemBottomSheet(
                 onDone = {
                     addItem.invoke(text)
                     text = ""
-                         },
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .imePadding()
@@ -101,16 +94,12 @@ fun AddItemBottomSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
-fun AddItemBottomSheetPreview() {
+fun AddListBottomSheetPreview() {
     ShoppingListTheme {
-        AddItemBottomSheet(
+        AddListBottomSheet(
             sheetState = rememberStandardBottomSheetState(
                 initialValue = SheetValue.Expanded
             ),
-            historyComponent = object : PreviewStubHistoryComponent {
-                override val stateFlow: StateFlow<HistoryComponentState> = MutableStateFlow(HistoryComponentState())
-                override fun updateState(reducer: HistoryComponentState.() -> HistoryComponentState) {}
-            },
             onDismiss = {},
             addItem = {},
             placeholderResId = R.string.items_text_placeholder

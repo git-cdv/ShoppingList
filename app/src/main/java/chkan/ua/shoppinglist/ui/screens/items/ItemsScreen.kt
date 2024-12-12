@@ -45,7 +45,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.domain.models.Item
 import chkan.ua.shoppinglist.R
-import chkan.ua.shoppinglist.components.history_list.HistoryComponent
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheet
@@ -56,6 +55,7 @@ import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemsScreen(
     args: ItemsRoute,
@@ -69,18 +69,38 @@ fun ItemsScreen(
     val (readyItems, notReadyItems) = items.partition { it.isReady }
     val historyComponent = itemsViewModel.getHistoryComponent()
 
+    var showAddItemBottomSheet by remember { mutableStateOf(false) }
+    val addItemSheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+
     ItemsScreenContent(
         title = listTitle,
         items = notReadyItems,
         readyItems = readyItems,
         isEmptyState = isEmptyState,
-        historyComponent = historyComponent,
+        handleAddItemSheet = { isShow ->
+            showAddItemBottomSheet = isShow
+            if (isShow) {
+                scope.launch { addItemSheetState.show() }
+            } else {
+                scope.launch { addItemSheetState.hide() }
+            }
+         },
         onDeleteItem = { id -> itemsViewModel.deleteItem(id) },
-        addItem = { title -> itemsViewModel.addItem(Item(content = title, listId = listId))},
         onMarkReady = { id, state -> itemsViewModel.changeReadyInItem(id, state) },
         goToBack = {navController.popBackStack()},
         clearReadyItems = {itemsViewModel.clearReadyItems(listId)}
     )
+
+    if (showAddItemBottomSheet){
+        AddItemBottomSheet(
+            addItemSheetState,
+            historyComponent,
+            onDismiss = { showAddItemBottomSheet = false },
+            addItem = { title -> itemsViewModel.addItem(Item(content = title, listId = listId))},
+            R.string.items_text_placeholder
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,15 +110,12 @@ fun ItemsScreenContent(
     items: List<Item>,
     readyItems: List<Item>,
     isEmptyState: Boolean,
-    historyComponent: HistoryComponent,
+    handleAddItemSheet: (Boolean) -> Unit,
     onMarkReady: (Int, Boolean) -> Unit,
     onDeleteItem: (Int) -> Unit,
-    addItem: (String) -> Unit,
     goToBack: () -> Unit,
     clearReadyItems: () -> Unit,
 ) {
-    var showBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
     var showConfirmBottomSheet by remember { mutableStateOf(false) }
     val confirmSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
@@ -125,8 +142,7 @@ fun ItemsScreenContent(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    showBottomSheet = true
-                    scope.launch { sheetState.show() }
+                    handleAddItemSheet.invoke(true)
                 },
                 modifier = Modifier
                     .padding(dimensionResource(id = R.dimen.root_padding))
@@ -139,8 +155,7 @@ fun ItemsScreenContent(
 
         LaunchedEffect(isEmptyState) {
             if (isEmptyState){
-                showBottomSheet = true
-                scope.launch { sheetState.show() }
+                handleAddItemSheet.invoke(true)
             }
         }
 
@@ -204,15 +219,6 @@ fun ItemsScreenContent(
             }
         }
 
-        if (showBottomSheet){
-            AddItemBottomSheet(
-                sheetState,
-                historyComponent,
-                onDismiss = { showBottomSheet = false },
-                addItem = { text -> addItem.invoke(text)},
-                R.string.items_text_placeholder
-            )
-        }
         if (showConfirmBottomSheet){
             ConfirmBottomSheet(
                 confirmSheetState,
@@ -241,7 +247,6 @@ fun ItemsScreenContentPreview() {
         ), listOf(
             Item(55,"Item 1", 0,0, false),
             Item(44774,"Item 2", 0,1, false)
-        ), false,
-            {_,_ -> }, {}, {},{},{})
+        ), false, {},{_,_ -> }, {}, {},{})
     }
 }

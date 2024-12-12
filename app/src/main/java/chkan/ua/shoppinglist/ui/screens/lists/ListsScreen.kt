@@ -40,6 +40,7 @@ import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheet
+import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddListBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ListItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
@@ -110,7 +111,7 @@ fun ListsScreenContent(
         }
 
         if (showBottomSheet){
-            AddItemBottomSheet(sheetState,
+            AddListBottomSheet(sheetState,
                 onDismiss = { showBottomSheet = false },
                 addItem = { text -> onCreateList.invoke(text)},
                 R.string.first_list_text_placeholder)
