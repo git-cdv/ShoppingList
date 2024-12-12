@@ -70,7 +70,7 @@ fun ItemsScreen(
     val historyComponent = itemsViewModel.getHistoryComponent()
 
     var showAddItemBottomSheet by remember { mutableStateOf(false) }
-    val addItemSheetState = rememberModalBottomSheetState()
+    val addItemSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
     ItemsScreenContent(
