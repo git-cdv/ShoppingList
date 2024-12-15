@@ -1,8 +1,11 @@
 package chkan.ua.shoppinglist.components.history_list
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -10,7 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import chkan.ua.domain.models.HistoryItem
 import chkan.ua.shoppinglist.R
@@ -33,9 +38,12 @@ fun HistoryComponentContent(
     state: HistoryComponentState,
     modifier: Modifier,
     onToggle: (Boolean)-> Unit) {
+
+    val maxHistoryHeight = calculateMaxHistoryHeight()
+
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
-        modifier = modifier.fillMaxWidth().heightIn(max = 400.dp),
+        modifier = modifier.fillMaxWidth().heightIn(max = maxHistoryHeight),
         verticalArrangement = Arrangement.Top,
         horizontalArrangement = Arrangement.Start
     ){
@@ -68,5 +76,16 @@ private fun ComponentPreview() {
         HistoryItem(5,"Product nijioj"))
     )
     HistoryComponentContent(state= state, modifier = Modifier,{})
+}
+
+const val DEFAULT_TEXT_FIELD_HEIGHT = 56
+
+@Composable
+fun calculateMaxHistoryHeight(): Dp {
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val dragHandlerHeightAndBottomPadding = 28.dp
+    val keyboardHeight = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+    return screenHeight - keyboardHeight - dragHandlerHeightAndBottomPadding - DEFAULT_TEXT_FIELD_HEIGHT.dp
 }
 
