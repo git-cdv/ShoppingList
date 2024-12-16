@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import chkan.ua.domain.models.HistoryItem
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.StubHistoryComponent
-import chkan.ua.shoppinglist.ui.kit.items.ToggleCard
+import chkan.ua.shoppinglist.ui.kit.togglers.ToggleCard
 import chkan.ua.shoppinglist.ui.kit.items.SuggestionItemCard
 
 @Composable
@@ -41,6 +41,8 @@ fun HistoryComponentContent(
 
     val maxHistoryHeight = calculateMaxHistoryHeight()
 
+
+
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         modifier = modifier.fillMaxWidth().heightIn(max = maxHistoryHeight),
@@ -52,9 +54,11 @@ fun HistoryComponentContent(
                 state.list.take(8)
             } else state.list
         } else state.list
+
         items(list, key = { it.id }) { item ->
             SuggestionItemCard(item.name){}
         }
+
         if (state.list.size >= 9){
             if (state.isShort){
                 item { ToggleCard(R.string.more){ onToggle.invoke(false) } }

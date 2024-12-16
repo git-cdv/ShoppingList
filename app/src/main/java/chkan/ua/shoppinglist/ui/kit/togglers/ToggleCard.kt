@@ -1,4 +1,4 @@
-package chkan.ua.shoppinglist.ui.kit.items
+package chkan.ua.shoppinglist.ui.kit.togglers
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
