@@ -19,7 +19,6 @@ import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 @Composable
 fun ToggleShowText(isHide: Boolean){
     Row {
-
         Icon(
             imageVector = Icons.Default.ArrowDropDown,
             contentDescription = "Drag handle",
@@ -36,6 +35,6 @@ fun ToggleShowText(isHide: Boolean){
 @Composable
 fun ToggleShowTextPreview() {
     ShoppingListTheme {
-        ToggleShowText()
+        ToggleShowText(false)
     }
 }
