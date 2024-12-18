@@ -22,4 +22,6 @@
     <string name="text_empty_items">Start planning your shopping – add an item to the list!</string>
     <string name="more">More</string>
     <string name="less">Less</string>
+    <string name="hide_suggestions">Hide suggestions</string>
+    <string name="show_suggestions">Show suggestions</string>
 </resources>

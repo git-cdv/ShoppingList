@@ -1,6 +1,7 @@
 package chkan.ua.shoppinglist.components.history_list
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,6 +23,7 @@ import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.StubHistoryComponent
 import chkan.ua.shoppinglist.ui.kit.togglers.ToggleCard
 import chkan.ua.shoppinglist.ui.kit.items.SuggestionItemCard
+import chkan.ua.shoppinglist.ui.kit.togglers.ToggleShowText
 
 @Composable
 fun HistoryUiComponent(component: StubHistoryComponent, modifier: Modifier) {
@@ -29,7 +31,8 @@ fun HistoryUiComponent(component: StubHistoryComponent, modifier: Modifier) {
     HistoryComponentContent(
         state,
         modifier,
-        onToggle = { component.updateState { copy(isShort = it) } }
+        onToggleSize = { component.updateState { copy(isShort = it) } },
+        onToggleShow = { component.updateState { copy(isShow = it) } }
     )
 }
 
@@ -37,36 +40,45 @@ fun HistoryUiComponent(component: StubHistoryComponent, modifier: Modifier) {
 fun HistoryComponentContent(
     state: HistoryComponentState,
     modifier: Modifier,
-    onToggle: (Boolean)-> Unit) {
+    onToggleSize: (Boolean)-> Unit,
+    onToggleShow: (Boolean)-> Unit) {
 
-    val maxHistoryHeight = calculateMaxHistoryHeight()
+    Column {
+        ToggleShowText(state.isShow){ onToggleShow.invoke(it)}
 
+        if (state.isShow){
 
+            val maxHistoryHeight = calculateMaxHistoryHeight()
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        modifier = modifier.fillMaxWidth().heightIn(max = maxHistoryHeight),
-        verticalArrangement = Arrangement.Top,
-        horizontalArrangement = Arrangement.Start
-    ){
-        val list = if (state.isShort) {
-            if (state.list.size >= 9){
-                state.list.take(8)
-            } else state.list
-        } else state.list
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = modifier
+                    .fillMaxWidth()
+                    .heightIn(max = maxHistoryHeight),
+                verticalArrangement = Arrangement.Top,
+                horizontalArrangement = Arrangement.Start
+            ){
+                val list = if (state.isShort) {
+                    if (state.list.size >= 9){
+                        state.list.take(8)
+                    } else state.list
+                } else state.list
 
-        items(list, key = { it.id }) { item ->
-            SuggestionItemCard(item.name){}
-        }
+                items(list, key = { it.id }) { item ->
+                    SuggestionItemCard(item.name){}
+                }
 
-        if (state.list.size >= 9){
-            if (state.isShort){
-                item { ToggleCard(R.string.more){ onToggle.invoke(false) } }
-            } else {
-                item { ToggleCard(R.string.less){ onToggle.invoke(true) } }
+                if (state.list.size >= 9){
+                    if (state.isShort){
+                        item { ToggleCard(R.string.more){ onToggleSize.invoke(false) } }
+                    } else {
+                        item { ToggleCard(R.string.less){ onToggleSize.invoke(true) } }
+                    }
+                }
             }
         }
     }
+
 }
 
 @Preview
@@ -79,7 +91,7 @@ private fun ComponentPreview() {
         HistoryItem(4,"Product 4"),
         HistoryItem(5,"Product nijioj"))
     )
-    HistoryComponentContent(state= state, modifier = Modifier,{})
+    HistoryComponentContent(state= state, modifier = Modifier,{},{})
 }
 
 const val DEFAULT_TEXT_FIELD_HEIGHT = 56

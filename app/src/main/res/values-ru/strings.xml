@@ -22,4 +22,6 @@
     <string name="text_empty_items">Начните планировать покупки – добавьте товар в список!</string>
     <string name="more">Еще</string>
     <string name="less">Меньше</string>
+    <string name="hide_suggestions">Скрыть предложения</string>
+    <string name="show_suggestions">Показать предложения</string>
 </resources>
