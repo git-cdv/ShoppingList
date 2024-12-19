@@ -1,6 +1,7 @@
 package chkan.ua.shoppinglist.components.history_list
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -53,7 +54,8 @@ fun HistoryComponentContent(
                 columns = GridCells.Fixed(3),
                 modifier = modifier
                     .fillMaxWidth()
-                    .heightIn(max = maxHistoryHeight),
+                    .heightIn(max = maxHistoryHeight)
+                    .animateContentSize(),
                 verticalArrangement = Arrangement.Top,
                 horizontalArrangement = Arrangement.Start
             ){
