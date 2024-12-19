@@ -1,5 +1,6 @@
 package chkan.ua.shoppinglist.components.history_list
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -45,9 +46,7 @@ fun HistoryComponentContent(
 
     Column {
         ToggleShowText(state.isShow){ onToggleShow.invoke(it)}
-
-        if (state.isShow){
-
+        AnimatedVisibility(visible = state.isShow) {
             val maxHistoryHeight = calculateMaxHistoryHeight()
 
             LazyVerticalGrid(
@@ -101,7 +100,8 @@ fun calculateMaxHistoryHeight(): Dp {
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val dragHandlerHeightAndBottomPadding = 28.dp
+    val toggleShowTextHeight = 24.dp
     val keyboardHeight = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-    return screenHeight - keyboardHeight - dragHandlerHeightAndBottomPadding - DEFAULT_TEXT_FIELD_HEIGHT.dp
+    return screenHeight - keyboardHeight - dragHandlerHeightAndBottomPadding - toggleShowTextHeight - DEFAULT_TEXT_FIELD_HEIGHT.dp
 }
 
