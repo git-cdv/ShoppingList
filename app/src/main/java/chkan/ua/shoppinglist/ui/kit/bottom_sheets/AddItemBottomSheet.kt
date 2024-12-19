@@ -82,10 +82,11 @@ fun AddItemBottomSheet(
                 .fillMaxWidth()
         ) {
             HistoryUiComponent(
-                historyComponent,
-                Modifier
+                component = historyComponent,
+                modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = dimensionResource(id = R.dimen.root_padding), end = dimensionResource(id = R.dimen.root_padding), bottom = dimensionResource(id = R.dimen.inner_padding)))
+                .padding(start = dimensionResource(id = R.dimen.root_padding), end = dimensionResource(id = R.dimen.root_padding), bottom = dimensionResource(id = R.dimen.inner_padding)),
+                onChoose = { addItem.invoke(it) })
 
             RoundedTextField(
                 value = text,

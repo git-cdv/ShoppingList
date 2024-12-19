@@ -28,11 +28,12 @@ import chkan.ua.shoppinglist.ui.kit.items.SuggestionItemCard
 import chkan.ua.shoppinglist.ui.kit.togglers.ToggleShowText
 
 @Composable
-fun HistoryUiComponent(component: StubHistoryComponent, modifier: Modifier) {
+fun HistoryUiComponent(component: StubHistoryComponent, modifier: Modifier, onChoose: (String)-> Unit) {
     val state by component.stateFlow.collectAsState()
     HistoryComponentContent(
         state,
         modifier,
+        onChoose = onChoose,
         onToggleSize = { component.updateState { copy(isShort = it) } },
         onToggleShow = { component.updateState { copy(isShow = it) } }
     )
@@ -42,6 +43,7 @@ fun HistoryUiComponent(component: StubHistoryComponent, modifier: Modifier) {
 fun HistoryComponentContent(
     state: HistoryComponentState,
     modifier: Modifier,
+    onChoose: (String)-> Unit,
     onToggleSize: (Boolean)-> Unit,
     onToggleShow: (Boolean)-> Unit) {
 
@@ -66,7 +68,7 @@ fun HistoryComponentContent(
                 } else state.list
 
                 items(list, key = { it.id }) { item ->
-                    SuggestionItemCard(item.name){}
+                    SuggestionItemCard(item.name){ onChoose.invoke(item.name) }
                 }
 
                 if (state.list.size >= 9){
@@ -92,7 +94,7 @@ private fun ComponentPreview() {
         HistoryItem(4,"Product 4"),
         HistoryItem(5,"Product nijioj"))
     )
-    HistoryComponentContent(state= state, modifier = Modifier,{},{})
+    HistoryComponentContent(state= state, modifier = Modifier,{},{},{})
 }
 
 const val DEFAULT_TEXT_FIELD_HEIGHT = 56
