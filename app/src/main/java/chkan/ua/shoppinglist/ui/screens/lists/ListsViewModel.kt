@@ -9,6 +9,7 @@ import chkan.ua.domain.usecases.lists.AddListUseCase
 import chkan.ua.domain.usecases.lists.DeleteListUseCase
 import chkan.ua.domain.usecases.lists.GetListsCountUseCase
 import chkan.ua.domain.usecases.lists.GetListsFlowUseCase
+import chkan.ua.domain.usecases.lists.MoveToTopUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +22,7 @@ class ListsViewModel @Inject constructor(
     private val addList: AddListUseCase,
     private val getListsCount: GetListsCountUseCase,
     private val deleteList: DeleteListUseCase,
+    private val moveToTop: MoveToTopUseCase,
     private val errorHandler: ErrorHandler,
 ) : ViewModel() {
 
@@ -60,4 +62,14 @@ class ListsViewModel @Inject constructor(
     }
 
     fun isListExist() = isListsExist
+
+    fun moveToTop(from: Int) {
+        viewModelScope.launch (Dispatchers.IO) {
+            try {
+                moveToTop.run(from)
+            } catch (e: Exception){
+                errorHandler.handle(e,moveToTop.getErrorReason())
+            }
+        }
+    }
 }

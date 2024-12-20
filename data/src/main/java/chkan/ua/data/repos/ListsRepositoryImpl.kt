@@ -1,9 +1,7 @@
 package chkan.ua.data.repos
 
 import chkan.ua.data.models.ListEntity
-import chkan.ua.data.models.mapToItems
 import chkan.ua.data.sources.DataSource
-import chkan.ua.domain.models.Item
 import chkan.ua.domain.models.ListItems
 import chkan.ua.domain.repos.ListsRepository
 import kotlinx.coroutines.flow.Flow
@@ -24,4 +22,6 @@ class ListsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
     }
 
     override suspend fun getListCount() = dataSource.getListCount()
+    override suspend fun moveToTop(from: Int) = dataSource.moveToTop(from)
+
 }

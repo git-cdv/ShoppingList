@@ -9,4 +9,5 @@ interface ListsRepository {
     suspend fun addList(title: String, position: Int)
     suspend fun deleteList(listId: Int)
     suspend fun getListCount(): Int
+    suspend fun moveToTop(from: Int)
 }

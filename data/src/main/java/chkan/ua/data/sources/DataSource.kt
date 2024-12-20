@@ -18,4 +18,5 @@ interface DataSource {
     suspend fun markItemReady(itemId: Int, state: Boolean)
     suspend fun clearReadyItems(listId: Int)
     suspend fun incrementOrInsertInHistory(name: String)
+    suspend fun moveToTop(from: Int)
 }

@@ -39,7 +39,6 @@ import chkan.ua.domain.models.ListProgress
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
-import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddListBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ListItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
@@ -55,6 +54,7 @@ fun ListsScreen(
     ListsScreenContent(lists,
         onDeleteList = { id -> listsViewModel.deleteList(id) },
         onCreateList = { title -> listsViewModel.addList(title) },
+        onToTop = { fromIndex -> listsViewModel.moveToTop(fromIndex)},
         goToItems = {list -> navController.navigate(ItemsRoute(list.id, list.title))})
 }
 
@@ -64,6 +64,7 @@ fun ListsScreenContent(
     lists: List<ListItemsUi>,
     onDeleteList: (Int) -> Unit,
     onCreateList: (String) -> Unit,
+    onToTop: (Int) -> Unit,
     goToItems: (ListItemsUi) -> Unit
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -136,6 +137,6 @@ fun ListsScreenContentPreview() {
                 position = 7555,
                 isReady = false
             )), progress = ListProgress(count = 4, readyCount = 2)
-        )),{},{},{})
+        )),{},{},{ _, _ ->},{})
     }
 }
