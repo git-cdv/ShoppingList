@@ -31,8 +31,8 @@ class RoomSourceImpl @Inject constructor (
 
     override suspend fun getListCount() = listsDao.getListCount()
 
-    override suspend fun moveToTop(from: Int) {
-        listsDao.moveToTop(from)
+    override suspend fun moveToTop(id: Int, position: Int) {
+        listsDao.moveToTop(id,position)
     }
 
     override suspend fun addItem(item: ItemEntity) {

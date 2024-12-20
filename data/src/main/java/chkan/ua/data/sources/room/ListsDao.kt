@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import chkan.ua.data.models.ItemEntity
 import chkan.ua.data.models.ListEntity
 import chkan.ua.data.models.ListWithItems
 import kotlinx.coroutines.flow.Flow
@@ -25,19 +26,15 @@ interface ListsDao {
     @Query("SELECT COUNT(*) FROM lists")
     suspend fun getListCount(): Int
 
-    //for drag and drop
     @Transaction
-    suspend fun moveToTop(from: Int) {
-        val items = getItemsForPositionChange(from, 0)
-        for (item in items) {
-            updateList(item.copy(position = item.position + 1))
-        }
-        updateList(items.first { it.position == from }.copy(position = 0))
+    suspend fun moveToTop(id: Int, position: Int) {
+        shiftPositions(position)
+        moveItemToTop(id)
     }
 
-    @Update
-    suspend fun updateList(list: ListEntity)
+    @Query("UPDATE lists SET position = position + 1 WHERE position < :currentPosition")
+    suspend fun shiftPositions(currentPosition: Int)
 
-    @Query("SELECT * FROM lists WHERE position BETWEEN :start AND :end ORDER BY position ASC")
-    suspend fun getItemsForPositionChange(start: Int, end: Int): List<ListEntity>
+    @Query("UPDATE lists SET position = 0 WHERE listId = :id")
+    suspend fun moveItemToTop(id: Int)
 }

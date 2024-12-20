@@ -22,6 +22,6 @@ class ListsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
     }
 
     override suspend fun getListCount() = dataSource.getListCount()
-    override suspend fun moveToTop(from: Int) = dataSource.moveToTop(from)
+    override suspend fun moveToTop(id: Int, position: Int) = dataSource.moveToTop(id, position)
 
 }

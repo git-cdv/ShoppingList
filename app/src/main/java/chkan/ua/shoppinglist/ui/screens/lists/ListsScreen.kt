@@ -1,6 +1,5 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.models.ListProgress
+import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
@@ -54,8 +54,9 @@ fun ListsScreen(
     ListsScreenContent(lists,
         onDeleteList = { id -> listsViewModel.deleteList(id) },
         onCreateList = { title -> listsViewModel.addList(title) },
-        onToTop = { fromIndex -> listsViewModel.moveToTop(fromIndex)},
-        goToItems = {list -> navController.navigate(ItemsRoute(list.id, list.title))})
+        onMoveToTop = { id, position -> listsViewModel.moveToTop(MoveTop(id, position)) },
+        goToItems = { list -> navController.navigate(ItemsRoute(list.id, list.title)) }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +65,7 @@ fun ListsScreenContent(
     lists: List<ListItemsUi>,
     onDeleteList: (Int) -> Unit,
     onCreateList: (String) -> Unit,
-    onToTop: (Int) -> Unit,
+    onMoveToTop: (Int, Int) -> Unit,
     goToItems: (ListItemsUi) -> Unit
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -101,13 +102,14 @@ fun ListsScreenContent(
                 .padding(top = paddingValue.calculateTopPadding())
                 .background(MaterialTheme.colorScheme.background)
         ){
-            items(lists, key = {it.id}){ list ->
-                Log.d("CHKAN", "list progress:${list.progress.get()} ")
+            items(lists, key = { it.id }){ list ->
                 ListItem(
                     list = list,
                     modifier = Modifier.animateItem(),
                     onDeleteList = { onDeleteList.invoke(list.id) },
-                    onCardClick = {goToItems.invoke(list)} )
+                    onMoveToTop = { onMoveToTop.invoke(list.id, list.position) },
+                    onCardClick = { goToItems.invoke(list) }
+                )
             }
         }
 
@@ -137,6 +139,6 @@ fun ListsScreenContentPreview() {
                 position = 7555,
                 isReady = false
             )), progress = ListProgress(count = 4, readyCount = 2)
-        )),{},{},{ _, _ ->},{})
+        )),{},{},{_,_->},{})
     }
 }

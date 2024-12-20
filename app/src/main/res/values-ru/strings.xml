@@ -24,4 +24,5 @@
     <string name="less">Меньше</string>
     <string name="hide_suggestions">Скрыть предложения</string>
     <string name="show_suggestions">Показать предложения</string>
+    <string name="moveToTop">Переместить наверх</string>
 </resources>

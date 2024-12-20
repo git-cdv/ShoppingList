@@ -24,4 +24,5 @@
     <string name="less">Less</string>
     <string name="hide_suggestions">Hide suggestions</string>
     <string name="show_suggestions">Show suggestions</string>
+    <string name="moveToTop">Move to top</string>
 </resources>

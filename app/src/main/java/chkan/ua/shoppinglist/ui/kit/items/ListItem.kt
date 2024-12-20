@@ -38,6 +38,7 @@ fun ListItem(
     list: ListItemsUi,
     modifier: Modifier,
     onDeleteList: () -> Unit,
+    onMoveToTop: () -> Unit,
     onCardClick: () -> Unit)
 {
     Card(
@@ -118,6 +119,7 @@ fun ListItem(
                     listItems = listOf(
                         MenuItem(title = stringResource(id = R.string.delete), onClick = { onDeleteList.invoke()}),
                         MenuItem(title = stringResource(id = R.string.edit), onClick = { }),
+                        MenuItem(title = stringResource(id = R.string.moveToTop), onClick = { onMoveToTop.invoke() }),
                     )
                 )
             }
@@ -137,6 +139,6 @@ fun ListItemPreview() {
             readyCount = 2,
             progress = ListProgress(count = 5, readyCount = 2),
             items = listOf()
-        ), Modifier,{},{})
+        ), Modifier,{},{},{})
     }
 }

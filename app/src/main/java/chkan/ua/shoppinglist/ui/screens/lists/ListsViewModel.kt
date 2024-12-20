@@ -10,6 +10,7 @@ import chkan.ua.domain.usecases.lists.DeleteListUseCase
 import chkan.ua.domain.usecases.lists.GetListsCountUseCase
 import chkan.ua.domain.usecases.lists.GetListsFlowUseCase
 import chkan.ua.domain.usecases.lists.MoveToTopUseCase
+import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -63,10 +64,10 @@ class ListsViewModel @Inject constructor(
 
     fun isListExist() = isListsExist
 
-    fun moveToTop(from: Int) {
+    fun moveToTop(config: MoveTop) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
-                moveToTop.run(from)
+                moveToTop.run(config)
             } catch (e: Exception){
                 errorHandler.handle(e,moveToTop.getErrorReason())
             }
