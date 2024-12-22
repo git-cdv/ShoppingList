@@ -136,7 +136,7 @@ fun ListsScreenContentPreview() {
                 itemId = 5847,
                 content = "senserit",
                 listId = 8123,
-                position = 7555,
+                position = 75556,
                 isReady = false
             )), progress = ListProgress(count = 4, readyCount = 2)
         )),{},{},{_,_->},{})
