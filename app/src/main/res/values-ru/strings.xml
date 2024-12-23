@@ -25,4 +25,5 @@
     <string name="hide_suggestions">Скрыть предложения</string>
     <string name="show_suggestions">Показать предложения</string>
     <string name="moveToTop">Переместить наверх</string>
+    <string name="sure_delete_list">Вы уверены, что хотите удалить список?</string>
 </resources>

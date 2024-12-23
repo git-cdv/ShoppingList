@@ -117,9 +117,9 @@ fun ListItem(
                     isMenuExpanded = isMenuExpanded,
                     onDismissRequest = { isMenuExpanded = false },
                     listItems = listOf(
-                        MenuItem(title = stringResource(id = R.string.delete), onClick = { onDeleteList.invoke()}),
-                        MenuItem(title = stringResource(id = R.string.edit), onClick = { }),
                         MenuItem(title = stringResource(id = R.string.moveToTop), onClick = { onMoveToTop.invoke() }),
+                        MenuItem(title = stringResource(id = R.string.edit), onClick = { }),
+                        MenuItem(title = stringResource(id = R.string.delete), onClick = { onDeleteList.invoke()})
                     )
                 )
             }

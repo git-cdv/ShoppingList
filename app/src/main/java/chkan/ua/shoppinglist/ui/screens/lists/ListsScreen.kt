@@ -20,6 +20,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,6 +41,7 @@ import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddListBottomSheet
+import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ListItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
@@ -70,6 +72,9 @@ fun ListsScreenContent(
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+    var showConfirmBottomSheet by remember { mutableStateOf(false) }
+    val confirmSheetState = rememberModalBottomSheetState()
+    var argDeletedIdList by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -106,7 +111,11 @@ fun ListsScreenContent(
                 ListItem(
                     list = list,
                     modifier = Modifier.animateItem(),
-                    onDeleteList = { onDeleteList.invoke(list.id) },
+                    onDeleteList = {
+                        argDeletedIdList = list.id
+                        showConfirmBottomSheet = true
+                        scope.launch { confirmSheetState.show() }
+                                   },
                     onMoveToTop = { onMoveToTop.invoke(list.id, list.position) },
                     onCardClick = { goToItems.invoke(list) }
                 )
@@ -118,6 +127,22 @@ fun ListsScreenContent(
                 onDismiss = { showBottomSheet = false },
                 addItem = { text -> onCreateList.invoke(text)},
                 R.string.first_list_text_placeholder)
+        }
+
+        if (showConfirmBottomSheet){
+            ConfirmBottomSheet(
+                confirmSheetState,
+                question = stringResource(id = R.string.sure_delete_list),
+                onConfirm = { scope.launch {
+                    onDeleteList.invoke(argDeletedIdList)
+                    confirmSheetState.hide()
+                    showConfirmBottomSheet = false
+                } },
+                onDismiss = { scope.launch {
+                    confirmSheetState.hide()
+                    showConfirmBottomSheet = false
+                } }
+            )
         }
     }
 }
