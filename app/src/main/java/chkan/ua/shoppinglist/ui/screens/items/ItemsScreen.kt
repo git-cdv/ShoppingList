@@ -73,6 +73,10 @@ fun ItemsScreen(
     val addItemSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
+    LaunchedEffect(Unit) {
+        itemsViewModel.saveLastOpenListId(listId)
+    }
+
     ItemsScreenContent(
         title = listTitle,
         items = notReadyItems,

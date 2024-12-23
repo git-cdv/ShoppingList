@@ -1,5 +1,6 @@
 package chkan.ua.shoppinglist.ui.screens.items
 
+import android.content.SharedPreferences
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -15,6 +16,8 @@ import chkan.ua.domain.usecases.items.MarkReadyItemUseCase
 import chkan.ua.shoppinglist.components.history_list.HistoryComponent
 import chkan.ua.shoppinglist.core.components.ComponentsViewModel
 import chkan.ua.shoppinglist.core.services.ErrorHandler
+import chkan.ua.shoppinglist.core.services.SharedPreferencesService
+import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -34,6 +37,7 @@ class ItemsViewModel @Inject constructor(
     private val addInHistory: AddItemInHistoryUseCase,
     private val errorHandler: ErrorHandler,
     private val historyComponent: HistoryComponent,
+    private val spService: SharedPreferencesService
 ) : ComponentsViewModel() {
 
     init {
@@ -100,5 +104,11 @@ class ItemsViewModel @Inject constructor(
     }
 
     fun getHistoryComponent() = historyComponent
+
+    fun saveLastOpenListId(listId: Int) {
+        viewModelScope.launch {
+            spService.set(LAST_OPEN_LIST_ID_INT, listId)
+        }
+    }
 
 }
