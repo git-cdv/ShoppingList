@@ -18,6 +18,7 @@ import chkan.ua.shoppinglist.core.components.ComponentsViewModel
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
+import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_TITLE_STR
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -105,8 +106,9 @@ class ItemsViewModel @Inject constructor(
 
     fun getHistoryComponent() = historyComponent
 
-    fun saveLastOpenListId(listId: Int) {
+    fun saveLastOpenedList(listId: Int, listTitle: String) {
         spService.set(LAST_OPEN_LIST_ID_INT, listId)
+        spService.set(LAST_OPEN_LIST_TITLE_STR, listTitle)
     }
 
 }

@@ -74,7 +74,7 @@ fun ItemsScreen(
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        itemsViewModel.saveLastOpenListId(listId)
+        itemsViewModel.saveLastOpenedList(listId, listTitle)
     }
 
     ItemsScreenContent(

@@ -44,5 +44,14 @@ fun NavigationContainer(
             }
             composable<ListsRoute> { ListsScreen() }
         }
+
+        if (startDestination is ListsRoute){
+            val lastOpenedList = listsViewModel.getLastOpenedList()
+            if (lastOpenedList != null){
+                navController.navigate(ItemsRoute(lastOpenedList.id,lastOpenedList.title )) {
+                    popUpTo(ListsRoute) { inclusive = false }
+                }
+            }
+        }
     }
 }

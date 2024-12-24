@@ -55,7 +55,7 @@ fun ListsScreen(
     val lists by listsViewModel.listsFlow.collectAsStateWithLifecycle(initialValue = listOf())
 
     LaunchedEffect(Unit) {
-        listsViewModel.clearLastOpenListId()
+        listsViewModel.clearLastOpenedList()
     }
 
     ListsScreenContent(lists,

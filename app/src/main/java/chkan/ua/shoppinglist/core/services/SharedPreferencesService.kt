@@ -14,6 +14,7 @@ class SharedPreferencesServiceImpl @Inject constructor (@ApplicationContext cont
 
     companion object {
         const val LAST_OPEN_LIST_ID_INT = "last_list_id"
+        const val LAST_OPEN_LIST_TITLE_STR = "last_list_title"
     }
 
     private val sp: SharedPreferences =
