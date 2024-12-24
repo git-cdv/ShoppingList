@@ -106,9 +106,7 @@ class ItemsViewModel @Inject constructor(
     fun getHistoryComponent() = historyComponent
 
     fun saveLastOpenListId(listId: Int) {
-        viewModelScope.launch {
-            spService.set(LAST_OPEN_LIST_ID_INT, listId)
-        }
+        spService.set(LAST_OPEN_LIST_ID_INT, listId)
     }
 
 }

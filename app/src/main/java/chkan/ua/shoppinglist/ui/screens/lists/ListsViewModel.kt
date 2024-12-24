@@ -12,6 +12,8 @@ import chkan.ua.domain.usecases.lists.GetListsFlowUseCase
 import chkan.ua.domain.usecases.lists.MoveToTopUseCase
 import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.shoppinglist.core.services.ErrorHandler
+import chkan.ua.shoppinglist.core.services.SharedPreferencesService
+import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,6 +27,7 @@ class ListsViewModel @Inject constructor(
     private val deleteList: DeleteListUseCase,
     private val moveToTop: MoveToTopUseCase,
     private val errorHandler: ErrorHandler,
+    private val spService: SharedPreferencesService
 ) : ViewModel() {
 
     init {
@@ -72,5 +75,9 @@ class ListsViewModel @Inject constructor(
                 errorHandler.handle(e,moveToTop.getErrorReason())
             }
         }
+    }
+
+    fun clearLastOpenListId() {
+        spService.set(LAST_OPEN_LIST_ID_INT, 0)
     }
 }

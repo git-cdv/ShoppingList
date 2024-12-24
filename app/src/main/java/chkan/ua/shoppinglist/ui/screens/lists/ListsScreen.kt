@@ -19,6 +19,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +53,10 @@ fun ListsScreen(
 ){
     val navController = localNavController.current
     val lists by listsViewModel.listsFlow.collectAsStateWithLifecycle(initialValue = listOf())
+
+    LaunchedEffect(Unit) {
+        listsViewModel.clearLastOpenListId()
+    }
 
     ListsScreenContent(lists,
         onDeleteList = { id -> listsViewModel.deleteList(id) },
