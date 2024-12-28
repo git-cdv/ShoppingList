@@ -100,7 +100,7 @@ fun ListsScreen(
     if (showEditBottomSheet && edited != null){
         EditBottomSheet(editSheetState,
             onDismiss = { showEditBottomSheet = false },
-            onEdit = { text -> },
+            onEdit = { editable -> listsViewModel.editList(editable)},
             editable = edited!!
         )
     }

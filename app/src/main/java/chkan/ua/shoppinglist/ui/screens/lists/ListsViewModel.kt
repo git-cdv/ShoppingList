@@ -4,10 +4,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.lists.AddListConfig
 import chkan.ua.domain.usecases.lists.AddListUseCase
 import chkan.ua.domain.usecases.lists.DeleteListUseCase
+import chkan.ua.domain.usecases.lists.EditListUseCase
 import chkan.ua.domain.usecases.lists.GetListsCountUseCase
 import chkan.ua.domain.usecases.lists.GetListsFlowUseCase
 import chkan.ua.domain.usecases.lists.MoveToTopUseCase
@@ -27,6 +29,7 @@ class ListsViewModel @Inject constructor(
     private val addList: AddListUseCase,
     private val getListsCount: GetListsCountUseCase,
     private val deleteList: DeleteListUseCase,
+    private val editList: EditListUseCase,
     private val moveToTop: MoveToTopUseCase,
     private val errorHandler: ErrorHandler,
     private val spService: SharedPreferencesService
@@ -92,6 +95,16 @@ class ListsViewModel @Inject constructor(
         } catch (e: Exception) {
             errorHandler.handle(e,e.message)
             null
+        }
+    }
+
+    fun editList(editable: Editable) {
+        viewModelScope.launch (Dispatchers.IO) {
+            try {
+                editList.run(editable)
+            } catch (e: Exception){
+                errorHandler.handle(e,editList.getErrorReason(editable))
+            }
         }
     }
 }

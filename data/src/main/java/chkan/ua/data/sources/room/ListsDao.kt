@@ -8,6 +8,7 @@ import androidx.room.Update
 import chkan.ua.data.models.ItemEntity
 import chkan.ua.data.models.ListEntity
 import chkan.ua.data.models.ListWithItems
+import chkan.ua.domain.objects.Editable
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -18,6 +19,9 @@ interface ListsDao {
     @Transaction
     @Query("DELETE FROM lists WHERE listId = :listId")
     suspend fun deleteListById(listId: Int)
+
+    @Query("UPDATE lists SET title = :newTitle WHERE listId = :id")
+    suspend fun updateTitle(id: Int, newTitle: String)
 
     @Transaction
     @Query("SELECT * FROM lists ORDER BY position ASC")

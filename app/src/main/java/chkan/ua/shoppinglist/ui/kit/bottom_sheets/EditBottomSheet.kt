@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import chkan.ua.domain.objects.Editable
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.ui.kit.RoundedTextField
+import chkan.ua.shoppinglist.ui.kit.RoundedTextFieldWithValue
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
@@ -92,7 +93,7 @@ fun EditBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            RoundedTextField(
+            RoundedTextFieldWithValue(
                 value = value,
                 onValueChange = { newValue -> value = newValue },
                 roundedCornerRes = R.dimen.rounded_corner,

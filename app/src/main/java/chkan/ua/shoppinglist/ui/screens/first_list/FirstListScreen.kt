@@ -19,7 +19,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -66,8 +65,8 @@ fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Un
         val centerLine = createGuidelineFromTop(0.5f)
 
         RoundedTextField(
-            value = TextFieldValue(listNameText),
-            onValueChange = { newValue -> listNameText = newValue.text },
+            text = listNameText,
+            onValueChange = { newValue -> listNameText = newValue },
             roundedCornerRes = R.dimen.rounded_corner,
             placeholderTextRes = R.string.first_list_text_placeholder,
             focusRequester = focusRequester,

@@ -22,15 +22,16 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 
 @Composable
-fun RoundedTextField(
-    text: String,
-    onValueChange: (String) -> Unit,
+fun RoundedTextFieldWithValue(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
     roundedCornerRes: Int,
     placeholderTextRes: Int? = null,
     focusRequester: FocusRequester? = null,
@@ -38,16 +39,15 @@ fun RoundedTextField(
     modifier: Modifier
 ) {
     OutlinedTextField(
-        value = text,
+        value = value,
         onValueChange = onValueChange,
         shape = RoundedCornerShape(dimensionResource(id = roundedCornerRes)),
         label = null,
-        placeholder = placeholderTextRes?.let{ { Text(stringResource(id = placeholderTextRes), color = Color.Gray) } },
+        placeholder = placeholderTextRes?.let{ {Text(stringResource(id = placeholderTextRes), color = Color.Gray)} },
         maxLines = 2,
         trailingIcon = {
-            if (text.isNotBlank()){
-                Icon(
-                    Icons.Filled.Done,
+            if (value.text.isNotBlank()){
+                Icon(Icons.Filled.Done,
                     contentDescription = "Done",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
@@ -59,7 +59,7 @@ fun RoundedTextField(
         keyboardOptions = KeyboardOptions(
             autoCorrectEnabled = true,
             keyboardType = KeyboardType.Text,
-            imeAction = if (text.isNotBlank()) ImeAction.Done else ImeAction.None
+            imeAction = if (value.text.isNotBlank()) ImeAction.Done else ImeAction.None
         ),
         keyboardActions = KeyboardActions(
             onDone = {
@@ -76,10 +76,10 @@ fun RoundedTextField(
 
 @Preview(showBackground = true)
 @Composable
-fun RoundedTextFieldPreview() {
+fun RoundedTextFieldWithValuePreview() {
     ShoppingListTheme {
-        RoundedTextField(
-            text = "",
+        RoundedTextFieldWithValue(
+            value = TextFieldValue(""),
             onValueChange ={},
             roundedCornerRes = R.dimen.rounded_corner,
             placeholderTextRes = R.string.first_list_text_placeholder,

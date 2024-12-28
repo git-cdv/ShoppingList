@@ -6,6 +6,7 @@ import chkan.ua.data.models.ListWithItems
 import chkan.ua.data.sources.room.HistoryItemDao
 import chkan.ua.data.sources.room.ItemsDao
 import chkan.ua.data.sources.room.ListsDao
+import chkan.ua.domain.objects.Editable
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -27,6 +28,10 @@ class RoomSourceImpl @Inject constructor (
 
     override suspend fun deleteList(listId: Int) {
         listsDao.deleteListById(listId)
+    }
+
+    override suspend fun updateTitle(editable: Editable) {
+        listsDao.updateTitle(editable.id, editable.title)
     }
 
     override suspend fun getListCount() = listsDao.getListCount()

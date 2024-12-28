@@ -23,7 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import chkan.ua.domain.models.HistoryItem
 import chkan.ua.shoppinglist.R
@@ -90,8 +89,8 @@ fun AddItemBottomSheet(
                 onChoose = { addItem.invoke(it) })
 
             RoundedTextField(
-                value = TextFieldValue(text),
-                onValueChange = { newValue -> text = newValue.text },
+                text = text,
+                onValueChange = { newText -> text = newText },
                 roundedCornerRes = R.dimen.rounded_corner,
                 placeholderTextRes = placeholderResId,
                 focusRequester,

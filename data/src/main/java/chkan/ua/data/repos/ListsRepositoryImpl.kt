@@ -3,6 +3,7 @@ package chkan.ua.data.repos
 import chkan.ua.data.models.ListEntity
 import chkan.ua.data.sources.DataSource
 import chkan.ua.domain.models.ListItems
+import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.repos.ListsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -19,6 +20,10 @@ class ListsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
 
     override suspend fun deleteList(listId: Int) {
         dataSource.deleteList(listId)
+    }
+
+    override suspend fun updateTitle(editable: Editable) {
+        dataSource.updateTitle(editable)
     }
 
     override suspend fun getListCount() = dataSource.getListCount()
