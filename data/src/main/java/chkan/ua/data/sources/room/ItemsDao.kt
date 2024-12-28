@@ -24,4 +24,7 @@ interface ItemsDao {
 
     @Query("UPDATE items SET isReady = :state WHERE itemId = :itemId")
     suspend fun markItemReady(itemId: Int, state: Int)
+
+    @Query("UPDATE items SET content = :content WHERE itemId = :itemId")
+    suspend fun updateContent(itemId: Int, content: String)
 }

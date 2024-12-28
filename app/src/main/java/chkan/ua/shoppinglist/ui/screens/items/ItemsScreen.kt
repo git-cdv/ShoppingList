@@ -44,11 +44,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.domain.models.Item
+import chkan.ua.domain.objects.Editable
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
+import chkan.ua.shoppinglist.ui.kit.bottom_sheets.EditBottomSheet
 import chkan.ua.shoppinglist.ui.kit.empty_state.CenteredTextScreen
 import chkan.ua.shoppinglist.ui.kit.items.ItemItem
 import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
@@ -71,6 +73,10 @@ fun ItemsScreen(
 
     var showAddItemBottomSheet by remember { mutableStateOf(false) }
     val addItemSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    var showEditBottomSheet by remember { mutableStateOf(false) }
+    val editSheetState = rememberModalBottomSheetState()
+    var editable by remember { mutableStateOf(Editable()) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -93,7 +99,12 @@ fun ItemsScreen(
         onDeleteItem = { id -> itemsViewModel.deleteItem(id) },
         onMarkReady = { id, state -> itemsViewModel.changeReadyInItem(id, state) },
         goToBack = {navController.popBackStack()},
-        clearReadyItems = {itemsViewModel.clearReadyItems(listId)}
+        clearReadyItems = {itemsViewModel.clearReadyItems(listId)},
+        onEditItem = { edited ->
+            editable = edited
+            showEditBottomSheet = true
+            scope.launch { editSheetState.show() }
+        }
     )
 
     if (showAddItemBottomSheet){
@@ -103,6 +114,14 @@ fun ItemsScreen(
             onDismiss = { showAddItemBottomSheet = false },
             addItem = { title -> itemsViewModel.addItem(Item(content = title, listId = listId))},
             R.string.items_text_placeholder
+        )
+    }
+
+    if (showEditBottomSheet){
+        EditBottomSheet(editSheetState,
+            onDismiss = { showEditBottomSheet = false },
+            onEdit = { edited -> itemsViewModel.editItem(edited)},
+            editable = editable
         )
     }
 }
@@ -119,6 +138,7 @@ fun ItemsScreenContent(
     onDeleteItem: (Int) -> Unit,
     goToBack: () -> Unit,
     clearReadyItems: () -> Unit,
+    onEditItem: (Editable) -> Unit,
 ) {
     var showConfirmBottomSheet by remember { mutableStateOf(false) }
     val confirmSheetState = rememberModalBottomSheetState()
@@ -178,7 +198,8 @@ fun ItemsScreenContent(
                         text = item.content,
                         modifier = Modifier.animateItem(),
                         onReady = { onMarkReady.invoke(item.itemId, true) },
-                        onDeleteList = { onDeleteItem.invoke(item.itemId) })
+                        onDelete = { onDeleteItem.invoke(item.itemId) },
+                        onEdit = { onEditItem.invoke(Editable(item.itemId, item.content))})
                 }
                 if (readyItems.isNotEmpty()) {
                     item {
@@ -251,6 +272,6 @@ fun ItemsScreenContentPreview() {
         ), listOf(
             Item(55,"Item 1", 0,0, false),
             Item(44774,"Item 2", 0,1, false)
-        ), false, {},{_,_ -> }, {}, {},{})
+        ), false, {},{_,_ -> }, {}, {},{},{})
     }
 }

@@ -57,7 +57,7 @@ fun ListsScreen(
     val navController = localNavController.current
     val lists by listsViewModel.listsFlow.collectAsStateWithLifecycle(initialValue = listOf())
     var argDeletedIdList by remember { mutableIntStateOf(0) }
-    var edited by remember { mutableStateOf<Editable?>(null) }
+    var editable by remember { mutableStateOf(Editable()) }
 
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -84,7 +84,7 @@ fun ListsScreen(
         onMoveToTop = { id, position -> listsViewModel.moveToTop(MoveTop(id, position)) },
         goToItems = { list -> navController.navigate(ItemsRoute(list.id, list.title)) },
         onEditList = { editedList ->
-            edited = editedList
+            editable = editedList
             showEditBottomSheet = true
             scope.launch { editSheetState.show() }
         }
@@ -97,11 +97,11 @@ fun ListsScreen(
             R.string.first_list_text_placeholder)
     }
 
-    if (showEditBottomSheet && edited != null){
+    if (showEditBottomSheet){
         EditBottomSheet(editSheetState,
             onDismiss = { showEditBottomSheet = false },
-            onEdit = { editable -> listsViewModel.editList(editable)},
-            editable = edited!!
+            onEdit = { edited -> listsViewModel.editList(edited)},
+            editable = editable
         )
     }
 

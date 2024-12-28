@@ -6,10 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import chkan.ua.core.extensions.firstAsTitle
 import chkan.ua.domain.models.Item
+import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.usecases.history.AddItemInHistoryUseCase
 import chkan.ua.domain.usecases.items.AddItemUseCase
 import chkan.ua.domain.usecases.items.ClearReadyItemsUseCase
 import chkan.ua.domain.usecases.items.DeleteItemUseCase
+import chkan.ua.domain.usecases.items.EditItemUseCase
 import chkan.ua.domain.usecases.items.GetItemsFlowUseCase
 import chkan.ua.domain.usecases.items.MarkReadyConfig
 import chkan.ua.domain.usecases.items.MarkReadyItemUseCase
@@ -34,6 +36,7 @@ class ItemsViewModel @Inject constructor(
     private val addItem: AddItemUseCase,
     private val markReady: MarkReadyItemUseCase,
     private val deleteItem: DeleteItemUseCase,
+    private val editItem: EditItemUseCase,
     private val clearReadyItems: ClearReadyItemsUseCase,
     private val addInHistory: AddItemInHistoryUseCase,
     private val errorHandler: ErrorHandler,
@@ -109,6 +112,16 @@ class ItemsViewModel @Inject constructor(
     fun saveLastOpenedList(listId: Int, listTitle: String) {
         spService.set(LAST_OPEN_LIST_ID_INT, listId)
         spService.set(LAST_OPEN_LIST_TITLE_STR, listTitle)
+    }
+
+    fun editItem(edited: Editable) {
+        viewModelScope.launch (Dispatchers.IO) {
+            try {
+                editItem.run(edited)
+            } catch (e: Exception){
+                errorHandler.handle(e,editItem.getErrorReason(edited))
+            }
+        }
     }
 
 }

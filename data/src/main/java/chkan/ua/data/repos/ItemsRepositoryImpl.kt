@@ -4,6 +4,7 @@ import chkan.ua.data.models.mapToItems
 import chkan.ua.data.models.toEntity
 import chkan.ua.data.sources.DataSource
 import chkan.ua.domain.models.Item
+import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.repos.ItemsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -21,6 +22,10 @@ class ItemsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
 
     override suspend fun deleteItem(itemId: Int) {
         dataSource.deleteItem(itemId)
+    }
+
+    override suspend fun updateContent(editable: Editable) {
+        dataSource.updateContent(editable)
     }
 
     override suspend fun clearReadyItems(listId: Int) {

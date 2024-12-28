@@ -56,6 +56,9 @@ class RoomSourceImpl @Inject constructor (
     override suspend fun clearReadyItems(listId: Int) {
         itemsDao.clearReadyItems(listId)
     }
+    override suspend fun updateContent(editable: Editable) {
+        itemsDao.updateContent(editable.id, editable.title)
+    }
 
     override fun getHistory() = historyDao.getHistory()
 

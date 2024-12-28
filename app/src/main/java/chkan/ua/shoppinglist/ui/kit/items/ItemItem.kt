@@ -41,8 +41,9 @@ fun ItemItem(
     text: String,
     modifier: Modifier,
     onReady: () -> Unit,
-    onDeleteList: () -> Unit)
-{
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
+) {
     Row {
         Icon(
             painter = painterResource(R.drawable.icon_drag_handle),
@@ -104,8 +105,8 @@ fun ItemItem(
                         isMenuExpanded = isMenuExpanded,
                         onDismissRequest = { isMenuExpanded = false },
                         listItems = listOf(
-                            MenuItem(title = stringResource(id = R.string.delete), onClick = { onDeleteList.invoke()}),
-                            MenuItem(title = stringResource(id = R.string.edit), onClick = { }),
+                            MenuItem(title = stringResource(id = R.string.delete), onClick = { onDelete.invoke()}),
+                            MenuItem(title = stringResource(id = R.string.edit), onClick = { onEdit.invoke() }),
                         )
                     )
                 }
@@ -118,6 +119,6 @@ fun ItemItem(
 @Composable
 fun ItemPreview() {
     ShoppingListTheme {
-        ItemItem("Products",Modifier,{},{})
+        ItemItem("Products",Modifier,{},{},{})
     }
 }

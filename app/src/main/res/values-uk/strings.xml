@@ -11,9 +11,9 @@
     <string name="home">Дім</string>
     <string name="drug">Ліки</string>
     <string name="supermarket">Супермаркет</string>
-    <string name="delete">Delete</string>
-    <string name="edit">Edit</string>
-    <string name="lists">Lists</string>
+    <string name="delete">Видалити</string>
+    <string name="edit">Редагувати</string>
+    <string name="lists">Списки</string>
     <string name="items_text_placeholder">напр. молоко або хліб</string>
     <string name="clear">Очистити</string>
     <string name="cancel">Скасувати</string>
