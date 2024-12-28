@@ -47,23 +47,61 @@ import chkan.ua.shoppinglist.ui.kit.items.ListItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListsScreen(
     listsViewModel: ListsViewModel = hiltViewModel()
 ){
     val navController = localNavController.current
     val lists by listsViewModel.listsFlow.collectAsStateWithLifecycle(initialValue = listOf())
+    var argDeletedIdList by remember { mutableIntStateOf(0) }
+
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+    var showConfirmBottomSheet by remember { mutableStateOf(false) }
+    val confirmSheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         listsViewModel.clearLastOpenedList()
     }
 
     ListsScreenContent(lists,
-        onDeleteList = { id -> listsViewModel.deleteList(id) },
-        onCreateList = { title -> listsViewModel.addList(title) },
+        onDeleteList = { id ->
+            argDeletedIdList = id
+            showConfirmBottomSheet = true
+            scope.launch { confirmSheetState.show() }
+        },
+        onCreateList = {
+            showBottomSheet = true
+            scope.launch { sheetState.show() }
+                       },
         onMoveToTop = { id, position -> listsViewModel.moveToTop(MoveTop(id, position)) },
         goToItems = { list -> navController.navigate(ItemsRoute(list.id, list.title)) }
     )
+
+    if (showBottomSheet){
+        AddListBottomSheet(sheetState,
+            onDismiss = { showBottomSheet = false },
+            addItem = { text -> listsViewModel.addList(text)},
+            R.string.first_list_text_placeholder)
+    }
+
+    if (showConfirmBottomSheet){
+        ConfirmBottomSheet(
+            confirmSheetState,
+            question = stringResource(id = R.string.sure_delete_list),
+            onConfirm = { scope.launch {
+                listsViewModel.deleteList(argDeletedIdList)
+                confirmSheetState.hide()
+                showConfirmBottomSheet = false
+            } },
+            onDismiss = { scope.launch {
+                confirmSheetState.hide()
+                showConfirmBottomSheet = false
+            } }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,16 +109,10 @@ fun ListsScreen(
 fun ListsScreenContent(
     lists: List<ListItemsUi>,
     onDeleteList: (Int) -> Unit,
-    onCreateList: (String) -> Unit,
+    onCreateList: () -> Unit,
     onMoveToTop: (Int, Int) -> Unit,
     goToItems: (ListItemsUi) -> Unit
 ) {
-    var showBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
-    var showConfirmBottomSheet by remember { mutableStateOf(false) }
-    val confirmSheetState = rememberModalBottomSheetState()
-    var argDeletedIdList by remember { mutableIntStateOf(0) }
-    val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(modifier = Modifier
@@ -93,10 +125,7 @@ fun ListsScreenContent(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-                    showBottomSheet = true
-                    scope.launch { sheetState.show() }
-                },
+                onClick = { onCreateList.invoke() },
                 modifier = Modifier
                     .padding(dimensionResource(id = R.dimen.root_padding))
             ) {
@@ -116,38 +145,11 @@ fun ListsScreenContent(
                 ListItem(
                     list = list,
                     modifier = Modifier.animateItem(),
-                    onDeleteList = {
-                        argDeletedIdList = list.id
-                        showConfirmBottomSheet = true
-                        scope.launch { confirmSheetState.show() }
-                                   },
+                    onDeleteList = { onDeleteList.invoke(list.id) },
                     onMoveToTop = { onMoveToTop.invoke(list.id, list.position) },
                     onCardClick = { goToItems.invoke(list) }
                 )
             }
-        }
-
-        if (showBottomSheet){
-            AddListBottomSheet(sheetState,
-                onDismiss = { showBottomSheet = false },
-                addItem = { text -> onCreateList.invoke(text)},
-                R.string.first_list_text_placeholder)
-        }
-
-        if (showConfirmBottomSheet){
-            ConfirmBottomSheet(
-                confirmSheetState,
-                question = stringResource(id = R.string.sure_delete_list),
-                onConfirm = { scope.launch {
-                    onDeleteList.invoke(argDeletedIdList)
-                    confirmSheetState.hide()
-                    showConfirmBottomSheet = false
-                } },
-                onDismiss = { scope.launch {
-                    confirmSheetState.hide()
-                    showConfirmBottomSheet = false
-                } }
-            )
         }
     }
 }
