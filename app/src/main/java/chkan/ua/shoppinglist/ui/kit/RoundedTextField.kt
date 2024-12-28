@@ -13,7 +13,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
@@ -23,6 +22,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import chkan.ua.shoppinglist.R
@@ -30,10 +30,10 @@ import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 
 @Composable
 fun RoundedTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
     roundedCornerRes: Int,
-    placeholderTextRes: Int,
+    placeholderTextRes: Int? = null,
     focusRequester: FocusRequester? = null,
     onDone: () -> Unit,
     modifier: Modifier
@@ -43,10 +43,10 @@ fun RoundedTextField(
         onValueChange = onValueChange,
         shape = RoundedCornerShape(dimensionResource(id = roundedCornerRes)),
         label = null,
-        placeholder = { Text(stringResource(id = placeholderTextRes), color = Color.Gray) },
+        placeholder = placeholderTextRes?.let{ {Text(stringResource(id = placeholderTextRes), color = Color.Gray)} },
         maxLines = 2,
         trailingIcon = {
-            if (value.isNotBlank()){
+            if (value.text.isNotBlank()){
                 Icon(Icons.Filled.Done,
                     contentDescription = "Done",
                     tint = MaterialTheme.colorScheme.primary,
@@ -59,7 +59,7 @@ fun RoundedTextField(
         keyboardOptions = KeyboardOptions(
             autoCorrectEnabled = true,
             keyboardType = KeyboardType.Text,
-            imeAction = if (value.isNotBlank()) ImeAction.Done else ImeAction.None
+            imeAction = if (value.text.isNotBlank()) ImeAction.Done else ImeAction.None
         ),
         keyboardActions = KeyboardActions(
             onDone = {
@@ -79,7 +79,7 @@ fun RoundedTextField(
 fun RoundedTextFieldPreview() {
     ShoppingListTheme {
         RoundedTextField(
-            value = "",
+            value = TextFieldValue(""),
             onValueChange ={},
             roundedCornerRes = R.dimen.rounded_corner,
             placeholderTextRes = R.string.first_list_text_placeholder,

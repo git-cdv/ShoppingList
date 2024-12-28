@@ -37,12 +37,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.models.ListProgress
+import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddListBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
+import chkan.ua.shoppinglist.ui.kit.bottom_sheets.EditBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ListItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
@@ -55,11 +57,14 @@ fun ListsScreen(
     val navController = localNavController.current
     val lists by listsViewModel.listsFlow.collectAsStateWithLifecycle(initialValue = listOf())
     var argDeletedIdList by remember { mutableIntStateOf(0) }
+    var edited by remember { mutableStateOf<Editable?>(null) }
 
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     var showConfirmBottomSheet by remember { mutableStateOf(false) }
     val confirmSheetState = rememberModalBottomSheetState()
+    var showEditBottomSheet by remember { mutableStateOf(false) }
+    val editSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -77,7 +82,12 @@ fun ListsScreen(
             scope.launch { sheetState.show() }
                        },
         onMoveToTop = { id, position -> listsViewModel.moveToTop(MoveTop(id, position)) },
-        goToItems = { list -> navController.navigate(ItemsRoute(list.id, list.title)) }
+        goToItems = { list -> navController.navigate(ItemsRoute(list.id, list.title)) },
+        onEditList = { editedList ->
+            edited = editedList
+            showEditBottomSheet = true
+            scope.launch { editSheetState.show() }
+        }
     )
 
     if (showBottomSheet){
@@ -85,6 +95,14 @@ fun ListsScreen(
             onDismiss = { showBottomSheet = false },
             addItem = { text -> listsViewModel.addList(text)},
             R.string.first_list_text_placeholder)
+    }
+
+    if (showEditBottomSheet && edited != null){
+        EditBottomSheet(editSheetState,
+            onDismiss = { showEditBottomSheet = false },
+            onEdit = { text -> },
+            editable = edited!!
+        )
     }
 
     if (showConfirmBottomSheet){
@@ -110,6 +128,7 @@ fun ListsScreenContent(
     lists: List<ListItemsUi>,
     onDeleteList: (Int) -> Unit,
     onCreateList: () -> Unit,
+    onEditList: (Editable) -> Unit,
     onMoveToTop: (Int, Int) -> Unit,
     goToItems: (ListItemsUi) -> Unit
 ) {
@@ -145,6 +164,7 @@ fun ListsScreenContent(
                 ListItem(
                     list = list,
                     modifier = Modifier.animateItem(),
+                    onEditList = onEditList,
                     onDeleteList = { onDeleteList.invoke(list.id) },
                     onMoveToTop = { onMoveToTop.invoke(list.id, list.position) },
                     onCardClick = { goToItems.invoke(list) }
@@ -171,6 +191,6 @@ fun ListsScreenContentPreview() {
                 position = 75556,
                 isReady = false
             )), progress = ListProgress(count = 4, readyCount = 2)
-        )),{},{},{_,_->},{})
+        )),{},{},{},{_,_->},{})
     }
 }

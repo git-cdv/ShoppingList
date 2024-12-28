@@ -28,6 +28,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.models.ListProgress
+import chkan.ua.domain.objects.Editable
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.core.models.MenuItem
 import chkan.ua.shoppinglist.ui.kit.BaseDropdownMenu
@@ -37,6 +38,7 @@ import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 fun ListItem(
     list: ListItemsUi,
     modifier: Modifier,
+    onEditList: (Editable) -> Unit,
     onDeleteList: () -> Unit,
     onMoveToTop: () -> Unit,
     onCardClick: () -> Unit)
@@ -120,7 +122,7 @@ fun ListItem(
                         if (list.position != 0){
                             add(MenuItem(title = stringResource(id = R.string.moveToTop), onClick = { onMoveToTop.invoke() }))
                         }
-                        add(MenuItem(title = stringResource(id = R.string.edit), onClick = { }))
+                        add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onEditList.invoke(Editable(list.id, list.title)) }))
                         add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onDeleteList.invoke()}))
                     }
                 )
@@ -141,6 +143,6 @@ fun ListItemPreview() {
             readyCount = 2,
             progress = ListProgress(count = 5, readyCount = 2),
             items = listOf()
-        ), Modifier,{},{},{})
+        ), Modifier,{},{},{},{})
     }
 }

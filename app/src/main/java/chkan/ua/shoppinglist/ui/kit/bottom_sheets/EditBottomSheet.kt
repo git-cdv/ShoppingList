@@ -18,37 +18,40 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
-import chkan.ua.domain.models.HistoryItem
+import chkan.ua.domain.objects.Editable
 import chkan.ua.shoppinglist.R
-import chkan.ua.shoppinglist.components.history_list.HistoryComponentState
-import chkan.ua.shoppinglist.components.history_list.HistoryUiComponent
-import chkan.ua.shoppinglist.core.components.StateDelegate
 import chkan.ua.shoppinglist.ui.kit.RoundedTextField
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
-interface StubHistoryComponent : StateDelegate<HistoryComponentState>
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun AddItemBottomSheet(
+fun EditBottomSheet(
     sheetState: SheetState,
-    historyComponent: StubHistoryComponent,
     onDismiss: () -> Unit,
-    addItem: (String) -> Unit,
-    placeholderResId: Int
-){
+    onEdit: (Editable) -> Unit,
+    editable: Editable
+    ){
     val scope = rememberCoroutineScope()
-    var text by rememberSaveable { mutableStateOf("") }
+    val textFieldValueSaver = remember {
+        Saver<TextFieldValue, Pair<String, TextRange>>(
+            save = { value -> value.text to value.selection },
+            restore = { TextFieldValue(it.first, it.second) }
+        )
+    }
+
+    var value by rememberSaveable(stateSaver = textFieldValueSaver) {
+        mutableStateOf(TextFieldValue(""))
+    }
     val focusRequester = remember { FocusRequester() }
     var wasKeyboardVisible by remember { mutableStateOf(false) }
     val isKeyboardVisible = WindowInsets.isImeVisible
@@ -62,6 +65,13 @@ fun AddItemBottomSheet(
             }
         }})
     {
+        LaunchedEffect(Unit) {
+            value = TextFieldValue(
+                text = editable.title,
+                selection = TextRange(editable.title.length)
+            )
+        }
+
         //focus after first show
         LaunchedEffect(sheetState.currentValue) {
             if (sheetState.currentValue == SheetValue.Expanded ||
@@ -82,23 +92,17 @@ fun AddItemBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            HistoryUiComponent(
-                component = historyComponent,
-                modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = dimensionResource(id = R.dimen.root_padding), end = dimensionResource(id = R.dimen.root_padding), bottom = dimensionResource(id = R.dimen.inner_padding)),
-                onChoose = { addItem.invoke(it) })
-
             RoundedTextField(
-                value = TextFieldValue(text),
-                onValueChange = { newValue -> text = newValue.text },
+                value = value,
+                onValueChange = { newValue -> value = newValue },
                 roundedCornerRes = R.dimen.rounded_corner,
-                placeholderTextRes = placeholderResId,
-                focusRequester,
+                focusRequester = focusRequester,
                 onDone = {
-                    addItem.invoke(text)
-                    text = ""
-                         },
+                    if (value.text != editable.title){
+                        onEdit.invoke(editable.copy(title = value.text))
+                    }
+                    onDismiss.invoke()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .imePadding()
@@ -111,27 +115,15 @@ fun AddItemBottomSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
-fun AddItemBottomSheetPreview() {
+fun EditBottomSheetPreview() {
     ShoppingListTheme {
-        val state = HistoryComponentState(isShow = true, isShort = true, list = listOf(
-            HistoryItem(1,"Product1"),
-            HistoryItem(2,"Product2"),
-            HistoryItem(3,"Product 3555"),
-            HistoryItem(4,"Product 4"),
-            HistoryItem(5,"Product nijioj")
-        )
-        )
-        AddItemBottomSheet(
+        EditBottomSheet(
             sheetState = rememberStandardBottomSheetState(
                 initialValue = SheetValue.Expanded
             ),
-            historyComponent = object : StubHistoryComponent {
-                override val stateFlow: StateFlow<HistoryComponentState> = MutableStateFlow(state)
-                override fun updateState(reducer: HistoryComponentState.() -> HistoryComponentState) {}
-            },
             onDismiss = {},
-            addItem = {},
-            placeholderResId = R.string.items_text_placeholder
+            onEdit = {},
+            Editable(77, "Title")
         )
     }
 }
