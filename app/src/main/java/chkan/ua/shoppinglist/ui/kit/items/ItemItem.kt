@@ -44,72 +44,64 @@ fun ItemItem(
     onDelete: () -> Unit,
     onEdit: () -> Unit
 ) {
-    Row {
-        Icon(
-            painter = painterResource(R.drawable.icon_drag_handle),
-            contentDescription = "Drag handle",
-            tint = Color.Gray,
-            modifier = Modifier
-                .padding(start = dimensionResource(id = R.dimen.root_padding), end = dimensionResource(id = R.dimen.min_padding))
-                .size(20.dp)
-                .align(Alignment.CenterVertically)
-        )
-        Card(
-            onClick = {onReady.invoke()},
-            shape = RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)),
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(
-                    top = dimensionResource(id = R.dimen.min_padding),
-                    bottom = dimensionResource(id = R.dimen.min_padding),
-                    end = dimensionResource(id = R.dimen.root_padding)
-                )
-        ) {
-            ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
-                val (textTitle, menuIcon) = createRefs()
-                var isMenuExpanded by remember { mutableStateOf(false) }
+    Card(
+        onClick = { onReady.invoke() },
+        shape = RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(
+                vertical = dimensionResource(id = R.dimen.min_padding),
+                horizontal = dimensionResource(id = R.dimen.root_padding)
+            )
+    ) {
+        ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
+            val (textTitle, menuIcon) = createRefs()
+            var isMenuExpanded by remember { mutableStateOf(false) }
 
-                Text(
-                    text = text.firstAsTitle(),
-                    style = MaterialTheme.typography.titleMedium,
-                    textAlign = TextAlign.Start,
-                    color = MaterialTheme.colorScheme.onSurface,
+            Text(
+                text = text.firstAsTitle(),
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Start,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .padding(vertical = dimensionResource(id = R.dimen.min_padding))
+                    .constrainAs(textTitle) {
+                        start.linkTo(parent.start, 16.dp)
+                        end.linkTo(menuIcon.start, 8.dp)
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        width = Dimension.fillToConstraints
+                    }
+
+            )
+
+            //box needed to open menu under icon
+            Box(modifier = Modifier
+                .constrainAs(menuIcon) {
+                    end.linkTo(parent.end)
+                }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "More options",
+                    tint = Color.Gray,
                     modifier = Modifier
-                        .padding(vertical = dimensionResource(id = R.dimen.min_padding))
-                        .constrainAs(textTitle) {
-                            start.linkTo(parent.start, 16.dp)
-                            end.linkTo(menuIcon.start,8.dp)
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
-                            width = Dimension.fillToConstraints
-                        }
-
+                        .padding(8.dp)
+                        .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
+                        .clickable { isMenuExpanded = true }
                 )
 
-                //box needed to open menu under icon
-                Box(modifier = Modifier
-                    .constrainAs(menuIcon) {
-                        end.linkTo(parent.end, 4.dp)
-                    }){
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More options",
-                        tint = Color.Gray,
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
-                            .clickable { isMenuExpanded = true }
+                BaseDropdownMenu(
+                    isMenuExpanded = isMenuExpanded,
+                    onDismissRequest = { isMenuExpanded = false },
+                    listItems = listOf(
+                        MenuItem(
+                            title = stringResource(id = R.string.delete),
+                            onClick = { onDelete.invoke() }),
+                        MenuItem(
+                            title = stringResource(id = R.string.edit),
+                            onClick = { onEdit.invoke() }),
                     )
-
-                    BaseDropdownMenu(
-                        isMenuExpanded = isMenuExpanded,
-                        onDismissRequest = { isMenuExpanded = false },
-                        listItems = listOf(
-                            MenuItem(title = stringResource(id = R.string.delete), onClick = { onDelete.invoke()}),
-                            MenuItem(title = stringResource(id = R.string.edit), onClick = { onEdit.invoke() }),
-                        )
-                    )
-                }
+                )
             }
         }
     }
