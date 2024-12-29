@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -160,14 +161,15 @@ fun ListsScreenContent(
                 .padding(top = paddingValue.calculateTopPadding())
                 .background(MaterialTheme.colorScheme.background)
         ){
-            items(lists, key = { it.id }){ list ->
+            itemsIndexed(lists, key = { _, item -> item.id }) { index, list ->
                 ListItem(
                     list = list,
                     modifier = Modifier.animateItem(),
                     onEditList = onEditList,
                     onDeleteList = { onDeleteList.invoke(list.id) },
                     onMoveToTop = { onMoveToTop.invoke(list.id, list.position) },
-                    onCardClick = { goToItems.invoke(list) }
+                    onCardClick = { goToItems.invoke(list) },
+                    isFirst = index == 0
                 )
             }
         }

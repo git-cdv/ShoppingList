@@ -41,7 +41,8 @@ fun ListItem(
     onEditList: (Editable) -> Unit,
     onDeleteList: () -> Unit,
     onMoveToTop: () -> Unit,
-    onCardClick: () -> Unit)
+    onCardClick: () -> Unit,
+    isFirst: Boolean)
 {
     Card(
         onClick = { onCardClick.invoke() },
@@ -119,7 +120,7 @@ fun ListItem(
                     isMenuExpanded = isMenuExpanded,
                     onDismissRequest = { isMenuExpanded = false },
                     listItems = mutableListOf<MenuItem>().apply {
-                        if (list.position != 0){
+                        if (!isFirst){
                             add(MenuItem(title = stringResource(id = R.string.moveToTop), onClick = { onMoveToTop.invoke() }))
                         }
                         add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onEditList.invoke(Editable(list.id, list.title)) }))
@@ -143,6 +144,6 @@ fun ListItemPreview() {
             readyCount = 2,
             progress = ListProgress(count = 5, readyCount = 2),
             items = listOf()
-        ), Modifier,{},{},{},{})
+        ), Modifier,{},{},{},{}, false)
     }
 }
