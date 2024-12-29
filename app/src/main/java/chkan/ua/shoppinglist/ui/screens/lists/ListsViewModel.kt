@@ -19,6 +19,7 @@ import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companio
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_TITLE_STR
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,8 +37,15 @@ class ListsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch (Dispatchers.IO) {
-            val count = getListsCount.run(Unit)
-            isListsExist = count > 0
+            val splashMinShowTime = 500L
+
+            val dataJob = launch {
+                val count = getListsCount.run(Unit)
+                isListsExist = count > 0
+            }
+
+            delay(splashMinShowTime)
+            dataJob.join()
             _isLoadReady.value = true
         }
     }
