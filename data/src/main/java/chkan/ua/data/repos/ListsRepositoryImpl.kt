@@ -14,7 +14,8 @@ class ListsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
         return dataSource.getListsWithItemsFlow().map { it.map { it.mapToListItem() } }
     }
 
-    override suspend fun addList(title: String, position: Int) {
+    override suspend fun addList(title: String) {
+        val position = (dataSource.getMaxListPosition() ?: -1) + 1
         dataSource.addList(ListEntity(title = title,position = position))
     }
 

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -45,6 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.objects.Editable
+import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
@@ -104,7 +106,8 @@ fun ItemsScreen(
             editable = edited
             showEditBottomSheet = true
             scope.launch { editSheetState.show() }
-        }
+        },
+        onMoveToTop = { id, position -> itemsViewModel.moveToTop(MoveTop(id, position))}
     )
 
     if (showAddItemBottomSheet){
@@ -139,6 +142,7 @@ fun ItemsScreenContent(
     goToBack: () -> Unit,
     clearReadyItems: () -> Unit,
     onEditItem: (Editable) -> Unit,
+    onMoveToTop: (Int, Int) -> Unit,
 ) {
     var showConfirmBottomSheet by remember { mutableStateOf(false) }
     val confirmSheetState = rememberModalBottomSheetState()
@@ -193,13 +197,16 @@ fun ItemsScreenContent(
                     .padding(top = paddingValue.calculateTopPadding())
                     .background(MaterialTheme.colorScheme.background)
             ) {
-                items(items, key = { it.itemId }) { item ->
+                itemsIndexed(items, key = { _, item -> item.itemId }) { index, item ->
                     ItemItem(
                         text = item.content,
                         modifier = Modifier.animateItem(),
                         onReady = { onMarkReady.invoke(item.itemId, true) },
                         onDelete = { onDeleteItem.invoke(item.itemId) },
-                        onEdit = { onEditItem.invoke(Editable(item.itemId, item.content))})
+                        onEdit = { onEditItem.invoke(Editable(item.itemId, item.content))},
+                        onMoveToTop = { onMoveToTop.invoke(item.itemId, item.position) },
+                        isFirst = index == 0
+                    )
                 }
                 if (readyItems.isNotEmpty()) {
                     item {
@@ -272,6 +279,6 @@ fun ItemsScreenContentPreview() {
         ), listOf(
             Item(55,"Item 1", 0,0, false),
             Item(44774,"Item 2", 0,1, false)
-        ), false, {},{_,_ -> }, {}, {},{},{})
+        ), false, {},{_,_->}, {}, {},{},{},{_,_->})
     }
 }

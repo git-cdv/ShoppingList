@@ -17,7 +17,9 @@ class ItemsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
     }
 
     override suspend fun addItem(item: Item) {
-        dataSource.addItem(item.toEntity())
+        val position = (dataSource.getMaxItemPosition() ?: -1) + 1
+        val itemWithPosition = item.copy(position = position)
+        dataSource.addItem(itemWithPosition.toEntity())
     }
 
     override suspend fun deleteItem(itemId: Int) {
@@ -35,4 +37,6 @@ class ItemsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
     override suspend fun markItemReady(itemId: Int, state: Boolean) {
         dataSource.markItemReady(itemId,state)
     }
+
+    override suspend fun moveToTop(id: Int, position: Int) = dataSource.moveItemToTop(id, position)
 }

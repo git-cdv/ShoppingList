@@ -15,6 +15,8 @@ import chkan.ua.domain.usecases.items.EditItemUseCase
 import chkan.ua.domain.usecases.items.GetItemsFlowUseCase
 import chkan.ua.domain.usecases.items.MarkReadyConfig
 import chkan.ua.domain.usecases.items.MarkReadyItemUseCase
+import chkan.ua.domain.usecases.items.MoveItemToTopUseCase
+import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.shoppinglist.components.history_list.HistoryComponent
 import chkan.ua.shoppinglist.core.components.ComponentsViewModel
 import chkan.ua.shoppinglist.core.services.ErrorHandler
@@ -41,7 +43,8 @@ class ItemsViewModel @Inject constructor(
     private val addInHistory: AddItemInHistoryUseCase,
     private val errorHandler: ErrorHandler,
     private val historyComponent: HistoryComponent,
-    private val spService: SharedPreferencesService
+    private val spService: SharedPreferencesService,
+    private val moveToTop: MoveItemToTopUseCase,
 ) : ComponentsViewModel() {
 
     init {
@@ -120,6 +123,16 @@ class ItemsViewModel @Inject constructor(
                 editItem.run(edited)
             } catch (e: Exception){
                 errorHandler.handle(e,editItem.getErrorReason(edited))
+            }
+        }
+    }
+
+    fun moveToTop(config: MoveTop) {
+        viewModelScope.launch (Dispatchers.IO) {
+            try {
+                moveToTop.run(config)
+            } catch (e: Exception){
+                errorHandler.handle(e,moveToTop.getErrorReason())
             }
         }
     }

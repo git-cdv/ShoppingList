@@ -6,11 +6,11 @@ import chkan.ua.domain.repos.ItemsRepository
 import javax.inject.Inject
 
 class EditItemUseCase @Inject constructor(
-    private val listsRepository: ItemsRepository
+    private val itemsRepository: ItemsRepository
 ) : SuspendUseCase<Editable> {
 
     override suspend fun run(config: Editable) {
-        listsRepository.updateContent(config)
+        itemsRepository.updateContent(config)
     }
 
     override fun getErrorReason(config: Editable?) = "Failed to edit item $config"

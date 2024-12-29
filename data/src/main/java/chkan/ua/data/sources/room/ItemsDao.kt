@@ -13,7 +13,7 @@ interface ItemsDao {
     suspend fun addItem(item: ItemEntity)
 
     @Transaction
-    @Query("SELECT * FROM items WHERE listId = :listId")
+    @Query("SELECT * FROM items WHERE listId = :listId ORDER BY position ASC")
     fun getItemsFlowByListId(listId: Int): Flow<List<ItemEntity>>
 
     @Query("DELETE FROM items WHERE itemId = :itemId")
@@ -27,4 +27,19 @@ interface ItemsDao {
 
     @Query("UPDATE items SET content = :content WHERE itemId = :itemId")
     suspend fun updateContent(itemId: Int, content: String)
+
+    @Query("SELECT MAX(position) FROM items")
+    suspend fun getMaxItemPosition(): Int?
+
+    @Transaction
+    suspend fun moveToTop(id: Int, position: Int) {
+        shiftPositions(position)
+        moveItemToTop(id)
+    }
+
+    @Query("UPDATE items SET position = position + 1 WHERE position < :currentPosition")
+    suspend fun shiftPositions(currentPosition: Int)
+
+    @Query("UPDATE items SET position = 0 WHERE itemId = :id")
+    suspend fun moveItemToTop(id: Int)
 }

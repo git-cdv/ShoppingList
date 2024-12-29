@@ -38,7 +38,9 @@ fun ItemItem(
     modifier: Modifier,
     onReady: () -> Unit,
     onDelete: () -> Unit,
-    onEdit: () -> Unit
+    onEdit: () -> Unit,
+    onMoveToTop: () -> Unit,
+    isFirst: Boolean
 ) {
     Card(
         onClick = { onReady.invoke() },
@@ -89,14 +91,13 @@ fun ItemItem(
                 BaseDropdownMenu(
                     isMenuExpanded = isMenuExpanded,
                     onDismissRequest = { isMenuExpanded = false },
-                    listItems = listOf(
-                        MenuItem(
-                            title = stringResource(id = R.string.delete),
-                            onClick = { onDelete.invoke() }),
-                        MenuItem(
-                            title = stringResource(id = R.string.edit),
-                            onClick = { onEdit.invoke() }),
-                    )
+                    listItems = mutableListOf<MenuItem>().apply {
+                        if (!isFirst){
+                            add(MenuItem(title = stringResource(id = R.string.moveToTop), onClick = { onMoveToTop.invoke() }))
+                        }
+                        add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onEdit.invoke() }))
+                        add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onDelete.invoke() }))
+                    }
                 )
             }
         }
@@ -107,6 +108,6 @@ fun ItemItem(
 @Composable
 fun ItemPreview() {
     ShoppingListTheme {
-        ItemItem("Products",Modifier,{},{},{})
+        ItemItem("Products",Modifier,{},{},{},{}, false)
     }
 }

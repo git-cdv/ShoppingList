@@ -15,6 +15,8 @@ interface DataSource {
     suspend fun deleteList(listId: Int)
     suspend fun updateTitle(editable: Editable)
     suspend fun getListCount(): Int
+    suspend fun getMaxListPosition(): Int?
+    suspend fun getMaxItemPosition(): Int?
     suspend fun addItem(item: ItemEntity)
     suspend fun deleteItem(itemId: Int)
     suspend fun markItemReady(itemId: Int, state: Boolean)
@@ -22,4 +24,5 @@ interface DataSource {
     suspend fun updateContent(editable: Editable)
     suspend fun incrementOrInsertInHistory(name: String)
     suspend fun moveToTop(id: Int, position: Int)
+    suspend fun moveItemToTop(id: Int, position: Int)
 }

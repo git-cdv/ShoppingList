@@ -4,11 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
-import androidx.room.Update
-import chkan.ua.data.models.ItemEntity
 import chkan.ua.data.models.ListEntity
 import chkan.ua.data.models.ListWithItems
-import chkan.ua.domain.objects.Editable
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -29,6 +26,9 @@ interface ListsDao {
 
     @Query("SELECT COUNT(*) FROM lists")
     suspend fun getListCount(): Int
+
+    @Query("SELECT MAX(position) FROM lists")
+    suspend fun getMaxListPosition(): Int?
 
     @Transaction
     suspend fun moveToTop(id: Int, position: Int) {

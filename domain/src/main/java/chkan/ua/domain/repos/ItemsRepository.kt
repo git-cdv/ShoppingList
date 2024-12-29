@@ -11,4 +11,5 @@ interface ItemsRepository {
     suspend fun updateContent(editable: Editable)
     suspend fun clearReadyItems(listId: Int)
     suspend fun markItemReady(itemId: Int, state: Boolean)
+    suspend fun moveToTop(id: Int, position: Int)
 }

@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.objects.LastOpenedList
-import chkan.ua.domain.usecases.lists.AddListConfig
 import chkan.ua.domain.usecases.lists.AddListUseCase
 import chkan.ua.domain.usecases.lists.DeleteListUseCase
 import chkan.ua.domain.usecases.lists.EditListUseCase
@@ -52,8 +51,7 @@ class ListsViewModel @Inject constructor(
     fun addList(title: String){
         viewModelScope.launch (Dispatchers.IO) {
             try {
-                val count = getListsCount.run(Unit)
-                addList.run(AddListConfig(title,count + 1))
+                addList.run(title)
             } catch (e: Exception){
                 errorHandler.handle(e,addList.getErrorReason())
             }

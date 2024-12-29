@@ -35,6 +35,8 @@ class RoomSourceImpl @Inject constructor (
     }
 
     override suspend fun getListCount() = listsDao.getListCount()
+    override suspend fun getMaxListPosition() = listsDao.getMaxListPosition()
+    override suspend fun getMaxItemPosition() = itemsDao.getMaxItemPosition()
 
     override suspend fun moveToTop(id: Int, position: Int) {
         listsDao.moveToTop(id,position)
@@ -46,6 +48,10 @@ class RoomSourceImpl @Inject constructor (
 
     override suspend fun deleteItem(itemId: Int) {
         itemsDao.deleteById(itemId)
+    }
+
+    override suspend fun moveItemToTop(id: Int, position: Int) {
+        itemsDao.moveToTop(id,position)
     }
 
     override suspend fun markItemReady(itemId: Int, state: Boolean) {

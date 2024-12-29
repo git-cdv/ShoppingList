@@ -6,13 +6,11 @@ import javax.inject.Inject
 
 class AddListUseCase @Inject constructor(
     private val listsRepository: ListsRepository
-) : SuspendUseCase<AddListConfig> {
+) : SuspendUseCase<String> {
 
-    override suspend fun run(config: AddListConfig) {
-        listsRepository.addList(config.title, config.position)
+    override suspend fun run(config: String) {
+        listsRepository.addList(config)
     }
 
-    override fun getErrorReason(config: AddListConfig?) = "Failed to add list"
+    override fun getErrorReason(config: String?) = "Failed to add list"
 }
-
-data class AddListConfig (val title: String, val position: Int)
