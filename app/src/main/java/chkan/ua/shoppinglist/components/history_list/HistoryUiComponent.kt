@@ -3,20 +3,28 @@ package chkan.ua.shoppinglist.components.history_list
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -50,32 +58,48 @@ fun HistoryComponentContent(
     Column {
         ToggleShowText(state.isShow){ onToggleShow.invoke(it)}
         AnimatedVisibility(visible = state.isShow) {
-            val maxHistoryHeight = calculateMaxHistoryHeight()
-
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
-                modifier = modifier
-                    .fillMaxWidth()
-                    .heightIn(max = maxHistoryHeight)
-                    .animateContentSize(),
-                verticalArrangement = Arrangement.Top,
-                horizontalArrangement = Arrangement.Start
-            ){
-                val list = if (state.isShort) {
-                    if (state.list.size >= 9){
-                        state.list.take(8)
-                    } else state.list
-                } else state.list
-
-                items(list, key = { it.id }) { item ->
-                    SuggestionItemCard(item.name){ onChoose.invoke(item.name) }
+            if (state.list.isEmpty()){
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = stringResource(R.string.no_suggestions_yet),
+                        color = Color.Gray,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(
+                                vertical = dimensionResource(id = R.dimen.root_padding)
+                            )
+                    )
                 }
+            } else {
+                val maxHistoryHeight = calculateMaxHistoryHeight()
 
-                if (state.list.size >= 9){
-                    if (state.isShort){
-                        item { ToggleCard(R.string.more){ onToggleSize.invoke(false) } }
-                    } else {
-                        item { ToggleCard(R.string.less){ onToggleSize.invoke(true) } }
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .heightIn(max = maxHistoryHeight)
+                        .animateContentSize(),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalArrangement = Arrangement.Start
+                ){
+                    val list = if (state.isShort) {
+                        if (state.list.size >= 9){
+                            state.list.take(8)
+                        } else state.list
+                    } else state.list
+
+                    items(list, key = { it.id }) { item ->
+                        SuggestionItemCard(item.name){ onChoose.invoke(item.name) }
+                    }
+
+                    if (state.list.size >= 9){
+                        if (state.isShort){
+                            item { ToggleCard(R.string.more){ onToggleSize.invoke(false) } }
+                        } else {
+                            item { ToggleCard(R.string.less){ onToggleSize.invoke(true) } }
+                        }
                     }
                 }
             }
@@ -87,13 +111,7 @@ fun HistoryComponentContent(
 @Preview
 @Composable
 private fun ComponentPreview() {
-    val state = HistoryComponentState(isShow = true, isShort = true, list = listOf(
-        HistoryItem(1,"Product1"),
-        HistoryItem(2,"Product2"),
-        HistoryItem(3,"Product 3555"),
-        HistoryItem(4,"Product 4"),
-        HistoryItem(5,"Product nijioj"))
-    )
+    val state = HistoryComponentState(isShow = true, isShort = true, list = listOf())
     HistoryComponentContent(state= state, modifier = Modifier,{},{},{})
 }
 

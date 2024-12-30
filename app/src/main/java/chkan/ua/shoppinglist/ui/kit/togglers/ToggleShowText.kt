@@ -43,9 +43,9 @@ fun ToggleShowText(isShowing: Boolean, onToggle: (Boolean)->Unit){
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
-                .padding(horizontal = dimensionResource(id = R.dimen.inner_padding))
                 .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
                 .clickable { onToggle.invoke(!isShowing) }
+                .padding(horizontal = dimensionResource(id = R.dimen.inner_padding))
         )
     }
 }
