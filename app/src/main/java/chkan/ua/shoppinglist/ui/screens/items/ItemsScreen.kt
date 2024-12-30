@@ -71,7 +71,7 @@ fun ItemsScreen(
     val isEmptyState by itemsViewModel.isEmpty
     val items by itemsViewModel.getFlowItemsByListId(listId).collectAsStateWithLifecycle(initialValue = listOf())
     val (readyItems, notReadyItems) = items.partition { it.isReady }
-    val historyComponent = itemsViewModel.getHistoryComponent()
+    val historyComponent = itemsViewModel.getHistoryComponent(listId)
 
     var showAddItemBottomSheet by remember { mutableStateOf(false) }
     val addItemSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)

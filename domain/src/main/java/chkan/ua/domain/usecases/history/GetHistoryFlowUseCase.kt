@@ -6,9 +6,9 @@ import javax.inject.Inject
 
 class GetHistoryFlowUseCase @Inject constructor(
     private val historyItem: HistoryRepository
-) : FlowUseCase<Unit> {
+) : FlowUseCase<Int> {
 
-    override fun run(config: Unit) = historyItem.getHistory()
+    override fun run(config: Int) = historyItem.getHistory(config)
 
-    override fun getErrorReason(config: Unit?): String = "Failed to get history"
+    override fun getErrorReason(config: Int?): String = "Failed to get history"
 }

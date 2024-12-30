@@ -1,6 +1,5 @@
 package chkan.ua.shoppinglist.ui.screens.items
 
-import android.content.SharedPreferences
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -110,7 +109,11 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    fun getHistoryComponent() = historyComponent
+    fun getHistoryComponent(listId: Int): HistoryComponent {
+        return historyComponent.apply {
+            initFlow(listId)
+        }
+    }
 
     fun saveLastOpenedList(listId: Int, listTitle: String) {
         spService.set(LAST_OPEN_LIST_ID_INT, listId)

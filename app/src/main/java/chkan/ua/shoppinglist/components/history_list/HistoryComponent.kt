@@ -7,11 +7,11 @@ import javax.inject.Inject
 
 
 class HistoryComponent @Inject constructor(
-    getHistoryFlow: GetHistoryFlowUseCase
+    private val getHistoryFlow: GetHistoryFlowUseCase
 ) : StateComponent<HistoryComponentState>(HistoryComponentState()), StubHistoryComponent {
 
-    init {
-        getHistoryFlow.run(Unit).updateStateOnEach { copy(list = it) }
+    fun initFlow(listId: Int){
+        getHistoryFlow.run(listId).updateStateOnEach { copy(list = it) }
     }
 
 }
