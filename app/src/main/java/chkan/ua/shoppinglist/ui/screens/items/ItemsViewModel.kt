@@ -1,7 +1,5 @@
 package chkan.ua.shoppinglist.ui.screens.items
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import chkan.ua.core.extensions.firstAsTitle
 import chkan.ua.domain.models.Item
@@ -25,8 +23,12 @@ import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companio
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 import javax.inject.Inject
@@ -50,18 +52,33 @@ class ItemsViewModel @Inject constructor(
         attachComponent(historyComponent)
     }
 
+    private val _state = MutableStateFlow(ItemsState())
+    val state: StateFlow<ItemsState> = _state.asStateFlow()
+
     private val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
-    private val _isEmpty = mutableStateOf(false)
-    val isEmpty: State<Boolean> = _isEmpty
+    fun observeItems(listId: Int) {
+        getItemsFlow.run(listId)
+            .onEach { items ->
+                //work in main thread (ok for not huge data)
+                val (readyItems, notReadyItems) = items.partition { it.isReady }
+                _state.update { it.copy(isEmpty = items.isEmpty(), notReadyItems = notReadyItems, readyItems = readyItems) }
+            }
+            .launchIn(viewModelScope)
+    }
 
-    fun getFlowItemsByListId(listId: Int): Flow<List<Item>> {
-        return getItemsFlow.run(listId).onEach { items ->
-            _isEmpty.value = items.isEmpty()
+    fun processIntent(intent: ItemsIntent) {
+        when (intent) {
+            is ItemsIntent.AddItem -> addItem(intent.item)
+            is ItemsIntent.ClearReadyItems -> clearReadyItems(intent.listId)
+            is ItemsIntent.DeleteItem -> deleteItem(intent.id)
+            is ItemsIntent.EditItem -> editItem(intent.editable)
+            is ItemsIntent.MarkReady -> changeReadyInItem(intent.id,intent.state)
+            is ItemsIntent.MoveToTop -> moveToTop(MoveTop(intent.id,intent.position))
         }
     }
 
-    fun addItem(item: Item) {
+    private fun addItem(item: Item) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
                 addItem.run(item)
@@ -78,7 +95,7 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    fun deleteItem(id: Int) {
+    private fun deleteItem(id: Int) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
                 deleteItem.run(id)
@@ -88,7 +105,7 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    fun changeReadyInItem(id: Int, state: Boolean) {
+    private fun changeReadyInItem(id: Int, state: Boolean) {
         viewModelScope.launch (singleThreadDispatcher) {
             val config = MarkReadyConfig(id,state)
             try {
@@ -99,7 +116,7 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    fun clearReadyItems(listId: Int) {
+    private fun clearReadyItems(listId: Int) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
                 clearReadyItems.run(listId)
@@ -120,7 +137,7 @@ class ItemsViewModel @Inject constructor(
         spService.set(LAST_OPEN_LIST_TITLE_STR, listTitle)
     }
 
-    fun editItem(edited: Editable) {
+    private fun editItem(edited: Editable) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
                 editItem.run(edited)
@@ -130,7 +147,7 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    fun moveToTop(config: MoveTop) {
+    private fun moveToTop(config: MoveTop) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
                 moveToTop.run(config)

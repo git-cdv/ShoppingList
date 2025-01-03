@@ -46,7 +46,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.objects.Editable
-import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
@@ -68,9 +67,13 @@ fun ItemsScreen(
     val navController = localNavController.current
     val listId = args.listId
     val listTitle = args.listTitle
-    val isEmptyState by itemsViewModel.isEmpty
-    val items by itemsViewModel.getFlowItemsByListId(listId).collectAsStateWithLifecycle(initialValue = listOf())
-    val (readyItems, notReadyItems) = items.partition { it.isReady }
+
+    LaunchedEffect(Unit) {
+        itemsViewModel.observeItems(listId)
+        itemsViewModel.saveLastOpenedList(listId, listTitle)
+    }
+
+    val uiState by itemsViewModel.state.collectAsStateWithLifecycle()
     val historyComponent = itemsViewModel.getHistoryComponent(listId)
 
     var showAddItemBottomSheet by remember { mutableStateOf(false) }
@@ -81,15 +84,11 @@ fun ItemsScreen(
     var editable by remember { mutableStateOf(Editable()) }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        itemsViewModel.saveLastOpenedList(listId, listTitle)
-    }
-
     ItemsScreenContent(
         title = listTitle,
-        items = notReadyItems,
-        readyItems = readyItems,
-        isEmptyState = isEmptyState,
+        items = uiState.notReadyItems,
+        readyItems = uiState.readyItems,
+        isEmptyState = uiState.isEmpty,
         handleAddItemSheet = { isShow ->
             showAddItemBottomSheet = isShow
             if (isShow) {
@@ -98,16 +97,16 @@ fun ItemsScreen(
                 scope.launch { addItemSheetState.hide() }
             }
          },
-        onDeleteItem = { id -> itemsViewModel.deleteItem(id) },
-        onMarkReady = { id, state -> itemsViewModel.changeReadyInItem(id, state) },
-        goToBack = {navController.popBackStack()},
-        clearReadyItems = {itemsViewModel.clearReadyItems(listId)},
+        onDeleteItem = { id -> itemsViewModel.processIntent(ItemsIntent.DeleteItem(id)) },
+        onMarkReady = { id, state -> itemsViewModel.processIntent(ItemsIntent.MarkReady(id, state)) },
+        goToBack = { navController.popBackStack() },
+        clearReadyItems = { itemsViewModel.processIntent(ItemsIntent.ClearReadyItems(listId)) },
         onEditItem = { edited ->
             editable = edited
             showEditBottomSheet = true
             scope.launch { editSheetState.show() }
         },
-        onMoveToTop = { id, position -> itemsViewModel.moveToTop(MoveTop(id, position))}
+        onMoveToTop = { id, position -> itemsViewModel.processIntent(ItemsIntent.MoveToTop(id,position))}
     )
 
     if (showAddItemBottomSheet){
@@ -115,7 +114,7 @@ fun ItemsScreen(
             addItemSheetState,
             historyComponent,
             onDismiss = { showAddItemBottomSheet = false },
-            addItem = { title -> itemsViewModel.addItem(Item(content = title, listId = listId))},
+            addItem = { title -> itemsViewModel.processIntent(ItemsIntent.AddItem(Item(content = title, listId = listId)))},
             R.string.items_text_placeholder
         )
     }
@@ -123,7 +122,7 @@ fun ItemsScreen(
     if (showEditBottomSheet){
         EditBottomSheet(editSheetState,
             onDismiss = { showEditBottomSheet = false },
-            onEdit = { edited -> itemsViewModel.editItem(edited)},
+            onEdit = { edited -> itemsViewModel.processIntent(ItemsIntent.EditItem(edited))},
             editable = editable
         )
     }
