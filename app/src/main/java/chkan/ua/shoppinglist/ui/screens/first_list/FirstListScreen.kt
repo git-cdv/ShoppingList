@@ -94,9 +94,9 @@ fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Un
 
         SuggestionsHorizontalList(
             suggestions = suggestions,
-            onSuggestionChoose = {
-                suggestion -> listNameText = suggestion
+            onSuggestionChoose = { suggestion ->
                 focusManager.clearFocus()
+                addListWithTitle.invoke(suggestion)
                                  },
             modifier = Modifier
                 .fillMaxWidth()
