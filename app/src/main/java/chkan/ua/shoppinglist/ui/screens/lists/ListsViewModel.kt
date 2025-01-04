@@ -1,5 +1,6 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -31,7 +32,7 @@ class ListsViewModel @Inject constructor(
     private val deleteList: DeleteListUseCase,
     private val editList: EditListUseCase,
     private val moveToTop: MoveToTopUseCase,
-    private val errorHandler: ErrorHandler,
+    val errorHandler: ErrorHandler,
     private val spService: SharedPreferencesService
 ) : ViewModel() {
 
@@ -59,7 +60,9 @@ class ListsViewModel @Inject constructor(
     fun addList(title: String){
         viewModelScope.launch (Dispatchers.IO) {
             try {
-                addList.run(title)
+                //addList.run(title)
+                Log.d("CHKAN", "errorHandler IN VM ${errorHandler.hashCode()}")
+                throw IllegalArgumentException("Test Exception")
             } catch (e: Exception){
                 errorHandler.handle(e,addList.getErrorReason())
             }
@@ -99,7 +102,6 @@ class ListsViewModel @Inject constructor(
             val title = spService.get(LAST_OPEN_LIST_TITLE_STR, String::class.java) ?: ""
             LastOpenedList(id,title)
         } catch (e: Exception) {
-            errorHandler.handle(e,e.message)
             null
         }
     }
