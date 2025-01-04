@@ -94,7 +94,12 @@ fun ListsScreen(
     if (showBottomSheet){
         AddListBottomSheet(sheetState,
             onDismiss = { showBottomSheet = false },
-            addItem = { text -> listsViewModel.addList(text)},
+            addItem = { text ->
+                listsViewModel.addList(text)
+                scope.launch { sheetState.hide()}.invokeOnCompletion {
+                    showBottomSheet = false
+                }
+                      },
             R.string.first_list_text_placeholder)
     }
 
