@@ -10,7 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.core.services.ErrorEvent
 import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 
@@ -37,11 +39,11 @@ fun ErrorDialogHandler(
                     Text("OK")
                 }
             },
-            title = { Text("Error") },
+            title = { Text(stringResource(id = R.string.error)) },
             text = {
                 Text(
-                    "An error occurred: ${currentError?.e?.message}. " +
-                            "Reason: ${currentError?.reason ?: "Unknown"}"
+                            stringResource(id = R.string.reason) + ": ${currentError?.reason ?: stringResource(id = R.string.unknown)} " +
+                                    stringResource(id = R.string.working_on_solution)
                 )
             }
         )
