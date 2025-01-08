@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.crashlytics)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -19,7 +21,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "chkan.ua.shoppinglist"
+        applicationId = "com.chkan.shopping"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -98,6 +100,10 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.compose)
     implementation(libs.kotlinx.serialization.json)
+
+    //crashlytics
+    implementation (platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

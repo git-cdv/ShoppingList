@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "chkan.ua.data"
+    namespace = "com.chkan.data"
     compileSdk = 34
 
     defaultConfig {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "540183954113",
+    "project_id": "shoppinglist-ac908",
+    "storage_bucket": "shoppinglist-ac908.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:540183954113:android:c1b5d85b338bc6558e8a40",
+        "android_client_info": {
+          "package_name": "com.chkan.shopping"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjg2fPuTdEacReID96NdaWXYe1-5qTkxk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
