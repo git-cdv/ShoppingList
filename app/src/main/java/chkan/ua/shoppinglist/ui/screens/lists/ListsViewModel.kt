@@ -60,9 +60,7 @@ class ListsViewModel @Inject constructor(
     fun addList(title: String){
         viewModelScope.launch (Dispatchers.IO) {
             try {
-                //addList.run(title)
-                Log.d("CHKAN", "errorHandler IN VM ${errorHandler.hashCode()}")
-                throw IllegalArgumentException("Test Exception")
+                addList.run(title)
             } catch (e: Exception){
                 errorHandler.handle(e,addList.getErrorReason())
             }
