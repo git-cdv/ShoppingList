@@ -1,27 +1,26 @@
 package chkan.ua.shoppinglist.core.services
 
 import android.util.Log
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.receiveAsFlow
 import javax.inject.Inject
 
 interface ErrorHandler {
-    fun handle(e:Exception, reason: String?)
-    val errorFlow: SharedFlow<ErrorEvent>
+    suspend fun handle(e:Exception, reason: String)
+    val errorChannelFlow: Flow<ErrorEvent>
 }
 
 class ErrorHandlerImpl @Inject constructor() : ErrorHandler {
 
-    private val _errorFlow = MutableSharedFlow<ErrorEvent>(replay = 1)
-    override val errorFlow = _errorFlow.asSharedFlow()
+    private val errorChannel = Channel<ErrorEvent>()
+    override val errorChannelFlow = errorChannel.receiveAsFlow()
 
-    override fun handle(e: Exception, reason: String?) {
+    override suspend fun handle(e: Exception, reason: String) {
         Log.d("CHKAN", "Error ${e.message} with reason: $reason")
-        val result = _errorFlow.tryEmit(ErrorEvent(e, reason))
-        Log.d("CHKAN", "Error push in flow - $result")
+        errorChannel.send(ErrorEvent(e::class.simpleName ?: "", e.message ?: "", reason))
     }
 
 }
 
-data class ErrorEvent(val e: Exception, val reason: String?)
+data class ErrorEvent(val exType: String, val exMessage: String, val reason: String)
