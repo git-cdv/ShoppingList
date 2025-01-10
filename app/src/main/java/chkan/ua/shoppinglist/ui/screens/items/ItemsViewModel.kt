@@ -1,5 +1,7 @@
 package chkan.ua.shoppinglist.ui.screens.items
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import chkan.ua.core.extensions.firstAsTitle
 import chkan.ua.domain.models.Item
@@ -20,6 +22,8 @@ import chkan.ua.shoppinglist.core.services.ErrorHandler
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_TITLE_STR
+import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheetState
+import chkan.ua.shoppinglist.ui.kit.bottom_sheets.BottomSheetAction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -55,6 +59,9 @@ class ItemsViewModel @Inject constructor(
     private val _state = MutableStateFlow(ItemsState())
     val state: StateFlow<ItemsState> = _state.asStateFlow()
 
+    private val _addItemBottomSheetState = mutableStateOf(AddItemBottomSheetState())
+    val addItemBottomSheetState: State<AddItemBottomSheetState> = _addItemBottomSheetState
+
     private val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
     fun observeItems(listId: Int) {
@@ -75,6 +82,13 @@ class ItemsViewModel @Inject constructor(
             is ItemsIntent.EditItem -> editItem(intent.editable)
             is ItemsIntent.MarkReady -> changeReadyInItem(intent.id,intent.state)
             is ItemsIntent.MoveToTop -> moveToTop(MoveTop(intent.id,intent.position))
+        }
+    }
+
+    fun processAddItemBottomSheetChange(action: BottomSheetAction) {
+        _addItemBottomSheetState.value = when (action) {
+            is BottomSheetAction.SetIsOpen -> _addItemBottomSheetState.value.copy(isOpen = action.isOpen)
+            is BottomSheetAction.SetText -> _addItemBottomSheetState.value.copy(text = action.text)
         }
     }
 
@@ -156,5 +170,4 @@ class ItemsViewModel @Inject constructor(
             }
         }
     }
-
 }

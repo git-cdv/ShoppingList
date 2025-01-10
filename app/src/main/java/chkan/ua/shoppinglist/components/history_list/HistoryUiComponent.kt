@@ -24,15 +24,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import chkan.ua.domain.models.HistoryItem
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.StubHistoryComponent
-import chkan.ua.shoppinglist.ui.kit.togglers.ToggleCard
 import chkan.ua.shoppinglist.ui.kit.items.SuggestionItemCard
+import chkan.ua.shoppinglist.ui.kit.togglers.ToggleCard
 import chkan.ua.shoppinglist.ui.kit.togglers.ToggleShowText
 
 @Composable

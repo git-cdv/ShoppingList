@@ -50,6 +50,7 @@ import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheet
+import chkan.ua.shoppinglist.ui.kit.bottom_sheets.BottomSheetAction
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.EditBottomSheet
 import chkan.ua.shoppinglist.ui.kit.empty_state.CenteredTextScreen
@@ -76,7 +77,7 @@ fun ItemsScreen(
     val uiState by itemsViewModel.state.collectAsStateWithLifecycle()
     val historyComponent = itemsViewModel.getHistoryComponent(listId)
 
-    var showAddItemBottomSheet by remember { mutableStateOf(false) }
+    val addItemBottomSheetState by itemsViewModel.addItemBottomSheetState
     val addItemSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var showEditBottomSheet by remember { mutableStateOf(false) }
@@ -90,7 +91,7 @@ fun ItemsScreen(
         readyItems = uiState.readyItems,
         isEmptyState = uiState.isEmpty,
         handleAddItemSheet = { isShow ->
-            showAddItemBottomSheet = isShow
+            itemsViewModel.processAddItemBottomSheetChange(BottomSheetAction.SetIsOpen(isShow))
             if (isShow) {
                 scope.launch { addItemSheetState.show() }
             } else {
@@ -109,11 +110,11 @@ fun ItemsScreen(
         onMoveToTop = { id, position -> itemsViewModel.processIntent(ItemsIntent.MoveToTop(id,position))}
     )
 
-    if (showAddItemBottomSheet){
+    if (addItemBottomSheetState.isOpen){
         AddItemBottomSheet(
             addItemSheetState,
             historyComponent,
-            onDismiss = { showAddItemBottomSheet = false },
+            onDismiss = { itemsViewModel.processAddItemBottomSheetChange(BottomSheetAction.SetIsOpen(false)) },
             addItem = { title -> itemsViewModel.processIntent(ItemsIntent.AddItem(Item(content = title, listId = listId)))},
             R.string.items_text_placeholder
         )

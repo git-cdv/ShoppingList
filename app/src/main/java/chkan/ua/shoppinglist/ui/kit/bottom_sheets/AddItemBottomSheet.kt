@@ -24,12 +24,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import chkan.ua.domain.models.HistoryItem
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.components.history_list.HistoryComponentState
 import chkan.ua.shoppinglist.components.history_list.HistoryUiComponent
 import chkan.ua.shoppinglist.core.components.StateDelegate
 import chkan.ua.shoppinglist.ui.kit.RoundedTextField
+import chkan.ua.shoppinglist.ui.screens.items.ItemsViewModel
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,7 +46,8 @@ fun AddItemBottomSheet(
     historyComponent: StubHistoryComponent,
     onDismiss: () -> Unit,
     addItem: (String) -> Unit,
-    placeholderResId: Int
+    placeholderResId: Int,
+    itemsViewModel: ItemsViewModel = hiltViewModel()
 ){
     val scope = rememberCoroutineScope()
     var text by rememberSaveable { mutableStateOf("") }
@@ -90,7 +93,10 @@ fun AddItemBottomSheet(
 
             RoundedTextField(
                 text = text,
-                onValueChange = { newText -> text = newText },
+                onValueChange = { newText ->
+                    text = newText
+                    itemsViewModel.processAddItemBottomSheetChange(BottomSheetAction.SetText(newText))
+                                },
                 roundedCornerRes = R.dimen.rounded_corner,
                 placeholderTextRes = placeholderResId,
                 focusRequester,
