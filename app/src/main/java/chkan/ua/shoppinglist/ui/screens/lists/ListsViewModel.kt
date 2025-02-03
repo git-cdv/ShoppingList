@@ -1,17 +1,26 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import chkan.ua.domain.usecases.lists.AddListConfig
+import chkan.ua.domain.objects.Editable
+import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.lists.AddListUseCase
 import chkan.ua.domain.usecases.lists.DeleteListUseCase
+import chkan.ua.domain.usecases.lists.EditListUseCase
 import chkan.ua.domain.usecases.lists.GetListsCountUseCase
 import chkan.ua.domain.usecases.lists.GetListsFlowUseCase
+import chkan.ua.domain.usecases.lists.MoveToTopUseCase
+import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.shoppinglist.core.services.ErrorHandler
+import chkan.ua.shoppinglist.core.services.SharedPreferencesService
+import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
+import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_TITLE_STR
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,13 +30,23 @@ class ListsViewModel @Inject constructor(
     private val addList: AddListUseCase,
     private val getListsCount: GetListsCountUseCase,
     private val deleteList: DeleteListUseCase,
-    private val errorHandler: ErrorHandler,
+    private val editList: EditListUseCase,
+    private val moveToTop: MoveToTopUseCase,
+    val errorHandler: ErrorHandler,
+    private val spService: SharedPreferencesService
 ) : ViewModel() {
 
     init {
         viewModelScope.launch (Dispatchers.IO) {
-            val count = getListsCount.run(Unit)
-            isListsExist = count > 0
+            val splashMinShowTime = 500L
+
+            val dataJob = launch {
+                val count = getListsCount.run(Unit)
+                isListsExist = count > 0
+            }
+
+            delay(splashMinShowTime)
+            dataJob.join()
             _isLoadReady.value = true
         }
     }
@@ -41,8 +60,7 @@ class ListsViewModel @Inject constructor(
     fun addList(title: String){
         viewModelScope.launch (Dispatchers.IO) {
             try {
-                val count = getListsCount.run(Unit)
-                addList.run(AddListConfig(title,count + 1))
+                addList.run(title)
             } catch (e: Exception){
                 errorHandler.handle(e,addList.getErrorReason())
             }
@@ -60,4 +78,39 @@ class ListsViewModel @Inject constructor(
     }
 
     fun isListExist() = isListsExist
+
+    fun moveToTop(config: MoveTop) {
+        viewModelScope.launch (Dispatchers.IO) {
+            try {
+                moveToTop.run(config)
+            } catch (e: Exception){
+                errorHandler.handle(e,moveToTop.getErrorReason())
+            }
+        }
+    }
+
+    fun clearLastOpenedList() {
+        spService.set(LAST_OPEN_LIST_ID_INT, 0)
+        spService.set(LAST_OPEN_LIST_TITLE_STR, "")
+    }
+
+    fun getLastOpenedList(): LastOpenedList? {
+        return try {
+            val id = spService.get(LAST_OPEN_LIST_ID_INT, Int::class.java) ?: 0
+            val title = spService.get(LAST_OPEN_LIST_TITLE_STR, String::class.java) ?: ""
+            LastOpenedList(id,title)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun editList(editable: Editable) {
+        viewModelScope.launch (Dispatchers.IO) {
+            try {
+                editList.run(editable)
+            } catch (e: Exception){
+                errorHandler.handle(e,editList.getErrorReason(editable))
+            }
+        }
+    }
 }

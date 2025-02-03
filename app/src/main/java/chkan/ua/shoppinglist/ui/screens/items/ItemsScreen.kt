@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -44,16 +45,21 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.domain.models.Item
+import chkan.ua.domain.objects.Editable
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheet
+import chkan.ua.shoppinglist.ui.kit.bottom_sheets.BottomSheetAction
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
+import chkan.ua.shoppinglist.ui.kit.bottom_sheets.EditBottomSheet
+import chkan.ua.shoppinglist.ui.kit.empty_state.CenteredTextScreen
 import chkan.ua.shoppinglist.ui.kit.items.ItemItem
 import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemsScreen(
     args: ItemsRoute,
@@ -62,17 +68,65 @@ fun ItemsScreen(
     val navController = localNavController.current
     val listId = args.listId
     val listTitle = args.listTitle
-    val isEmptyState by itemsViewModel.isEmpty
-    val items by itemsViewModel.getFlowItemsByListId(listId).collectAsStateWithLifecycle(initialValue = listOf())
-    val (readyItems, notReadyItems) = items.partition { it.isReady }
 
-    ItemsScreenContent(listTitle, notReadyItems,readyItems, isEmptyState,
-        onDeleteItem = { id -> itemsViewModel.deleteItem(id) },
-        addItem = { title -> itemsViewModel.addItem(Item(content = title, listId = listId))},
-        onMarkReady = { id, state -> itemsViewModel.changeReadyInItem(id, state) },
-        goToBack = {navController.popBackStack()},
-        clearReadyItems = {itemsViewModel.clearReadyItems(listId)}
+    LaunchedEffect(Unit) {
+        itemsViewModel.observeItems(listId)
+        itemsViewModel.saveLastOpenedList(listId, listTitle)
+    }
+
+    val uiState by itemsViewModel.state.collectAsStateWithLifecycle()
+    val historyComponent = itemsViewModel.getHistoryComponent(listId)
+
+    val addItemBottomSheetState by itemsViewModel.addItemBottomSheetState
+    val addItemSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    var showEditBottomSheet by remember { mutableStateOf(false) }
+    val editSheetState = rememberModalBottomSheetState()
+    var editable by remember { mutableStateOf(Editable()) }
+    val scope = rememberCoroutineScope()
+
+    ItemsScreenContent(
+        title = listTitle,
+        items = uiState.notReadyItems,
+        readyItems = uiState.readyItems,
+        isEmptyState = uiState.isEmpty,
+        handleAddItemSheet = { isShow ->
+            itemsViewModel.processAddItemBottomSheetChange(BottomSheetAction.SetIsOpen(isShow))
+            if (isShow) {
+                scope.launch { addItemSheetState.show() }
+            } else {
+                scope.launch { addItemSheetState.hide() }
+            }
+         },
+        onDeleteItem = { id -> itemsViewModel.processIntent(ItemsIntent.DeleteItem(id)) },
+        onMarkReady = { id, state -> itemsViewModel.processIntent(ItemsIntent.MarkReady(id, state)) },
+        goToBack = { navController.popBackStack() },
+        clearReadyItems = { itemsViewModel.processIntent(ItemsIntent.ClearReadyItems(listId)) },
+        onEditItem = { edited ->
+            editable = edited
+            showEditBottomSheet = true
+            scope.launch { editSheetState.show() }
+        },
+        onMoveToTop = { id, position -> itemsViewModel.processIntent(ItemsIntent.MoveToTop(id,position))}
     )
+
+    if (addItemBottomSheetState.isOpen){
+        AddItemBottomSheet(
+            addItemSheetState,
+            historyComponent,
+            onDismiss = { itemsViewModel.processAddItemBottomSheetChange(BottomSheetAction.SetIsOpen(false)) },
+            addItem = { title -> itemsViewModel.processIntent(ItemsIntent.AddItem(Item(content = title, listId = listId)))},
+            R.string.items_text_placeholder
+        )
+    }
+
+    if (showEditBottomSheet){
+        EditBottomSheet(editSheetState,
+            onDismiss = { showEditBottomSheet = false },
+            onEdit = { edited -> itemsViewModel.processIntent(ItemsIntent.EditItem(edited))},
+            editable = editable
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,14 +136,14 @@ fun ItemsScreenContent(
     items: List<Item>,
     readyItems: List<Item>,
     isEmptyState: Boolean,
+    handleAddItemSheet: (Boolean) -> Unit,
     onMarkReady: (Int, Boolean) -> Unit,
     onDeleteItem: (Int) -> Unit,
-    addItem: (String) -> Unit,
     goToBack: () -> Unit,
     clearReadyItems: () -> Unit,
+    onEditItem: (Editable) -> Unit,
+    onMoveToTop: (Int, Int) -> Unit,
 ) {
-    var showBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
     var showConfirmBottomSheet by remember { mutableStateOf(false) }
     val confirmSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
@@ -116,8 +170,7 @@ fun ItemsScreenContent(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    showBottomSheet = true
-                    scope.launch { sheetState.show() }
+                    handleAddItemSheet.invoke(true)
                 },
                 modifier = Modifier
                     .padding(dimensionResource(id = R.dimen.root_padding))
@@ -130,75 +183,74 @@ fun ItemsScreenContent(
 
         LaunchedEffect(isEmptyState) {
             if (isEmptyState){
-                showBottomSheet = true
-                scope.launch { sheetState.show() }
+                handleAddItemSheet.invoke(true)
             }
         }
 
-        LazyColumn(
-            contentPadding = PaddingValues(bottom = 64.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValue.calculateTopPadding())
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            items(items, key = { it.itemId }) { item ->
-                ItemItem(
-                    text = item.content,
-                    modifier = Modifier.animateItem(),
-                    onReady = { onMarkReady.invoke(item.itemId, true) },
-                    onDeleteList = { onDeleteItem.invoke(item.itemId) })
-            }
-            if (readyItems.isNotEmpty()) {
-                item {
-                    HorizontalDivider(
-                        color = Color.LightGray,
-                        thickness = 1.dp,
-                        modifier = Modifier.padding(dimensionResource(id = R.dimen.root_padding))
-                    )
-                }
-                if (readyItems.size > 3) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = dimensionResource(id = R.dimen.root_padding))
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.clear),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = Color.Gray,
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
-                                    .clickable {
-                                        showConfirmBottomSheet = true
-                                        scope.launch { confirmSheetState.show() }
-                                    }
-                                    .padding(dimensionResource(id = R.dimen.inner_padding))
-
-                            )
-                        }
-                    }
-                }
-                items(readyItems, key = { it.itemId }) { item ->
-                    ReadyItem(
+        if (isEmptyState){
+            CenteredTextScreen(stringResource(id = R.string.text_empty_items))
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(bottom = 64.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValue.calculateTopPadding())
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
+                itemsIndexed(items, key = { _, item -> item.itemId }) { index, item ->
+                    ItemItem(
                         text = item.content,
                         modifier = Modifier.animateItem(),
-                        onNotReady = { onMarkReady.invoke(item.itemId, false) },
-                        onDeleteItem = { onDeleteItem.invoke(item.itemId) })
+                        onReady = { onMarkReady.invoke(item.itemId, true) },
+                        onDelete = { onDeleteItem.invoke(item.itemId) },
+                        onEdit = { onEditItem.invoke(Editable(item.itemId, item.content))},
+                        onMoveToTop = { onMoveToTop.invoke(item.itemId, item.position) },
+                        isFirst = index == 0
+                    )
+                }
+                if (readyItems.isNotEmpty()) {
+                    item {
+                        HorizontalDivider(
+                            color = Color.LightGray,
+                            thickness = 1.dp,
+                            modifier = Modifier.padding(dimensionResource(id = R.dimen.root_padding))
+                        )
+                    }
+                    if (readyItems.size > 3) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = dimensionResource(id = R.dimen.root_padding))
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.clear),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Color.Gray,
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
+                                        .clickable {
+                                            showConfirmBottomSheet = true
+                                            scope.launch { confirmSheetState.show() }
+                                        }
+                                        .padding(dimensionResource(id = R.dimen.inner_padding))
+
+                                )
+                            }
+                        }
+                    }
+                    items(readyItems, key = { it.itemId }) { item ->
+                        ReadyItem(
+                            text = item.content,
+                            modifier = Modifier.animateItem(),
+                            onNotReady = { onMarkReady.invoke(item.itemId, false) },
+                            onDeleteItem = { onDeleteItem.invoke(item.itemId) })
+                    }
                 }
             }
         }
 
-        if (showBottomSheet){
-            AddItemBottomSheet(
-                sheetState,
-                onDismiss = { showBottomSheet = false },
-                addItem = { text -> addItem.invoke(text)},
-                R.string.items_text_placeholder
-            )
-        }
         if (showConfirmBottomSheet){
             ConfirmBottomSheet(
                 confirmSheetState,
@@ -222,12 +274,11 @@ fun ItemsScreenContent(
 fun ItemsScreenContentPreview() {
     ShoppingListTheme {
         ItemsScreenContent("Title", listOf(
-            Item(333,"Item 1", 0,0, false),
+            Item(333,"Item 777", 0,0, false),
             Item(444,"Item 2", 0,1, false)
         ), listOf(
             Item(55,"Item 1", 0,0, false),
             Item(44774,"Item 2", 0,1, false)
-        ), false,
-            {_,_ -> }, {}, {},{},{})
+        ), false, {},{_,_->}, {}, {},{},{},{_,_->})
     }
 }

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "chkan.ua.data"
+    namespace = "com.chkan.data"
     compileSdk = 34
 
     defaultConfig {
@@ -23,6 +23,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        create("stage") {
+            initWith(getByName("release"))
         }
     }
     compileOptions {

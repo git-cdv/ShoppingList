@@ -27,6 +27,8 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.ui.kit.items.SuggestionItemCard
+import chkan.ua.shoppinglist.ui.kit.items.SuggestionListCard
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
@@ -58,27 +60,8 @@ fun SuggestionsHorizontalList(suggestions: List<String>, onSuggestionChoose: (St
         modifier = modifier.offset(x = animatedOffsetX.value.dp)
     ) {
         items(suggestions) { suggestion ->
-            SuggestionItemCard(suggestion,onSuggestionChoose)
+            SuggestionListCard(suggestion,onSuggestionChoose)
         }
-    }
-}
-
-@Composable
-fun SuggestionItemCard(suggestion: String, onSuggestionChoose: (String) -> Unit) {
-    Card(
-        modifier = Modifier
-            .wrapContentSize()
-            .padding(4.dp)
-            .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
-            .clickable { onSuggestionChoose.invoke(suggestion) },
-        shape = RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)),
-        border = BorderStroke(1.dp,Color.Gray)
-    ) {
-        Text(text = suggestion,
-            color = Color.Gray,
-            modifier = Modifier
-            .padding(horizontal = 12.dp, vertical = 4.dp)
-        )
     }
 }
 

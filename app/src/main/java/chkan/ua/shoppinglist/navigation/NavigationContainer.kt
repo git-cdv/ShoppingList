@@ -1,8 +1,10 @@
 package chkan.ua.shoppinglist.navigation
 
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -32,11 +34,24 @@ fun NavigationContainer(
             modifier = Modifier.fillMaxSize()
         ) {
             composable<FirstListRoute> { FirstListScreen() }
-            composable<ItemsRoute> { backStackEntry ->
+            composable<ItemsRoute>(
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) { backStackEntry ->
                 val args: ItemsRoute = backStackEntry.toRoute()
                 ItemsScreen(args)
             }
             composable<ListsRoute> { ListsScreen() }
+        }
+
+        if (startDestination is ListsRoute){
+            val lastOpenedList = listsViewModel.getLastOpenedList()
+            if (lastOpenedList != null){
+                navController.navigate(ItemsRoute(lastOpenedList.id,lastOpenedList.title )){
+                    popUpTo(ListsRoute) { inclusive = false }
+                }
+            }
         }
     }
 }

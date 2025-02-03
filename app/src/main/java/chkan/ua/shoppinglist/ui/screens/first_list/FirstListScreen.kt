@@ -65,8 +65,8 @@ fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Un
         val centerLine = createGuidelineFromTop(0.5f)
 
         RoundedTextField(
-            value = listNameText,
-            onValueChange = {newText -> listNameText = newText},
+            text = listNameText,
+            onValueChange = { newValue -> listNameText = newValue },
             roundedCornerRes = R.dimen.rounded_corner,
             placeholderTextRes = R.string.first_list_text_placeholder,
             focusRequester = focusRequester,
@@ -94,9 +94,9 @@ fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Un
 
         SuggestionsHorizontalList(
             suggestions = suggestions,
-            onSuggestionChoose = {
-                suggestion -> listNameText = suggestion
+            onSuggestionChoose = { suggestion ->
                 focusManager.clearFocus()
+                addListWithTitle.invoke(suggestion)
                                  },
             modifier = Modifier
                 .fillMaxWidth()

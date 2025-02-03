@@ -11,12 +11,24 @@
     <string name="home">Дом</string>
     <string name="drug">Лекарства</string>
     <string name="supermarket">Супермаркет</string>
-    <string name="delete">Delete</string>
-    <string name="edit">Edit</string>
-    <string name="lists">Lists</string>
+    <string name="delete">Удалить</string>
+    <string name="edit">Редактировать</string>
+    <string name="lists">Списки</string>
     <string name="items_text_placeholder">напр. молоко или хлеб</string>
     <string name="clear">Очистить</string>
     <string name="cancel">Отмена</string>
     <string name="confirm">Подтвердить</string>
     <string name="sure_clear_everything">Вы уверены, что хотите очистить все?</string>
+    <string name="text_empty_items">Начните планировать покупки – добавьте товар в список!</string>
+    <string name="more">Еще</string>
+    <string name="less">Меньше</string>
+    <string name="hide_suggestions">Скрыть предложения</string>
+    <string name="show_suggestions">Показать предложения</string>
+    <string name="moveToTop">Переместить наверх</string>
+    <string name="sure_delete_list">Вы уверены, что хотите удалить список?</string>
+    <string name="no_suggestions_yet">Пока нет предложений</string>
+    <string name="reason">Причина</string>
+    <string name="working_on_solution">Мы уже знаем о ней и работаем над решением.</string>
+    <string name="unknown">Неизвестна</string>
+    <string name="error">Ошибка</string>
 </resources>

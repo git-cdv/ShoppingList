@@ -1,7 +1,9 @@
 package chkan.ua.data.di
 
+import chkan.ua.data.repos.HistoryRepositoryImpl
 import chkan.ua.data.repos.ItemsRepositoryImpl
 import chkan.ua.data.repos.ListsRepositoryImpl
+import chkan.ua.domain.repos.HistoryRepository
 import chkan.ua.domain.repos.ItemsRepository
 import chkan.ua.domain.repos.ListsRepository
 import dagger.Binds
@@ -17,4 +19,7 @@ interface RepositoriesModule {
 
     @Binds
     fun itemsRepository(impl: ItemsRepositoryImpl) : ItemsRepository
+
+    @Binds
+    fun historyRepository(impl: HistoryRepositoryImpl) : HistoryRepository
 }

@@ -13,6 +13,6 @@ class AddItemUseCase @Inject constructor(
         itemsRepository.addItem(config)
     }
 
-    override fun getErrorReason(config: Item?) = "Failed to add item"
+    override fun getErrorReason(config: Item?) = "Failed to add item: ${config?.content}"
 
 }

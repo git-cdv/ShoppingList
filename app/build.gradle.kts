@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -5,14 +8,20 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.crashlytics)
 }
+
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties()
+keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 
 android {
     namespace = "chkan.ua.shoppinglist"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "chkan.ua.shoppinglist"
+        applicationId = "com.chkan.shopping"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -24,6 +33,15 @@ android {
         }
     }
 
+    signingConfigs {
+        create("stage") {
+            keyAlias = keystoreProperties["keyAlias"] as String
+            keyPassword = keystoreProperties["keyPassword"] as String
+            storeFile = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties["storePassword"] as String
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -31,6 +49,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        create("stage") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("stage")
         }
     }
     compileOptions {
@@ -67,6 +89,7 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.ui.tooling)
     implementation(libs.androidx.material3)
 
     implementation (libs.splashscreen)
@@ -77,6 +100,10 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.compose)
     implementation(libs.kotlinx.serialization.json)
+
+    //crashlytics
+    implementation (platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
