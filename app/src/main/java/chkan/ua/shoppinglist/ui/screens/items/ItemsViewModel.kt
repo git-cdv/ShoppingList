@@ -27,6 +27,7 @@ import chkan.ua.shoppinglist.ui.kit.bottom_sheets.BottomSheetAction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -96,15 +97,10 @@ class ItemsViewModel @Inject constructor(
         viewModelScope.launch (Dispatchers.IO) {
             try {
                 addItem.run(item)
+                delay(2000)
+                addInHistory.run(item.content)
             } catch (e: Exception){
                 errorHandler.handle(e,addItem.getErrorReason(item))
-            }
-        }
-        viewModelScope.launch (Dispatchers.IO) {
-            try {
-                addInHistory.run(item.content.firstAsTitle())
-            } catch (e: Exception){
-                errorHandler.handle(e,addInHistory.getErrorReason(item.content))
             }
         }
     }

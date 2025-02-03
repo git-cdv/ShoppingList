@@ -1,5 +1,6 @@
 package chkan.ua.data.repos
 
+import android.util.Log
 import chkan.ua.data.models.mapToHistoryItem
 import chkan.ua.data.sources.DataSource
 import chkan.ua.domain.models.HistoryItem
@@ -15,6 +16,7 @@ class HistoryRepositoryImpl @Inject constructor (private val dataSource: DataSou
         val itemsFlow = dataSource.getItemsFlowByListId(listId)
 
         return combine(historyFlow, itemsFlow) { historyList, itemsList ->
+            Log.d("CHKAN", "historyList: $historyList, itemsList: $itemsList")
             val contents = itemsList.map { it.content }.toSet()
             historyList.filter { it.name !in contents }.mapToHistoryItem()
         }

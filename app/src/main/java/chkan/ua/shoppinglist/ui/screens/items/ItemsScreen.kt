@@ -44,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import chkan.ua.core.extensions.firstAsTitle
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.objects.Editable
 import chkan.ua.shoppinglist.R
@@ -75,7 +76,6 @@ fun ItemsScreen(
     }
 
     val uiState by itemsViewModel.state.collectAsStateWithLifecycle()
-    val historyComponent = itemsViewModel.getHistoryComponent(listId)
 
     val addItemBottomSheetState by itemsViewModel.addItemBottomSheetState
     val addItemSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -113,9 +113,9 @@ fun ItemsScreen(
     if (addItemBottomSheetState.isOpen){
         AddItemBottomSheet(
             addItemSheetState,
-            historyComponent,
+            listId,
             onDismiss = { itemsViewModel.processAddItemBottomSheetChange(BottomSheetAction.SetIsOpen(false)) },
-            addItem = { title -> itemsViewModel.processIntent(ItemsIntent.AddItem(Item(content = title, listId = listId)))},
+            addItem = { title -> itemsViewModel.processIntent(ItemsIntent.AddItem(Item(content = title.firstAsTitle(), listId = listId)))},
             R.string.items_text_placeholder
         )
     }

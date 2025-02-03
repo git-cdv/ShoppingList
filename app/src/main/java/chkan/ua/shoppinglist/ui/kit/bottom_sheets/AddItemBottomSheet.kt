@@ -43,7 +43,7 @@ interface StubHistoryComponent : StateDelegate<HistoryComponentState>
 @Composable
 fun AddItemBottomSheet(
     sheetState: SheetState,
-    historyComponent: StubHistoryComponent,
+    listId: Int,
     onDismiss: () -> Unit,
     addItem: (String) -> Unit,
     placeholderResId: Int,
@@ -85,7 +85,7 @@ fun AddItemBottomSheet(
                 .fillMaxWidth()
         ) {
             HistoryUiComponent(
-                component = historyComponent,
+                listId = listId,
                 modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = dimensionResource(id = R.dimen.root_padding), end = dimensionResource(id = R.dimen.root_padding), bottom = dimensionResource(id = R.dimen.inner_padding)),
@@ -118,22 +118,11 @@ fun AddItemBottomSheet(
 @Composable
 fun AddItemBottomSheetPreview() {
     ShoppingListTheme {
-        val state = HistoryComponentState(isShow = true, isShort = true, list = listOf(
-            HistoryItem(1,"Product1"),
-            HistoryItem(2,"Product2"),
-            HistoryItem(3,"Product 3555"),
-            HistoryItem(4,"Product 4"),
-            HistoryItem(5,"Product nijioj")
-        )
-        )
         AddItemBottomSheet(
             sheetState = rememberStandardBottomSheetState(
                 initialValue = SheetValue.Expanded
             ),
-            historyComponent = object : StubHistoryComponent {
-                override val stateFlow: StateFlow<HistoryComponentState> = MutableStateFlow(state)
-                override fun updateState(reducer: HistoryComponentState.() -> HistoryComponentState) {}
-            },
+            listId = 2,
             onDismiss = {},
             addItem = {},
             placeholderResId = R.string.items_text_placeholder
