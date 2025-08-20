@@ -53,7 +53,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ListsScreen(
     listsViewModel: ListsViewModel = hiltViewModel()
-){
+) {
     val navController = localNavController.current
     val lists by listsViewModel.listsFlow.collectAsStateWithLifecycle(initialValue = listOf())
     var argDeletedIdList by remember { mutableIntStateOf(0) }
@@ -71,7 +71,8 @@ fun ListsScreen(
         listsViewModel.clearLastOpenedList()
     }
 
-    ListsScreenContent(lists,
+    ListsScreenContent(
+        lists,
         onDeleteList = { id ->
             argDeletedIdList = id
             showConfirmBottomSheet = true
@@ -80,7 +81,7 @@ fun ListsScreen(
         onCreateList = {
             showBottomSheet = true
             scope.launch { sheetState.show() }
-                       },
+        },
         onMoveToTop = { id, position -> listsViewModel.moveToTop(MoveTop(id, position)) },
         goToItems = { list -> navController.navigate(ItemsRoute(list.id, list.title)) },
         onEditList = { editedList ->
@@ -90,39 +91,46 @@ fun ListsScreen(
         }
     )
 
-    if (showBottomSheet){
-        AddListBottomSheet(sheetState,
+    if (showBottomSheet) {
+        AddListBottomSheet(
+            sheetState,
             onDismiss = { showBottomSheet = false },
             addItem = { text ->
                 listsViewModel.addList(text)
-                scope.launch { sheetState.hide()}.invokeOnCompletion {
+                scope.launch { sheetState.hide() }.invokeOnCompletion {
                     showBottomSheet = false
                 }
-                      },
-            R.string.first_list_text_placeholder)
+            },
+            R.string.first_list_text_placeholder
+        )
     }
 
-    if (showEditBottomSheet){
-        EditBottomSheet(editSheetState,
+    if (showEditBottomSheet) {
+        EditBottomSheet(
+            editSheetState,
             onDismiss = { showEditBottomSheet = false },
-            onEdit = { edited -> listsViewModel.editList(edited)},
+            onEdit = { edited -> listsViewModel.editList(edited) },
             editable = editable
         )
     }
 
-    if (showConfirmBottomSheet){
+    if (showConfirmBottomSheet) {
         ConfirmBottomSheet(
             confirmSheetState,
             question = stringResource(id = R.string.sure_delete_list),
-            onConfirm = { scope.launch {
-                listsViewModel.deleteList(argDeletedIdList)
-                confirmSheetState.hide()
-                showConfirmBottomSheet = false
-            } },
-            onDismiss = { scope.launch {
-                confirmSheetState.hide()
-                showConfirmBottomSheet = false
-            } }
+            onConfirm = {
+                scope.launch {
+                    listsViewModel.deleteList(argDeletedIdList)
+                    confirmSheetState.hide()
+                    showConfirmBottomSheet = false
+                }
+            },
+            onDismiss = {
+                scope.launch {
+                    confirmSheetState.hide()
+                    showConfirmBottomSheet = false
+                }
+            }
         )
     }
 }
@@ -139,17 +147,27 @@ fun ListsScreenContent(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-    Scaffold(modifier = Modifier
-        .fillMaxSize()
-        .nestedScroll(scrollBehavior.nestedScrollConnection),
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(id = R.string.lists), color = Color.Gray) },
-                scrollBehavior = scrollBehavior)
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.lists),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                },
+                scrollBehavior = scrollBehavior
+            )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { onCreateList.invoke() },
+                containerColor = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .padding(dimensionResource(id = R.dimen.root_padding))
             ) {
@@ -162,9 +180,12 @@ fun ListsScreenContent(
         LazyColumn(
             Modifier
                 .fillMaxWidth()
-                .padding(top = paddingValue.calculateTopPadding())
-                .background(MaterialTheme.colorScheme.background)
-        ){
+                .padding(
+                    top = paddingValue.calculateTopPadding(),
+                    start = dimensionResource(R.dimen.root_padding),
+                    end = dimensionResource(R.dimen.root_padding)
+                )
+        ) {
             itemsIndexed(lists, key = { _, item -> item.id }) { index, list ->
                 ListItem(
                     list = list,
@@ -184,19 +205,24 @@ fun ListsScreenContent(
 @Composable
 fun ListsScreenContentPreview() {
     ShoppingListTheme {
-        ListsScreenContent(listOf(ListItemsUi(
-            id = 6187,
-            title = "Commodo",
-            position = 1,
-            count = 4,
-            readyCount = 2,
-            items = listOf(Item(
-                itemId = 5847,
-                content = "senserit",
-                listId = 8123,
-                position = 75556,
-                isReady = false
-            )), progress = ListProgress(count = 4, readyCount = 2)
-        )),{},{},{},{_,_->},{})
+        ListsScreenContent(
+            listOf(
+                ListItemsUi(
+                    id = 6187,
+                    title = "Commodo",
+                    position = 1,
+                    count = 4,
+                    readyCount = 2,
+                    items = listOf(
+                        Item(
+                            itemId = 5847,
+                            content = "senserit",
+                            listId = 8123,
+                            position = 75556,
+                            isReady = false
+                        )
+                    ), progress = ListProgress(count = 4, readyCount = 2)
+                )
+            ), {}, {}, {}, { _, _ -> }, {})
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -50,9 +51,11 @@ fun ListItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(
-                vertical = dimensionResource(id = R.dimen.inner_padding),
-                horizontal = dimensionResource(id = R.dimen.root_padding)
-            )
+                bottom = dimensionResource(id = R.dimen.inner_padding)
+            ),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        )
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
             val (textTitle, textCounter, progress, menuIcon) = createRefs()
@@ -60,7 +63,7 @@ fun ListItem(
 
             Text(
                 text = list.title,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .padding(
@@ -74,8 +77,8 @@ fun ListItem(
 
             Text(
                 text = "${list.readyCount}/${list.count}",
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .constrainAs(textCounter) {
                         start.linkTo(menuIcon.start)
@@ -87,8 +90,8 @@ fun ListItem(
 
             LinearProgressIndicator(
                 progress = { list.progress.get() } ,
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.secondaryContainer,
+                color = MaterialTheme.colorScheme.secondary,
+                trackColor = MaterialTheme.colorScheme.surface,
                 modifier = Modifier
                     .height(dimensionResource(id = R.dimen.height_progress))
                     .constrainAs(progress) {
@@ -109,7 +112,7 @@ fun ListItem(
                 Icon(
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = "More options",
-                    tint = MaterialTheme.colorScheme.onSurface,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                     modifier = Modifier
                         .padding(8.dp)
                         .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
