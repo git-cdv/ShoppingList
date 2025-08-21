@@ -31,4 +31,6 @@
     <string name="working_on_solution">Мы уже знаем о ней и работаем над решением.</string>
     <string name="unknown">Неизвестна</string>
     <string name="error">Ошибка</string>
+    <string name="show_completed">Show completed</string>
+    <string name="hide_completed">Hide completed</string>
 </resources>

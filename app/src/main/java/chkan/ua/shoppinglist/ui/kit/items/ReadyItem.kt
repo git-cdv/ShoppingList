@@ -20,6 +20,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -38,30 +39,28 @@ fun ReadyItem(
         Icon(
             painter = painterResource(R.drawable.icon_restore),
             contentDescription = "Drag handle",
-            tint = Color.Gray,
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier
-                .padding(start = dimensionResource(id = R.dimen.root_padding), end = dimensionResource(id = R.dimen.min_padding))
+                .padding(start = dimensionResource(id = R.dimen.inner_padding))
                 .size(20.dp)
                 .align(Alignment.CenterVertically)
         )
-        ConstraintLayout(modifier = Modifier.fillMaxWidth().padding(
-            top = dimensionResource(id = R.dimen.min_padding),
-            bottom = dimensionResource(id = R.dimen.min_padding),
-            end = dimensionResource(id = R.dimen.root_padding)
-        )) {
+        ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
             val (textTitle, menuIcon) = createRefs()
 
             Text(
                 text = text.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
-                style = MaterialTheme.typography.titleMedium.copy(
+                style = MaterialTheme.typography.bodyLarge.copy(
                     textDecoration = TextDecoration.LineThrough
                 ),
                 textAlign = TextAlign.Start,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .padding(vertical = dimensionResource(id = R.dimen.min_padding))
                     .constrainAs(textTitle) {
-                        start.linkTo(parent.start, 16.dp)
+                        start.linkTo(parent.start, 8.dp)
                         end.linkTo(menuIcon.start,8.dp)
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom)
@@ -73,9 +72,10 @@ fun ReadyItem(
             Icon(
                 imageVector = Icons.Outlined.Delete,
                 contentDescription = "Delete ready item",
-                tint = Color.Gray,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier
                     .padding(8.dp)
+                    .size(20.dp)
                     .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
                     .clickable { onDeleteItem.invoke() }
                     .constrainAs(menuIcon) {

@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,20 +26,20 @@ import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 
 @Composable
-fun ToggleShowText(isShowing: Boolean, showText: String, hideText: String, onToggle: (Boolean)->Unit, modifier: Modifier){
+fun ToggleShowCompleted(isShowing: Boolean, showText: String, hideText: String, onToggle: (Boolean)->Unit, onClearAll: ()->Unit, modifier: Modifier){
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.End) {
         Icon(
             imageVector = if (isShowing) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp ,
             contentDescription = "Drag handle",
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier
                 .size(20.dp)
                 .align(Alignment.CenterVertically)
         )
         Text(text = if (isShowing) hideText else showText ,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
@@ -46,13 +47,25 @@ fun ToggleShowText(isShowing: Boolean, showText: String, hideText: String, onTog
                 .clickable { onToggle.invoke(!isShowing) }
                 .padding(horizontal = dimensionResource(id = R.dimen.inner_padding))
         )
+        Icon(
+            painter = painterResource(R.drawable.clear_all),
+            contentDescription = "Clear all",
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            modifier = Modifier
+                .padding(horizontal = dimensionResource(id = R.dimen.inner_padding))
+                .size(20.dp)
+                .align(Alignment.CenterVertically)
+                .clickable{
+                    onClearAll.invoke()
+                }
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun ToggleShowTextPreview() {
+fun ToggleShowCompletedPreview() {
     ShoppingListTheme {
-        ToggleShowText(false, "Show","Hide",{},Modifier.fillMaxWidth())
+        ToggleShowCompleted(false, "Show","Hide",{},{},Modifier.fillMaxWidth())
     }
 }
