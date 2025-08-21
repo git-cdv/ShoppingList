@@ -39,7 +39,7 @@ import chkan.ua.shoppinglist.ui.screens.items.ItemsViewModel
 fun HistoryUiComponent(
     listId: Int,
     modifier: Modifier,
-    onChoose: (String)-> Unit,
+    onChoose: (String) -> Unit,
     itemsViewModel: ItemsViewModel = hiltViewModel()
 ) {
     val component = remember { itemsViewModel.getHistoryComponent(listId) }
@@ -58,14 +58,22 @@ fun HistoryUiComponent(
 fun HistoryComponentContent(
     state: HistoryComponentState,
     modifier: Modifier,
-    onChoose: (String)-> Unit,
-    onToggleSize: (Boolean)-> Unit,
-    onToggleShow: (Boolean)-> Unit) {
-
+    onChoose: (String) -> Unit,
+    onToggleSize: (Boolean) -> Unit,
+    onToggleShow: (Boolean) -> Unit
+) {
     Column {
-        ToggleShowText(state.isShow){ onToggleShow.invoke(it)}
+        ToggleShowText(
+            isShowing = state.isShow,
+            showText = stringResource(id = R.string.show_suggestions),
+            hideText = stringResource(id = R.string.hide_suggestions),
+            onToggle = {
+                onToggleShow.invoke(it)
+            },
+            modifier = Modifier.fillMaxWidth().padding(end = dimensionResource(id = R.dimen.root_padding), bottom = dimensionResource(id = R.dimen.inner_padding))
+        )
         AnimatedVisibility(visible = state.isShow) {
-            if (state.list.isEmpty()){
+            if (state.list.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -90,22 +98,22 @@ fun HistoryComponentContent(
                         .animateContentSize(),
                     verticalArrangement = Arrangement.Top,
                     horizontalArrangement = Arrangement.Start
-                ){
+                ) {
                     val list = if (state.isShort) {
-                        if (state.list.size >= 9){
+                        if (state.list.size >= 9) {
                             state.list.take(8)
                         } else state.list
                     } else state.list
 
                     items(list, key = { it.id }) { item ->
-                        SuggestionItemCard(item.name){ onChoose.invoke(item.name) }
+                        SuggestionItemCard(item.name) { onChoose.invoke(item.name) }
                     }
 
-                    if (state.list.size >= 9){
-                        if (state.isShort){
-                            item { ToggleCard(R.string.more){ onToggleSize.invoke(false) } }
+                    if (state.list.size >= 9) {
+                        if (state.isShort) {
+                            item { ToggleCard(R.string.more) { onToggleSize.invoke(false) } }
                         } else {
-                            item { ToggleCard(R.string.less){ onToggleSize.invoke(true) } }
+                            item { ToggleCard(R.string.less) { onToggleSize.invoke(true) } }
                         }
                     }
                 }
@@ -119,7 +127,7 @@ fun HistoryComponentContent(
 @Composable
 private fun ComponentPreview() {
     val state = HistoryComponentState(isShow = true, isShort = true, list = listOf())
-    HistoryComponentContent(state= state, modifier = Modifier,{},{},{})
+    HistoryComponentContent(state = state, modifier = Modifier, {}, {}, {})
 }
 
 const val DEFAULT_TEXT_FIELD_HEIGHT = 56
