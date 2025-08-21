@@ -35,11 +35,19 @@ fun RoundedTextField(
     placeholderTextRes: Int? = null,
     focusRequester: FocusRequester? = null,
     onDone: () -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
+    maxLength: Int? = null
 ) {
     OutlinedTextField(
         value = text,
-        onValueChange = onValueChange,
+        onValueChange = { newText ->
+            val limitedText = if (maxLength != null && newText.length > maxLength) {
+                newText.take(maxLength)
+            } else {
+                newText
+            }
+            onValueChange(limitedText)
+        },
         shape = RoundedCornerShape(dimensionResource(id = roundedCornerRes)),
         label = null,
         placeholder = placeholderTextRes?.let{ { Text(stringResource(id = placeholderTextRes), color = Color.Gray) } },
@@ -59,7 +67,7 @@ fun RoundedTextField(
         keyboardOptions = KeyboardOptions(
             autoCorrectEnabled = true,
             keyboardType = KeyboardType.Text,
-            imeAction = if (text.isNotBlank()) ImeAction.Done else ImeAction.None
+            imeAction = ImeAction.Done
         ),
         keyboardActions = KeyboardActions(
             onDone = {

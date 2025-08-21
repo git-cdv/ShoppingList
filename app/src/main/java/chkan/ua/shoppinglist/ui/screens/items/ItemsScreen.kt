@@ -140,12 +140,13 @@ fun ItemsScreen(
                     )
                 )
             },
-            addItem = { title ->
+            addItem = { addedItem ->
                 itemsViewModel.processIntent(
                     ItemsIntent.AddItem(
                         Item(
-                            content = title.firstAsTitle(),
-                            listId = listId
+                            content = addedItem.content.firstAsTitle(),
+                            listId = listId,
+                            note = addedItem.note
                         )
                     )
                 )
@@ -183,7 +184,7 @@ fun ItemsScreenContent(
     val confirmSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    var isReadyShown by remember { mutableStateOf(true) }
+    var isReadyShown by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier
@@ -237,7 +238,7 @@ fun ItemsScreenContent(
         } else {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(top = 4.dp,bottom = 64.dp),
+                contentPadding = PaddingValues(top = 4.dp,bottom = 144.dp),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(
@@ -249,10 +250,11 @@ fun ItemsScreenContent(
                 itemsIndexed(items, key = { _, item -> item.itemId }) { index, item ->
                     ItemItem(
                         text = item.content,
+                        note = item.note,
                         modifier = Modifier.animateItem(),
                         onReady = { onMarkReady.invoke(item.itemId, true) },
                         onDelete = { onDeleteItem.invoke(item.itemId) },
-                        onEdit = { onEditItem.invoke(Editable(item.itemId, item.content)) },
+                        onEdit = { onEditItem.invoke(Editable(item.itemId, item.content, note = item.note)) },
                         onMoveToTop = { onMoveToTop.invoke(item.itemId, item.position) },
                         isFirst = index == 0
                     )

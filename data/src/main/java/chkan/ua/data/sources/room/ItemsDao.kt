@@ -25,8 +25,8 @@ interface ItemsDao {
     @Query("UPDATE items SET isReady = :state WHERE itemId = :itemId")
     suspend fun markItemReady(itemId: Int, state: Int)
 
-    @Query("UPDATE items SET content = :content WHERE itemId = :itemId")
-    suspend fun updateContent(itemId: Int, content: String)
+    @Query("UPDATE items SET content = :content,note = :note WHERE itemId = :itemId")
+    suspend fun updateContent(itemId: Int, content: String, note: String? = null)
 
     @Query("SELECT MAX(position) FROM items")
     suspend fun getMaxItemPosition(): Int?

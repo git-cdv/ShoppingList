@@ -3,11 +3,14 @@ package chkan.ua.shoppinglist.ui.kit.items
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -42,6 +45,7 @@ import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 @Composable
 fun ItemItem(
     text: String,
+    note: String? = null,
     modifier: Modifier,
     onReady: () -> Unit,
     onDelete: () -> Unit,
@@ -57,27 +61,41 @@ fun ItemItem(
         ),
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize(),
+                .wrapContentSize()
+                .padding(vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             var isMenuExpanded by remember { mutableStateOf(false) }
 
-            Text(
-                text = text.firstAsTitle(),
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Start,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .padding(start = dimensionResource(id = R.dimen.root_padding))
-                    .weight(1f)
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = text.firstAsTitle(),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Start,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .padding(start = dimensionResource(id = R.dimen.root_padding))
+                )
+                if(!note.isNullOrBlank()){
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = note.firstAsTitle(),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Start,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .padding(start = dimensionResource(id = R.dimen.root_padding))
+                    )
+                }
+            }
 
             //box needed to open menu under icon
             Box(modifier = Modifier, contentAlignment = Alignment.Center) {
@@ -111,6 +129,6 @@ fun ItemItem(
 @Composable
 fun ItemPreview() {
     ShoppingListTheme {
-        ItemItem("Products",Modifier,{},{},{},{}, false)
+        ItemItem("Products","Notes",Modifier,{},{},{},{}, false)
     }
 }
