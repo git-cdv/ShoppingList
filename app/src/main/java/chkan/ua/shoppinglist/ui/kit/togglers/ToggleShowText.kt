@@ -32,13 +32,13 @@ fun ToggleShowText(isShowing: Boolean, showText: String, hideText: String, onTog
         Icon(
             imageVector = if (isShowing) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp ,
             contentDescription = "Drag handle",
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier
                 .size(20.dp)
                 .align(Alignment.CenterVertically)
         )
         Text(text = if (isShowing) hideText else showText ,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
