@@ -22,13 +22,14 @@ data class ItemEntity(
     val listId: Int,
     val content: String,
     val position: Int = 0,
-    val isReady: Boolean = false
+    val isReady: Boolean = false,
+    val note: String? = null
 )
 
 fun List<ItemEntity>.mapToItems() : List<Item>{
-    return this.map { Item(it.itemId, content = it.content, listId = it.listId, position = it.position, isReady = it.isReady) }
+    return this.map { Item(it.itemId, content = it.content, listId = it.listId, position = it.position, isReady = it.isReady, note = it.note) }
 }
 
 fun Item.toEntity() : ItemEntity {
-    return ItemEntity(listId = this.listId, content = this.content, position = this.position)
+    return ItemEntity(listId = this.listId, content = this.content, position = this.position, note = this.note)
 }

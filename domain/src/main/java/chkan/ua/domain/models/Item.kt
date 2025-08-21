@@ -5,5 +5,6 @@ data class Item(
     val content: String,
     val listId: Int,
     val position: Int = 0,
-    val isReady: Boolean = false
+    val isReady: Boolean = false,
+    val note: String? = null
 )

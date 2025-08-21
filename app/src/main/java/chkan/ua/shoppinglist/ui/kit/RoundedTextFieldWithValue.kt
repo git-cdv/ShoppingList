@@ -20,6 +20,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -27,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
+import kotlin.text.take
 
 @Composable
 fun RoundedTextFieldWithValue(
@@ -36,11 +38,31 @@ fun RoundedTextFieldWithValue(
     placeholderTextRes: Int? = null,
     focusRequester: FocusRequester? = null,
     onDone: () -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
+    maxLength: Int? = null
 ) {
     OutlinedTextField(
         value = value,
-        onValueChange = onValueChange,
+        onValueChange = { newText ->
+            val limitedText = if (maxLength != null && newText.text.length > maxLength) {
+                newText.text.take(maxLength)
+            } else {
+                newText.text
+            }
+
+            val newSelection = if (maxLength != null && newText.text.length > maxLength) {
+                TextRange(minOf(newText.selection.start, limitedText.length))
+            } else {
+                newText.selection
+            }
+
+            onValueChange(
+                TextFieldValue(
+                    text = limitedText,
+                    selection = newSelection
+                )
+            )
+        },
         shape = RoundedCornerShape(dimensionResource(id = roundedCornerRes)),
         label = null,
         placeholder = placeholderTextRes?.let{ {Text(stringResource(id = placeholderTextRes), color = Color.Gray)} },
