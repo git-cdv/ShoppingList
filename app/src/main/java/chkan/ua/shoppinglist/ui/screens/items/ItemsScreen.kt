@@ -265,8 +265,8 @@ fun ItemsScreenContent(
                         Spacer(modifier = Modifier.height(8.dp))
                         ToggleShowCompleted(
                             isShowing = isReadyShown,
-                            showText = stringResource(id = R.string.show_completed),
-                            hideText = stringResource(id = R.string.hide_completed),
+                            showText = stringResource(id = R.string.show_completed) + " (${readyItems.size})",
+                            hideText = stringResource(id = R.string.hide_completed) + " (${readyItems.size})",
                             onToggle = {
                                 isReadyShown = it
                             },
