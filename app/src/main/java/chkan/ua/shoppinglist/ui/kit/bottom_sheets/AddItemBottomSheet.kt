@@ -151,7 +151,7 @@ fun AddItemBottomSheet(
                 focusRequester,
                 onDone = {
                     if (text.isNotBlank()) {
-                        addItem.invoke(AddedItem(text, textNote))
+                        addItem.invoke(AddedItem(text.trim(), textNote?.trim()))
                         focusRequester.requestFocus()
                         isAddNoteButtonShow = false
                         isAddNoteFieldShow = false

@@ -76,8 +76,8 @@ fun EditBottomSheet(
     var wasKeyboardVisible by remember { mutableStateOf(false) }
     val isKeyboardVisible = WindowInsets.isImeVisible
     //add note
-    var isAddNoteButtonShow by remember { mutableStateOf(editable.note == null) }
-    var isAddNoteFieldShow by remember { mutableStateOf(editable.note != null) }
+    var isAddNoteButtonShow by remember { mutableStateOf(editable.note.isNullOrBlank()) }
+    var isAddNoteFieldShow by remember { mutableStateOf(!editable.note.isNullOrBlank()) }
     var textNote by rememberSaveable { mutableStateOf(editable.note) }
     val noteFocusRequester = remember { FocusRequester() }
 
