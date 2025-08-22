@@ -17,7 +17,7 @@ interface HistoryItemDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(historyItem: HistoryItemEntity): Long
 
-    @Query("SELECT * FROM HistoryItemEntity ORDER BY count DESC")
+    @Query("SELECT * FROM HistoryItemEntity WHERE count > 1 ORDER BY count DESC")
     fun getHistory(): Flow<List<HistoryItemEntity>>
 
     @Transaction

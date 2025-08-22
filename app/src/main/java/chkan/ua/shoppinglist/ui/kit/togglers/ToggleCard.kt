@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -27,14 +28,13 @@ fun ToggleCard(titleRes: Int, onMore: () -> Unit) {
             .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
             .clickable { onMore.invoke() },
         shape = RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)),
-        border = BorderStroke(1.dp, Color.Gray),
         colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
         elevation = CardDefaults.cardElevation(0.dp)
     ) {
         Text(text = stringResource(id = titleRes),
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier

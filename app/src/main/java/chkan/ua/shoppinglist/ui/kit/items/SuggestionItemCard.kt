@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -13,8 +15,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.components.history_list.HistoryComponentContent
+import chkan.ua.shoppinglist.components.history_list.HistoryComponentState
+import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 
 @Composable
 fun SuggestionItemCard(suggestion: String, onSuggestionChoose: (String) -> Unit) {
@@ -25,14 +31,25 @@ fun SuggestionItemCard(suggestion: String, onSuggestionChoose: (String) -> Unit)
             .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
             .clickable { onSuggestionChoose.invoke(suggestion) },
         shape = RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)),
-        border = BorderStroke(1.dp, Color.Gray)
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Text(text = suggestion,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .padding(horizontal = 12.dp, vertical = 4.dp)
         )
+    }
+}
+
+@Preview
+@Composable
+private fun SuggestionItemCardPreview() {
+    ShoppingListTheme {
+        SuggestionItemCard("Bread", {})
     }
 }

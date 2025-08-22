@@ -16,7 +16,6 @@ class HistoryRepositoryImpl @Inject constructor (private val dataSource: DataSou
         val itemsFlow = dataSource.getItemsFlowByListId(listId)
 
         return combine(historyFlow, itemsFlow) { historyList, itemsList ->
-            Log.d("CHKAN", "historyList: $historyList, itemsList: $itemsList")
             val contents = itemsList.map { it.content }.toSet()
             historyList.filter { it.name !in contents }.mapToHistoryItem()
         }
