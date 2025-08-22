@@ -60,7 +60,7 @@ fun SuggestionsHorizontalList(suggestions: List<String>, onSuggestionChoose: (St
         modifier = modifier.offset(x = animatedOffsetX.value.dp)
     ) {
         items(suggestions) { suggestion ->
-            SuggestionListCard(suggestion,onSuggestionChoose)
+            SuggestionItemCard(suggestion,onSuggestionChoose)
         }
     }
 }

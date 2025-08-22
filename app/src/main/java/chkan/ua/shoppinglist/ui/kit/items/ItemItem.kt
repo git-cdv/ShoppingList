@@ -55,7 +55,7 @@ fun ItemItem(
 ) {
     Card(
         onClick = { onReady.invoke() },
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
