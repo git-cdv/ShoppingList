@@ -38,7 +38,7 @@ class ListsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch (Dispatchers.IO) {
-            val splashMinShowTime = 500L
+            val splashMinShowTime = 200L
 
             val dataJob = launch {
                 val count = getListsCount.run(Unit)

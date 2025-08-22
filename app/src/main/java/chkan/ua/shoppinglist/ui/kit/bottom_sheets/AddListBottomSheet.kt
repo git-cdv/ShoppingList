@@ -79,8 +79,10 @@ fun AddListBottomSheet(
                 placeholderTextRes = placeholderResId,
                 focusRequester,
                 onDone = {
-                    addItem.invoke(text)
-                    text = ""
+                    if (text.isNotBlank()) {
+                        addItem.invoke(text.trim())
+                        text = ""
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()

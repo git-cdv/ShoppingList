@@ -3,8 +3,10 @@
     <style name="Theme.ShoppingList" parent="android:Theme.Material.NoActionBar" />
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenBackground">@color/splash_bg</item>
         <item name="postSplashScreenTheme">@style/Theme.ShoppingList</item>
         <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="s">@drawable/animated_logo_splash</item>
+        <!-- for less 12 android-->
+        <item name="android:windowBackground">@drawable/splash_screen_old_version</item>
     </style>
 </resources>
