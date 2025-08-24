@@ -1,11 +1,10 @@
-package chkan.ua.data.sources
+package chkan.ua.data.sources.room
 
 import chkan.ua.data.models.ItemEntity
 import chkan.ua.data.models.ListEntity
 import chkan.ua.data.models.ListWithItems
-import chkan.ua.data.sources.room.HistoryItemDao
-import chkan.ua.data.sources.room.ItemsDao
-import chkan.ua.data.sources.room.ListsDao
+import chkan.ua.data.sources.DataSource
+import chkan.ua.data.sources.HistoryDataSource
 import chkan.ua.domain.objects.Editable
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -16,7 +15,7 @@ class RoomSourceImpl @Inject constructor (
     private val listsDao: ListsDao,
     private val itemsDao: ItemsDao,
     private val historyDao: HistoryItemDao
-) : DataSource {
+) : DataSource, HistoryDataSource {
 
     override fun getListsWithItemsFlow(): Flow<List<ListWithItems>> = listsDao.getListsWithItemsFlow()
 

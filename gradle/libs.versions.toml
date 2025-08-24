@@ -2,6 +2,7 @@
 agp = "8.12.1"
 constraintlayoutCompose = "1.1.0"
 coreSplashscreen = "1.0.1"
+firebaseAuthKtx = "23.2.1"
 firebaseBom = "33.7.0"
 javaxInject = "1"
 kotlin = "2.0.0"
@@ -25,11 +26,13 @@ constraintlayout = "2.2.0"
 serialization = "2.0.21"
 googleServices = "4.4.2"
 crashlytics = "3.0.2"
+firebaseFirestore = "26.0.0"
 
 
 [libraries]
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
@@ -59,6 +62,7 @@ hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.re
 hilt-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavCompose" }
 nav-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 
 [plugins]
 hilt = {id = "com.google.dagger.hilt.android", version.ref = "hilt"}

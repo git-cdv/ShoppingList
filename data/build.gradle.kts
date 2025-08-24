@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -52,5 +53,10 @@ dependencies {
     //hilt + ksp
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
+
+    //firestore
+    implementation(libs.firebase.firestore)
+    //firebase-auth
+    implementation(libs.firebase.auth.ktx)
 
 }

@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import chkan.ua.shoppinglist.navigation.NavigationContainer
+import chkan.ua.shoppinglist.session.SessionViewModel
 import chkan.ua.shoppinglist.ui.kit.dialogs.ErrorDialogHandler
 import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
@@ -21,9 +22,11 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val listsViewModel: ListsViewModel by viewModels()
+    private val sessionViewModel: SessionViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sessionViewModel.signInAnonymouslyIfNeed()
         installSplashScreen().apply {
             setKeepOnScreenCondition {
                 !listsViewModel.isLoadReady.value

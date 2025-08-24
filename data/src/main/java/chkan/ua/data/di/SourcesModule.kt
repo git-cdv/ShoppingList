@@ -1,7 +1,7 @@
 package chkan.ua.data.di
 
 import chkan.ua.data.sources.DataSource
-import chkan.ua.data.sources.RoomSourceImpl
+import chkan.ua.data.sources.room.RoomSourceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
