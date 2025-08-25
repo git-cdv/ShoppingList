@@ -1,5 +1,6 @@
 package chkan.ua.shoppinglist.ui.screens.items
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -16,6 +17,7 @@ import chkan.ua.domain.usecases.items.MarkReadyConfig
 import chkan.ua.domain.usecases.items.MarkReadyItemUseCase
 import chkan.ua.domain.usecases.items.MoveItemToTopUseCase
 import chkan.ua.domain.usecases.lists.MoveTop
+import chkan.ua.domain.usecases.share.ShareListUseCase
 import chkan.ua.shoppinglist.components.history_list.HistoryComponent
 import chkan.ua.shoppinglist.core.components.ComponentsViewModel
 import chkan.ua.shoppinglist.core.services.ErrorHandler
@@ -51,6 +53,7 @@ class ItemsViewModel @Inject constructor(
     private val historyComponent: HistoryComponent,
     private val spService: SharedPreferencesService,
     private val moveToTop: MoveItemToTopUseCase,
+    private val shareList: ShareListUseCase,
 ) : ComponentsViewModel() {
 
     init {
@@ -83,6 +86,7 @@ class ItemsViewModel @Inject constructor(
             is ItemsIntent.EditItem -> editItem(intent.editable)
             is ItemsIntent.MarkReady -> changeReadyInItem(intent.id,intent.state)
             is ItemsIntent.MoveToTop -> moveToTop(MoveTop(intent.id,intent.position))
+            is ItemsIntent.ShareList -> createShareList(intent.listId)
         }
     }
 
@@ -90,6 +94,18 @@ class ItemsViewModel @Inject constructor(
         _addItemBottomSheetState.value = when (action) {
             is BottomSheetAction.SetIsOpen -> _addItemBottomSheetState.value.copy(isOpen = action.isOpen)
             is BottomSheetAction.SetText -> _addItemBottomSheetState.value.copy(text = action.text)
+        }
+    }
+
+    fun createShareList(listId: Int){
+        viewModelScope.launch (Dispatchers.IO) {
+            shareList(listId)
+                .onSuccess {
+                    Log.d("SHARE", "Share list created successfully: $it")
+                }
+                .onFailure {
+                    Log.d("SHARE", "Share list creation failed: $it")
+                }
         }
     }
 

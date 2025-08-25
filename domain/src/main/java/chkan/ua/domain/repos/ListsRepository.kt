@@ -12,4 +12,6 @@ interface ListsRepository {
     suspend fun updateTitle(editable: Editable)
     suspend fun getListCount(): Int
     suspend fun moveToTop(id: Int, position: Int)
+    suspend fun getListWithItemsById(listId: Int): ListItems?
+    suspend fun markAsShared(listId: Int, firestoreId: String)
 }

@@ -14,6 +14,7 @@ import chkan.ua.domain.usecases.lists.GetListsCountUseCase
 import chkan.ua.domain.usecases.lists.GetListsFlowUseCase
 import chkan.ua.domain.usecases.lists.MoveToTopUseCase
 import chkan.ua.domain.usecases.lists.MoveTop
+import chkan.ua.domain.usecases.share.ShareListUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
@@ -33,7 +34,7 @@ class ListsViewModel @Inject constructor(
     private val editList: EditListUseCase,
     private val moveToTop: MoveToTopUseCase,
     val errorHandler: ErrorHandler,
-    private val spService: SharedPreferencesService
+    private val spService: SharedPreferencesService,
 ) : ViewModel() {
 
     init {
@@ -66,7 +67,6 @@ class ListsViewModel @Inject constructor(
             }
         }
     }
-
     fun deleteList(id: Int) {
         viewModelScope.launch (Dispatchers.IO) {
             try {

@@ -10,4 +10,5 @@ sealed interface ItemsIntent {
     data class MarkReady(val id: Int, val state: Boolean) : ItemsIntent
     data class MoveToTop(val id: Int, val position: Int) : ItemsIntent
     data class ClearReadyItems(val listId: Int) : ItemsIntent
+    data class ShareList(val listId: Int) : ItemsIntent
 }

@@ -5,6 +5,7 @@ import chkan.ua.data.models.ListEntity
 import chkan.ua.data.models.ListWithItems
 import chkan.ua.data.sources.DataSource
 import chkan.ua.data.sources.HistoryDataSource
+import chkan.ua.domain.models.ListItems
 import chkan.ua.domain.objects.Editable
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -51,6 +52,14 @@ class RoomSourceImpl @Inject constructor (
 
     override suspend fun moveItemToTop(id: Int, position: Int) {
         itemsDao.moveToTop(id,position)
+    }
+
+    override suspend fun getListWithItemsById(listId: Int): ListWithItems? {
+        return listsDao.getListWithItemsById(listId)
+    }
+
+    override suspend fun markAsShared(listId: Int, firestoreId: String) {
+        listsDao.markAsShared(listId, firestoreId)
     }
 
     override suspend fun markItemReady(itemId: Int, state: Boolean) {

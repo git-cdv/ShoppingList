@@ -1,9 +1,6 @@
 package chkan.ua.shoppinglist.ui.screens.items
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,14 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,12 +31,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -61,7 +54,6 @@ import chkan.ua.shoppinglist.ui.kit.empty_state.CenteredTextScreen
 import chkan.ua.shoppinglist.ui.kit.items.ItemItem
 import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
 import chkan.ua.shoppinglist.ui.kit.togglers.ToggleShowCompleted
-import chkan.ua.shoppinglist.ui.kit.togglers.ToggleShowText
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
@@ -126,6 +118,9 @@ fun ItemsScreen(
                     position
                 )
             )
+        },
+        onShareList = {
+            itemsViewModel.processIntent(ItemsIntent.ShareList(listId))
         }
     )
 
@@ -179,6 +174,7 @@ fun ItemsScreenContent(
     clearReadyItems: () -> Unit,
     onEditItem: (Editable) -> Unit,
     onMoveToTop: (Int, Int) -> Unit,
+    onShareList: () -> Unit,
 ) {
     var showConfirmBottomSheet by remember { mutableStateOf(false) }
     val confirmSheetState = rememberModalBottomSheetState()
@@ -199,6 +195,18 @@ fun ItemsScreenContent(
                         color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.titleLarge
                     )
+                },
+                actions = {
+                    IconButton(
+                        onClick = { onShareList() },
+                        modifier = Modifier.padding(end = dimensionResource(R.dimen.inner_padding))
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.ic_member_add),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            contentDescription = "Share list"
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = { goToBack.invoke() }) {
@@ -324,6 +332,6 @@ fun ItemsScreenContentPreview() {
         ), listOf(
             Item(55, "Item 1", 0, 0, false),
             Item(44774, "Item 2", 0, 1, false)
-        ), false, {}, { _, _ -> }, {}, {}, {}, {}, { _, _ -> })
+        ), false, {}, { _, _ -> }, {}, {}, {}, {}, { _, _ -> },{})
     }
 }

@@ -41,4 +41,11 @@ interface ListsDao {
 
     @Query("UPDATE lists SET position = 0 WHERE listId = :id")
     suspend fun moveItemToTop(id: Int)
+
+    @Transaction
+    @Query("SELECT * FROM lists WHERE listId = :id")
+    suspend fun getListWithItemsById(id:Int): ListWithItems?
+
+    @Query("UPDATE lists SET is_shared = 1, remote_id = :remoteId WHERE listId = :id")
+    suspend fun markAsShared(id: Int, remoteId: String)
 }

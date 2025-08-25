@@ -3,16 +3,20 @@ package chkan.ua.data.repos
 import android.util.Log
 import chkan.ua.data.models.mapToHistoryItem
 import chkan.ua.data.sources.DataSource
+import chkan.ua.data.sources.HistoryDataSource
 import chkan.ua.domain.models.HistoryItem
 import chkan.ua.domain.repos.HistoryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 
-class HistoryRepositoryImpl @Inject constructor (private val dataSource: DataSource) : HistoryRepository {
+class HistoryRepositoryImpl @Inject constructor (
+    private val dataSource: DataSource,
+    private val historyDataSource: HistoryDataSource,
+) : HistoryRepository {
 
     override fun getHistory(listId: Int) : Flow<List<HistoryItem>> {
-        val historyFlow = dataSource.getHistory()
+        val historyFlow = historyDataSource.getHistory()
         val itemsFlow = dataSource.getItemsFlowByListId(listId)
 
         return combine(historyFlow, itemsFlow) { historyList, itemsList ->
@@ -22,7 +26,7 @@ class HistoryRepositoryImpl @Inject constructor (private val dataSource: DataSou
     }
 
     override suspend fun incrementOrInsertInHistory(name: String) {
-        dataSource.incrementOrInsertInHistory(name)
+        historyDataSource.incrementOrInsertInHistory(name)
     }
 
 }

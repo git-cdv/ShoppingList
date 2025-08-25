@@ -29,5 +29,12 @@ class ListsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
 
     override suspend fun getListCount() = dataSource.getListCount()
     override suspend fun moveToTop(id: Int, position: Int) = dataSource.moveToTop(id, position)
+    override suspend fun getListWithItemsById(listId: Int): ListItems? {
+        return dataSource.getListWithItemsById(listId)?.mapToListItem()
+    }
+
+    override suspend fun markAsShared(listId: Int, firestoreId: String) {
+        dataSource.markAsShared(listId, firestoreId)
+    }
 
 }
