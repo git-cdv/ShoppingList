@@ -27,6 +27,7 @@ serialization = "2.0.21"
 googleServices = "4.4.2"
 crashlytics = "3.0.2"
 firebaseFirestore = "26.0.0"
+timber = "5.0.1"
 
 
 [libraries]
@@ -63,6 +64,7 @@ hilt-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref =
 nav-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
 [plugins]
 hilt = {id = "com.google.dagger.hilt.android", version.ref = "hilt"}

@@ -1,6 +1,7 @@
 package chkan.ua.data.di
 
 import chkan.ua.data.sources.firestore.AuthManagerImpl
+import chkan.ua.domain.Logger
 import chkan.ua.domain.usecases.auth.AuthManager
 import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
@@ -16,8 +17,9 @@ object AuthModule {
     @Provides
     @Singleton
     fun provideAuthManager(
-        auth: FirebaseAuth
+        auth: FirebaseAuth,
+        logger: Logger
     ): AuthManager {
-        return AuthManagerImpl(auth)
+        return AuthManagerImpl(auth,logger)
     }
 }
