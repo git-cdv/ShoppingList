@@ -10,6 +10,6 @@ interface SuspendUseCase<T> : UseCase<T> {
 }
 
 interface FlowUseCase<T> : UseCase<T> {
-    fun run(config: T) : Any
+    operator fun invoke(config: T) : Any
     override fun getErrorReason(config: T?) : String
 }

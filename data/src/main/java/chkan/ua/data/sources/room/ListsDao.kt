@@ -15,10 +15,10 @@ interface ListsDao {
 
     @Transaction
     @Query("DELETE FROM lists WHERE listId = :listId")
-    suspend fun deleteListById(listId: Int)
+    suspend fun deleteListById(listId: String)
 
     @Query("UPDATE lists SET title = :newTitle WHERE listId = :id")
-    suspend fun updateTitle(id: Int, newTitle: String)
+    suspend fun updateTitle(id: String, newTitle: String)
 
     @Transaction
     @Query("SELECT * FROM lists ORDER BY position ASC")
@@ -31,7 +31,7 @@ interface ListsDao {
     suspend fun getMaxListPosition(): Int?
 
     @Transaction
-    suspend fun moveToTop(id: Int, position: Int) {
+    suspend fun moveToTop(id: String, position: Int) {
         shiftPositions(position)
         moveItemToTop(id)
     }
@@ -40,5 +40,19 @@ interface ListsDao {
     suspend fun shiftPositions(currentPosition: Int)
 
     @Query("UPDATE lists SET position = 0 WHERE listId = :id")
-    suspend fun moveItemToTop(id: Int)
+    suspend fun moveItemToTop(id: String)
+
+    @Transaction
+    @Query("SELECT * FROM lists WHERE listId = :id")
+    suspend fun getListWithItemsById(id:String): ListWithItems?
+
+    @Query("SELECT * FROM lists WHERE listId = :id")
+    suspend fun getListById(id:String): ListEntity?
+
+    @Transaction
+    suspend fun replaceSharedList(listId: String, remoteId: String) {
+        val replacedList = getListById(listId) ?: return
+        addList(ListEntity(listId = remoteId, title = replacedList.title, position = replacedList.position, isShared = true))
+        deleteListById(listId)
+    }
 }

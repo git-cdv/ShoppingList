@@ -68,7 +68,7 @@ interface StubHistoryComponent : StateDelegate<HistoryComponentState>
 @Composable
 fun AddItemBottomSheet(
     sheetState: SheetState,
-    listId: Int,
+    listId: String,
     onDismiss: () -> Unit,
     addItem: (AddedItem) -> Unit,
     placeholderResId: Int,
@@ -240,7 +240,7 @@ fun AddItemBottomSheetPreview() {
             sheetState = rememberStandardBottomSheetState(
                 initialValue = SheetValue.Expanded
             ),
-            listId = 2,
+            listId = "2",
             onDismiss = {},
             addItem = {},
             placeholderResId = R.string.items_text_placeholder

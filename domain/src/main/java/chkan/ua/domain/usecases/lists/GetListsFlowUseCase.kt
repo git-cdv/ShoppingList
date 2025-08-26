@@ -10,7 +10,7 @@ class GetListsFlowUseCase @Inject constructor(
     private val listsRepository: ListsRepository
 ) : FlowUseCase<Unit> {
 
-    override fun run(config: Unit) = listsRepository.getListsWithItemsFlow().map { it.toUiModels() }
+    override fun invoke(config: Unit) = listsRepository.getListsWithItemsFlow().map { it.toUiModels() }
 
     override fun getErrorReason(config: Unit?) = "Failed to get lists"
 }

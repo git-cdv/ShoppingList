@@ -140,13 +140,14 @@ fun ListItem(
 fun ListItemPreview() {
     ShoppingListTheme {
         ListItem(ListItemsUi(
-            id = 2138,
+            id = "2138",
             title = "Item",
             position = 2,
             count = 5,
             readyCount = 2,
             progress = ListProgress(count = 5, readyCount = 2),
-            items = listOf()
+            items = listOf(),
+            isShared = false
         ), Modifier,{},{},{},{}, false)
     }
 }

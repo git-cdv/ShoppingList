@@ -7,6 +7,7 @@ import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.repos.ListsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.util.UUID
 import javax.inject.Inject
 
 class ListsRepositoryImpl @Inject constructor (private val dataSource: DataSource) : ListsRepository {
@@ -16,10 +17,10 @@ class ListsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
 
     override suspend fun addList(title: String) {
         val position = (dataSource.getMaxListPosition() ?: -1) + 1
-        dataSource.addList(ListEntity(title = title,position = position))
+        dataSource.addList(ListEntity(listId = UUID.randomUUID().toString().take(6), title = title,position = position))
     }
 
-    override suspend fun deleteList(listId: Int) {
+    override suspend fun deleteList(listId: String) {
         dataSource.deleteList(listId)
     }
 
@@ -28,6 +29,13 @@ class ListsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
     }
 
     override suspend fun getListCount() = dataSource.getListCount()
-    override suspend fun moveToTop(id: Int, position: Int) = dataSource.moveToTop(id, position)
+    override suspend fun moveToTop(listId: String, position: Int) = dataSource.moveToTop(listId, position)
+    override suspend fun getListWithItemsById(listId: String): ListItems? {
+        return dataSource.getListWithItemsById(listId)?.mapToListItem()
+    }
+
+    override suspend fun replaceSharedList(listId: String, remoteId: String) {
+        dataSource.replaceSharedList(listId, remoteId)
+    }
 
 }

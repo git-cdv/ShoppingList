@@ -6,11 +6,11 @@ import javax.inject.Inject
 
 class DeleteItemUseCase @Inject constructor(
     private val itemsRepository: ItemsRepository
-) : SuspendUseCase<Int> {
+) : SuspendUseCase<String> {
 
-    override suspend fun run(config: Int) {
+    override suspend fun run(config: String) {
         itemsRepository.deleteItem(config)
     }
 
-    override fun getErrorReason(config: Int?) = "Failed to delete itemId: $config"
+    override fun getErrorReason(config: String?) = "Failed to delete itemId: $config"
 }

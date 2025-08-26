@@ -1,9 +1,6 @@
 package chkan.ua.shoppinglist.ui.screens.items
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,14 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,12 +31,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -61,9 +54,9 @@ import chkan.ua.shoppinglist.ui.kit.empty_state.CenteredTextScreen
 import chkan.ua.shoppinglist.ui.kit.items.ItemItem
 import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
 import chkan.ua.shoppinglist.ui.kit.togglers.ToggleShowCompleted
-import chkan.ua.shoppinglist.ui.kit.togglers.ToggleShowText
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,10 +67,15 @@ fun ItemsScreen(
     val navController = localNavController.current
     val listId = args.listId
     val listTitle = args.listTitle
+    val isShared = args.isShared
 
     LaunchedEffect(Unit) {
-        itemsViewModel.observeItems(listId)
-        itemsViewModel.saveLastOpenedList(listId, listTitle)
+        if(isShared){
+            itemsViewModel.observeRemoteItems(listId)
+        } else {
+            itemsViewModel.observeItems(listId)
+        }
+        itemsViewModel.saveLastOpenedList(listId, listTitle,isShared)
     }
 
     val uiState by itemsViewModel.state.collectAsStateWithLifecycle()
@@ -126,6 +124,9 @@ fun ItemsScreen(
                     position
                 )
             )
+        },
+        onShareList = {
+            itemsViewModel.processIntent(ItemsIntent.ShareList(listId))
         }
     )
 
@@ -144,6 +145,7 @@ fun ItemsScreen(
                 itemsViewModel.processIntent(
                     ItemsIntent.AddItem(
                         Item(
+                            itemId = UUID.randomUUID().toString().take(6),
                             content = addedItem.content.firstAsTitle(),
                             listId = listId,
                             note = addedItem.note
@@ -173,15 +175,18 @@ fun ItemsScreenContent(
     readyItems: List<Item>,
     isEmptyState: Boolean,
     handleAddItemSheet: (Boolean) -> Unit,
-    onMarkReady: (Int, Boolean) -> Unit,
-    onDeleteItem: (Int) -> Unit,
+    onMarkReady: (String, Boolean) -> Unit,
+    onDeleteItem: (String) -> Unit,
     goToBack: () -> Unit,
     clearReadyItems: () -> Unit,
     onEditItem: (Editable) -> Unit,
-    onMoveToTop: (Int, Int) -> Unit,
+    onMoveToTop: (String, Int) -> Unit,
+    onShareList: () -> Unit,
 ) {
     var showConfirmBottomSheet by remember { mutableStateOf(false) }
     val confirmSheetState = rememberModalBottomSheetState()
+    var showConfirmShareBottomSheet by remember { mutableStateOf(false) }
+    val confirmShareSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var isReadyShown by remember { mutableStateOf(false) }
@@ -199,6 +204,20 @@ fun ItemsScreenContent(
                         color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.titleLarge
                     )
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            showConfirmShareBottomSheet = true
+                                  },
+                        modifier = Modifier.padding(end = dimensionResource(R.dimen.inner_padding))
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.ic_member_add),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            contentDescription = "Share list"
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = { goToBack.invoke() }) {
@@ -252,10 +271,10 @@ fun ItemsScreenContent(
                         text = item.content,
                         note = item.note,
                         modifier = Modifier.animateItem(),
-                        onReady = { onMarkReady.invoke(item.itemId, true) },
-                        onDelete = { onDeleteItem.invoke(item.itemId) },
-                        onEdit = { onEditItem.invoke(Editable(item.itemId, item.content, note = item.note)) },
-                        onMoveToTop = { onMoveToTop.invoke(item.itemId, item.position) },
+                        onReady = { onMarkReady(item.itemId, true) },
+                        onDelete = { onDeleteItem(item.itemId) },
+                        onEdit = { onEditItem(Editable(item.itemId, item.content, note = item.note)) },
+                        onMoveToTop = { onMoveToTop(item.itemId, item.position) },
                         isFirst = index == 0
                     )
                 }
@@ -310,6 +329,26 @@ fun ItemsScreenContent(
                 }
             )
         }
+
+        if (showConfirmShareBottomSheet) {
+            ConfirmBottomSheet(
+                confirmShareSheetState,
+                question = stringResource(id = R.string.sure_share_list),
+                onConfirm = {
+                    scope.launch {
+                        onShareList()
+                        confirmShareSheetState.hide()
+                        showConfirmShareBottomSheet = false
+                    }
+                },
+                onDismiss = {
+                    scope.launch {
+                        confirmShareSheetState.hide()
+                        showConfirmShareBottomSheet = false
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -319,11 +358,11 @@ fun ItemsScreenContentPreview() {
     ShoppingListTheme {
         ItemsScreenContent(
             "Title", listOf(
-            Item(333, "Item 777", 0, 0, false),
-            Item(444, "Item 2", 0, 1, false)
+            Item("333", "Item 777", "0", 0, false),
+            Item("444", "Item 2", "0", 1, false)
         ), listOf(
-            Item(55, "Item 1", 0, 0, false),
-            Item(44774, "Item 2", 0, 1, false)
-        ), false, {}, { _, _ -> }, {}, {}, {}, {}, { _, _ -> })
+            Item("55", "Item 1", "0", 0, false),
+            Item("44774", "Item 2", "0", 1, false)
+        ), false, {}, { _, _ -> }, {}, {}, {}, {}, { _, _ -> },{})
     }
 }

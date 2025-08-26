@@ -6,11 +6,11 @@ import javax.inject.Inject
 
 class DeleteListUseCase @Inject constructor(
     private val listsRepository: ListsRepository
-) : SuspendUseCase<Int> {
+) : SuspendUseCase<String> {
 
-    override suspend fun run(config: Int) {
+    override suspend fun run(config: String) {
         listsRepository.deleteList(config)
     }
 
-    override fun getErrorReason(config: Int?) = "Failed to delete list"
+    override fun getErrorReason(config: String?) = "Failed to delete list"
 }

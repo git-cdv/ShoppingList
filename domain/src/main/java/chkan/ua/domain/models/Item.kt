@@ -1,9 +1,9 @@
 package chkan.ua.domain.models
 
 data class Item(
-    val itemId: Int = 0,
+    val itemId: String,
     val content: String,
-    val listId: Int,
+    val listId: String,
     val position: Int = 0,
     val isReady: Boolean = false,
     val note: String? = null

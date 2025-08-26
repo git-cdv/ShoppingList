@@ -1,11 +1,11 @@
-package chkan.ua.data.sources
+package chkan.ua.data.sources.room
 
 import chkan.ua.data.models.ItemEntity
 import chkan.ua.data.models.ListEntity
 import chkan.ua.data.models.ListWithItems
-import chkan.ua.data.sources.room.HistoryItemDao
-import chkan.ua.data.sources.room.ItemsDao
-import chkan.ua.data.sources.room.ListsDao
+import chkan.ua.data.sources.DataSource
+import chkan.ua.data.sources.HistoryDataSource
+import chkan.ua.domain.models.ListItems
 import chkan.ua.domain.objects.Editable
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -16,17 +16,17 @@ class RoomSourceImpl @Inject constructor (
     private val listsDao: ListsDao,
     private val itemsDao: ItemsDao,
     private val historyDao: HistoryItemDao
-) : DataSource {
+) : DataSource, HistoryDataSource {
 
     override fun getListsWithItemsFlow(): Flow<List<ListWithItems>> = listsDao.getListsWithItemsFlow()
 
-    override fun getItemsFlowByListId(listId: Int): Flow<List<ItemEntity>> = itemsDao.getItemsFlowByListId(listId)
+    override fun getItemsFlowByListId(listId: String): Flow<List<ItemEntity>> = itemsDao.getItemsFlowByListId(listId)
 
     override suspend fun addList(list: ListEntity) {
         listsDao.addList(list)
     }
 
-    override suspend fun deleteList(listId: Int) {
+    override suspend fun deleteList(listId: String) {
         listsDao.deleteListById(listId)
     }
 
@@ -38,7 +38,7 @@ class RoomSourceImpl @Inject constructor (
     override suspend fun getMaxListPosition() = listsDao.getMaxListPosition()
     override suspend fun getMaxItemPosition() = itemsDao.getMaxItemPosition()
 
-    override suspend fun moveToTop(id: Int, position: Int) {
+    override suspend fun moveToTop(id: String, position: Int) {
         listsDao.moveToTop(id,position)
     }
 
@@ -46,20 +46,32 @@ class RoomSourceImpl @Inject constructor (
         itemsDao.addItem(item)
     }
 
-    override suspend fun deleteItem(itemId: Int) {
+    override suspend fun deleteItem(itemId: String) {
         itemsDao.deleteById(itemId)
     }
 
-    override suspend fun moveItemToTop(id: Int, position: Int) {
+    override suspend fun moveItemToTop(id: String, position: Int) {
         itemsDao.moveToTop(id,position)
     }
 
-    override suspend fun markItemReady(itemId: Int, state: Boolean) {
+    override suspend fun getListWithItemsById(listId: String): ListWithItems? {
+        return listsDao.getListWithItemsById(listId)
+    }
+
+    override suspend fun replaceSharedList(listId: String, remoteId: String) {
+        listsDao.replaceSharedList(listId, remoteId)
+    }
+
+    override suspend fun deleteItemsOfList(listId: String) {
+        itemsDao.deleteItemsOfList(listId)
+    }
+
+    override suspend fun markItemReady(itemId: String, state: Boolean) {
         val stateAsInt = if (state) 1 else 0
         itemsDao.markItemReady(itemId,stateAsInt)
     }
 
-    override suspend fun clearReadyItems(listId: Int) {
+    override suspend fun clearReadyItems(listId: String) {
         itemsDao.clearReadyItems(listId)
     }
     override suspend fun updateContent(editable: Editable) {

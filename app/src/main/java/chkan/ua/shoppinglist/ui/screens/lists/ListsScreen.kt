@@ -56,7 +56,7 @@ fun ListsScreen(
 ) {
     val navController = localNavController.current
     val lists by listsViewModel.listsFlow.collectAsStateWithLifecycle(initialValue = listOf())
-    var argDeletedIdList by remember { mutableIntStateOf(0) }
+    var argDeletedIdList by remember { mutableStateOf("") }
     var editable by remember { mutableStateOf(Editable()) }
 
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -83,7 +83,15 @@ fun ListsScreen(
             scope.launch { sheetState.show() }
         },
         onMoveToTop = { id, position -> listsViewModel.moveToTop(MoveTop(id, position)) },
-        goToItems = { list -> navController.navigate(ItemsRoute(list.id, list.title)) },
+        goToItems = { list ->
+            navController.navigate(
+                ItemsRoute(
+                    list.id,
+                    list.title,
+                    list.isShared
+                )
+            )
+        },
         onEditList = { editedList ->
             editable = editedList
             showEditBottomSheet = true
@@ -139,10 +147,10 @@ fun ListsScreen(
 @Composable
 fun ListsScreenContent(
     lists: List<ListItemsUi>,
-    onDeleteList: (Int) -> Unit,
+    onDeleteList: (String) -> Unit,
     onCreateList: () -> Unit,
     onEditList: (Editable) -> Unit,
-    onMoveToTop: (Int, Int) -> Unit,
+    onMoveToTop: (String, Int) -> Unit,
     goToItems: (ListItemsUi) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -191,9 +199,9 @@ fun ListsScreenContent(
                     list = list,
                     modifier = Modifier.animateItem(),
                     onEditList = onEditList,
-                    onDeleteList = { onDeleteList.invoke(list.id) },
-                    onMoveToTop = { onMoveToTop.invoke(list.id, list.position) },
-                    onCardClick = { goToItems.invoke(list) },
+                    onDeleteList = { onDeleteList(list.id) },
+                    onMoveToTop = { onMoveToTop(list.id, list.position) },
+                    onCardClick = { goToItems(list) },
                     isFirst = index == 0
                 )
             }
@@ -208,20 +216,20 @@ fun ListsScreenContentPreview() {
         ListsScreenContent(
             listOf(
                 ListItemsUi(
-                    id = 6187,
+                    id = "6187",
                     title = "Commodo",
                     position = 1,
                     count = 4,
                     readyCount = 2,
                     items = listOf(
                         Item(
-                            itemId = 5847,
+                            itemId = "5847",
                             content = "senserit",
-                            listId = 8123,
+                            listId = "8123",
                             position = 75556,
                             isReady = false
                         )
-                    ), progress = ListProgress(count = 4, readyCount = 2)
+                    ), progress = ListProgress(count = 4, readyCount = 2), isShared = false
                 )
             ), {}, {}, {}, { _, _ -> }, {})
     }

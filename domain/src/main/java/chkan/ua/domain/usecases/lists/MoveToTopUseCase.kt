@@ -15,4 +15,4 @@ class MoveToTopUseCase @Inject constructor(
     override fun getErrorReason(config: MoveTop?) = "Failed to move top"
 }
 
-data class MoveTop(val id: Int, val position: Int)
+data class MoveTop(val id: String, val position: Int)

@@ -15,4 +15,4 @@ class MarkReadyItemUseCase @Inject constructor(
     override fun getErrorReason(config: MarkReadyConfig?) = "Failed to mark ready itemId: ${config?.itemId}"
 }
 
-data class MarkReadyConfig(val itemId: Int, val state: Boolean)
+data class MarkReadyConfig(val itemId: String, val state: Boolean)

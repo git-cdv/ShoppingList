@@ -1,6 +1,5 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -17,6 +16,7 @@ import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
+import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_IS_SHARED
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_TITLE_STR
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +33,7 @@ class ListsViewModel @Inject constructor(
     private val editList: EditListUseCase,
     private val moveToTop: MoveToTopUseCase,
     val errorHandler: ErrorHandler,
-    private val spService: SharedPreferencesService
+    private val spService: SharedPreferencesService,
 ) : ViewModel() {
 
     init {
@@ -51,7 +51,7 @@ class ListsViewModel @Inject constructor(
         }
     }
 
-    val listsFlow = getListsFlow.run(Unit)
+    val listsFlow = getListsFlow(Unit)
     private var isListsExist = false
 
     private val _isLoadReady = mutableStateOf(false)
@@ -66,8 +66,7 @@ class ListsViewModel @Inject constructor(
             }
         }
     }
-
-    fun deleteList(id: Int) {
+    fun deleteList(id: String) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
                 deleteList.run(id)
@@ -92,13 +91,15 @@ class ListsViewModel @Inject constructor(
     fun clearLastOpenedList() {
         spService.set(LAST_OPEN_LIST_ID_INT, 0)
         spService.set(LAST_OPEN_LIST_TITLE_STR, "")
+        spService.set(LAST_OPEN_LIST_IS_SHARED, false)
     }
 
     fun getLastOpenedList(): LastOpenedList? {
         return try {
-            val id = spService.get(LAST_OPEN_LIST_ID_INT, Int::class.java) ?: 0
+            val id = spService.get(LAST_OPEN_LIST_ID_INT, String::class.java) ?: ""
             val title = spService.get(LAST_OPEN_LIST_TITLE_STR, String::class.java) ?: ""
-            LastOpenedList(id,title)
+            val isShared = spService.get(LAST_OPEN_LIST_IS_SHARED, Boolean::class.java) ?: false
+            LastOpenedList(id,title,isShared)
         } catch (e: Exception) {
             null
         }

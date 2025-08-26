@@ -70,6 +70,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     packaging {
         resources {
@@ -104,6 +105,9 @@ dependencies {
     //crashlytics
     implementation (platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
+
+    // Log
+    implementation(libs.timber)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

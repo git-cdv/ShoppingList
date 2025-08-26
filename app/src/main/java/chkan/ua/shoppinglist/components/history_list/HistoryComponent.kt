@@ -10,8 +10,8 @@ class HistoryComponent @Inject constructor(
     private val getHistoryFlow: GetHistoryFlowUseCase
 ) : StateComponent<HistoryComponentState>(HistoryComponentState()), StubHistoryComponent {
 
-    fun initFlow(listId: Int){
-        getHistoryFlow.run(listId).updateStateOnEach { copy(list = it) }
+    fun initFlow(listId: String){
+        getHistoryFlow(listId).updateStateOnEach { copy(list = it) }
     }
 
 }

@@ -6,10 +6,12 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "lists")
 data class ListEntity (
-    @PrimaryKey(autoGenerate = true)
-    val listId: Int = 0,
+    @PrimaryKey
+    val listId: String,
     @ColumnInfo(name = "title")
     val title: String,
     @ColumnInfo(name = "position")
     val position: Int,
+    @ColumnInfo(name = "is_shared")
+    val isShared: Boolean = false
 )

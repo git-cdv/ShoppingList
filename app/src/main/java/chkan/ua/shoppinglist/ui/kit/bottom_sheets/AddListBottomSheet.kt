@@ -87,7 +87,7 @@ fun AddListBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .imePadding()
-                    .padding(start = dimensionResource(id = R.dimen.root_padding), end = dimensionResource(id = R.dimen.root_padding), bottom = dimensionResource(id = R.dimen.inner_padding))
+                    .padding(start = dimensionResource(id = R.dimen.root_padding), end = dimensionResource(id = R.dimen.root_padding), bottom = dimensionResource(id = R.dimen.root_padding))
             )
         }
     }
