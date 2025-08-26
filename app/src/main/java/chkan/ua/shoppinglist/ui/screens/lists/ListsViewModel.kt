@@ -16,6 +16,7 @@ import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
+import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_IS_SHARED
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_TITLE_STR
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -90,13 +91,15 @@ class ListsViewModel @Inject constructor(
     fun clearLastOpenedList() {
         spService.set(LAST_OPEN_LIST_ID_INT, 0)
         spService.set(LAST_OPEN_LIST_TITLE_STR, "")
+        spService.set(LAST_OPEN_LIST_IS_SHARED, false)
     }
 
     fun getLastOpenedList(): LastOpenedList? {
         return try {
             val id = spService.get(LAST_OPEN_LIST_ID_INT, String::class.java) ?: ""
             val title = spService.get(LAST_OPEN_LIST_TITLE_STR, String::class.java) ?: ""
-            LastOpenedList(id,title)
+            val isShared = spService.get(LAST_OPEN_LIST_IS_SHARED, Boolean::class.java) ?: false
+            LastOpenedList(id,title,isShared)
         } catch (e: Exception) {
             null
         }

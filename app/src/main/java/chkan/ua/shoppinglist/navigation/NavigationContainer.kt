@@ -48,7 +48,7 @@ fun NavigationContainer(
         if (startDestination is ListsRoute){
             val lastOpenedList = listsViewModel.getLastOpenedList()
             if (lastOpenedList != null){
-                navController.navigate(ItemsRoute(lastOpenedList.id,lastOpenedList.title )){
+                navController.navigate(ItemsRoute(lastOpenedList.id,lastOpenedList.title, lastOpenedList.isShared)){
                     popUpTo(ListsRoute) { inclusive = false }
                 }
             }

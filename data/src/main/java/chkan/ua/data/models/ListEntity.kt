@@ -13,7 +13,5 @@ data class ListEntity (
     @ColumnInfo(name = "position")
     val position: Int,
     @ColumnInfo(name = "is_shared")
-    val isShared: Boolean = false,
-    @ColumnInfo(name = "remote_id")
-    val remoteId: String? = null,
+    val isShared: Boolean = false
 )

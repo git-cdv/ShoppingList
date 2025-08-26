@@ -1,7 +1,6 @@
 package chkan.ua.domain.usecases.share
 
 import chkan.ua.domain.Logger
-import chkan.ua.domain.repos.ItemsRepository
 import chkan.ua.domain.repos.ListsRepository
 import chkan.ua.domain.repos.RemoteRepository
 import chkan.ua.domain.usecases.auth.AuthManager
@@ -9,7 +8,6 @@ import javax.inject.Inject
 
 class ShareListUseCase @Inject constructor(
     private val listsRepository: ListsRepository,
-    private val itemsRepository: ItemsRepository,
     private val remoteRepository: RemoteRepository,
     private val authManager: AuthManager,
     private val logger: Logger,
@@ -23,12 +21,7 @@ class ShareListUseCase @Inject constructor(
                 throw Exception("User is not authenticated")
             } else {
                 val firestoreId = remoteRepository.createSharedList(userId,listWithItems)
-
-                listsRepository.markAsShared(
-                    listId = listId,
-                    firestoreId = firestoreId
-                )
-                itemsRepository.deleteItemsOfList(listId)
+                listsRepository.replaceSharedList(listId,firestoreId)
                 Result.success(firestoreId)
             }
         } catch (e: Exception) {

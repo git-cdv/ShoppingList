@@ -11,9 +11,11 @@ data class ListWithItems(
     @ColumnInfo(name = "position")
     val position: Int,
     @Relation(parentColumn = "listId", entityColumn = "listId")
-    val items: List<ItemEntity>)
+    val items: List<ItemEntity>,
+    @ColumnInfo(name = "is_shared")
+    val isShared: Boolean = false)
 {
     fun mapToListItem() : ListItems{
-        return ListItems(listId, title, position, items.mapToItems())
+        return ListItems(listId, title, position, items.mapToItems(), isShared)
     }
 }

@@ -23,6 +23,7 @@ import chkan.ua.shoppinglist.core.components.ComponentsViewModel
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
+import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_IS_SHARED
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_TITLE_STR
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheetState
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.BottomSheetAction
@@ -178,9 +179,10 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    fun saveLastOpenedList(listId: String, listTitle: String) {
+    fun saveLastOpenedList(listId: String, listTitle: String, isShared: Boolean) {
         spService.set(LAST_OPEN_LIST_ID_INT, listId)
         spService.set(LAST_OPEN_LIST_TITLE_STR, listTitle)
+        spService.set(LAST_OPEN_LIST_IS_SHARED, isShared)
     }
 
     private fun editItem(edited: Editable) {

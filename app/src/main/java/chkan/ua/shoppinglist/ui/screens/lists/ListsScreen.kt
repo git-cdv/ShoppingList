@@ -83,7 +83,15 @@ fun ListsScreen(
             scope.launch { sheetState.show() }
         },
         onMoveToTop = { id, position -> listsViewModel.moveToTop(MoveTop(id, position)) },
-        goToItems = { list -> navController.navigate(ItemsRoute(list.id, list.title)) },
+        goToItems = { list ->
+            navController.navigate(
+                ItemsRoute(
+                    list.id,
+                    list.title,
+                    list.isShared
+                )
+            )
+        },
         onEditList = { editedList ->
             editable = editedList
             showEditBottomSheet = true
@@ -221,7 +229,7 @@ fun ListsScreenContentPreview() {
                             position = 75556,
                             isReady = false
                         )
-                    ), progress = ListProgress(count = 4, readyCount = 2)
+                    ), progress = ListProgress(count = 4, readyCount = 2), isShared = false
                 )
             ), {}, {}, {}, { _, _ -> }, {})
     }

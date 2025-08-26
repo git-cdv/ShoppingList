@@ -67,10 +67,15 @@ fun ItemsScreen(
     val navController = localNavController.current
     val listId = args.listId
     val listTitle = args.listTitle
+    val isShared = args.isShared
 
     LaunchedEffect(Unit) {
-        itemsViewModel.observeItems(listId)
-        itemsViewModel.saveLastOpenedList(listId, listTitle)
+        if(isShared){
+            itemsViewModel.observeRemoteItems(listId)
+        } else {
+            itemsViewModel.observeItems(listId)
+        }
+        itemsViewModel.saveLastOpenedList(listId, listTitle,isShared)
     }
 
     val uiState by itemsViewModel.state.collectAsStateWithLifecycle()
@@ -140,7 +145,7 @@ fun ItemsScreen(
                 itemsViewModel.processIntent(
                     ItemsIntent.AddItem(
                         Item(
-                            itemId = UUID.randomUUID().toString(),
+                            itemId = UUID.randomUUID().toString().take(6),
                             content = addedItem.content.firstAsTitle(),
                             listId = listId,
                             note = addedItem.note
@@ -180,6 +185,8 @@ fun ItemsScreenContent(
 ) {
     var showConfirmBottomSheet by remember { mutableStateOf(false) }
     val confirmSheetState = rememberModalBottomSheetState()
+    var showConfirmShareBottomSheet by remember { mutableStateOf(false) }
+    val confirmShareSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var isReadyShown by remember { mutableStateOf(false) }
@@ -200,7 +207,9 @@ fun ItemsScreenContent(
                 },
                 actions = {
                     IconButton(
-                        onClick = { onShareList() },
+                        onClick = {
+                            showConfirmShareBottomSheet = true
+                                  },
                         modifier = Modifier.padding(end = dimensionResource(R.dimen.inner_padding))
                     ) {
                         Icon(
@@ -316,6 +325,26 @@ fun ItemsScreenContent(
                     scope.launch {
                         confirmSheetState.hide()
                         showConfirmBottomSheet = false
+                    }
+                }
+            )
+        }
+
+        if (showConfirmShareBottomSheet) {
+            ConfirmBottomSheet(
+                confirmShareSheetState,
+                question = stringResource(id = R.string.sure_share_list),
+                onConfirm = {
+                    scope.launch {
+                        onShareList()
+                        confirmShareSheetState.hide()
+                        showConfirmShareBottomSheet = false
+                    }
+                },
+                onDismiss = {
+                    scope.launch {
+                        confirmShareSheetState.hide()
+                        showConfirmShareBottomSheet = false
                     }
                 }
             )

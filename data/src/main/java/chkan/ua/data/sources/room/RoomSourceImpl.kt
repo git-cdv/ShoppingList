@@ -58,8 +58,8 @@ class RoomSourceImpl @Inject constructor (
         return listsDao.getListWithItemsById(listId)
     }
 
-    override suspend fun markAsShared(listId: String, firestoreId: String) {
-        listsDao.markAsShared(listId, firestoreId)
+    override suspend fun replaceSharedList(listId: String, remoteId: String) {
+        listsDao.replaceSharedList(listId, remoteId)
     }
 
     override suspend fun deleteItemsOfList(listId: String) {

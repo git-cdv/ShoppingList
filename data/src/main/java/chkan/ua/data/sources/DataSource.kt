@@ -24,6 +24,6 @@ interface DataSource {
     suspend fun moveToTop(id: String, position: Int)
     suspend fun moveItemToTop(id: String, position: Int)
     suspend fun getListWithItemsById(listId: String): ListWithItems?
-    suspend fun markAsShared(listId: String, firestoreId: String)
+    suspend fun replaceSharedList(listId: String,remoteId: String)
     suspend fun deleteItemsOfList(listId: String)
 }

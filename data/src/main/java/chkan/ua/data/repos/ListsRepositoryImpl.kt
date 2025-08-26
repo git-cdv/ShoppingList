@@ -34,8 +34,8 @@ class ListsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
         return dataSource.getListWithItemsById(listId)?.mapToListItem()
     }
 
-    override suspend fun markAsShared(listId: String, firestoreId: String) {
-        dataSource.markAsShared(listId, firestoreId)
+    override suspend fun replaceSharedList(listId: String, remoteId: String) {
+        dataSource.replaceSharedList(listId, remoteId)
     }
 
 }

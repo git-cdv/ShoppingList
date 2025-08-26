@@ -7,7 +7,8 @@ data class ListItemsUi(
     val count: Int,
     val readyCount: Int,
     val progress: ListProgress,
-    val items: List<Item>
+    val items: List<Item>,
+    val isShared: Boolean,
 )
 
 fun List<ListItems>.toUiModels() : List<ListItemsUi>{
@@ -18,7 +19,8 @@ fun List<ListItems>.toUiModels() : List<ListItemsUi>{
         count = it.items.size,
         readyCount = it.items.filter { it.isReady }.size,
         progress = ListProgress(it.items.size,it.items.filter { it.isReady }.size),
-        items = it.items
+        items = it.items,
+        isShared = it.isShared
     ) }
 }
 

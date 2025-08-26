@@ -13,5 +13,5 @@ interface ListsRepository {
     suspend fun getListCount(): Int
     suspend fun moveToTop(listId: String, position: Int)
     suspend fun getListWithItemsById(listId: String): ListItems?
-    suspend fun markAsShared(listId: String, firestoreId: String)
+    suspend fun replaceSharedList(listId: String,remoteId: String)
 }
