@@ -14,25 +14,25 @@ interface ItemsDao {
 
     @Transaction
     @Query("SELECT * FROM items WHERE listId = :listId ORDER BY position ASC")
-    fun getItemsFlowByListId(listId: Int): Flow<List<ItemEntity>>
+    fun getItemsFlowByListId(listId: String): Flow<List<ItemEntity>>
 
     @Query("DELETE FROM items WHERE itemId = :itemId")
-    suspend fun deleteById(itemId: Int)
+    suspend fun deleteById(itemId: String)
 
     @Query("DELETE FROM items WHERE listId = :listId AND isReady = 1")
-    suspend fun clearReadyItems(listId: Int)
+    suspend fun clearReadyItems(listId: String)
 
     @Query("UPDATE items SET isReady = :state WHERE itemId = :itemId")
-    suspend fun markItemReady(itemId: Int, state: Int)
+    suspend fun markItemReady(itemId: String, state: Int)
 
     @Query("UPDATE items SET content = :content,note = :note WHERE itemId = :itemId")
-    suspend fun updateContent(itemId: Int, content: String, note: String? = null)
+    suspend fun updateContent(itemId: String, content: String, note: String? = null)
 
     @Query("SELECT MAX(position) FROM items")
     suspend fun getMaxItemPosition(): Int?
 
     @Transaction
-    suspend fun moveToTop(id: Int, position: Int) {
+    suspend fun moveToTop(id: String, position: Int) {
         shiftPositions(position)
         moveItemToTop(id)
     }
@@ -41,5 +41,7 @@ interface ItemsDao {
     suspend fun shiftPositions(currentPosition: Int)
 
     @Query("UPDATE items SET position = 0 WHERE itemId = :id")
-    suspend fun moveItemToTop(id: Int)
+    suspend fun moveItemToTop(id: String)
+    @Query("DELETE FROM items WHERE listId = :listId")
+    fun deleteItemsOfList(listId: String)
 }

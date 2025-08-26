@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import chkan.ua.core.extensions.firstAsTitle
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.usecases.history.AddItemInHistoryUseCase
@@ -16,6 +15,7 @@ import chkan.ua.domain.usecases.items.GetItemsFlowUseCase
 import chkan.ua.domain.usecases.items.MarkReadyConfig
 import chkan.ua.domain.usecases.items.MarkReadyItemUseCase
 import chkan.ua.domain.usecases.items.MoveItemToTopUseCase
+import chkan.ua.domain.usecases.items.remote.GetRemoteItemsFlowUseCase
 import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.domain.usecases.share.ShareListUseCase
 import chkan.ua.shoppinglist.components.history_list.HistoryComponent
@@ -28,6 +28,7 @@ import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheetState
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.BottomSheetAction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +44,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ItemsViewModel @Inject constructor(
     private val getItemsFlow: GetItemsFlowUseCase,
+    private val getRemoteItemsFlow: GetRemoteItemsFlowUseCase,
     private val addItem: AddItemUseCase,
     private val markReady: MarkReadyItemUseCase,
     private val deleteItem: DeleteItemUseCase,
@@ -68,15 +70,33 @@ class ItemsViewModel @Inject constructor(
 
     private val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
-    fun observeItems(listId: Int) {
-        getItemsFlow.run(listId)
+    private var itemsObservationJob: Job? = null
+
+
+    fun observeItems(listId: String) {
+        itemsObservationJob?.cancel()
+
+        itemsObservationJob = getItemsFlow(listId)
             .onEach { items ->
+                //TODO: check on optima
                 //work in main thread (ok for not huge data)
                 val (readyItems, notReadyItems) = items.partition { it.isReady }
                 _state.update { it.copy(isEmpty = items.isEmpty(), notReadyItems = notReadyItems, readyItems = readyItems) }
             }
             .launchIn(viewModelScope)
     }
+
+    fun observeRemoteItems(remoteId: String) {
+        itemsObservationJob?.cancel()
+
+        itemsObservationJob = getRemoteItemsFlow(remoteId)
+            .onEach { items ->
+                val (readyItems, notReadyItems) = items.partition { it.isReady }
+                _state.update { it.copy(isEmpty = items.isEmpty(), notReadyItems = notReadyItems, readyItems = readyItems) }
+            }
+            .launchIn(viewModelScope)
+    }
+
 
     fun processIntent(intent: ItemsIntent) {
         when (intent) {
@@ -97,11 +117,11 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    fun createShareList(listId: Int){
+    fun createShareList(listId: String){
         viewModelScope.launch (Dispatchers.IO) {
             shareList(listId)
-                .onSuccess {
-                    Log.d("SHARE", "Share list created successfully: $it")
+                .onSuccess { remoteId ->
+                    observeRemoteItems(remoteId)
                 }
                 .onFailure {
                     Log.d("SHARE", "Share list creation failed: $it")
@@ -121,7 +141,7 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    private fun deleteItem(id: Int) {
+    private fun deleteItem(id: String) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
                 deleteItem.run(id)
@@ -131,7 +151,7 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    private fun changeReadyInItem(id: Int, state: Boolean) {
+    private fun changeReadyInItem(id: String, state: Boolean) {
         viewModelScope.launch (singleThreadDispatcher) {
             val config = MarkReadyConfig(id,state)
             try {
@@ -142,7 +162,7 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    private fun clearReadyItems(listId: Int) {
+    private fun clearReadyItems(listId: String) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
                 clearReadyItems.run(listId)
@@ -152,13 +172,13 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    fun getHistoryComponent(listId: Int): HistoryComponent {
+    fun getHistoryComponent(listId: String): HistoryComponent {
         return historyComponent.apply {
             initFlow(listId)
         }
     }
 
-    fun saveLastOpenedList(listId: Int, listTitle: String) {
+    fun saveLastOpenedList(listId: String, listTitle: String) {
         spService.set(LAST_OPEN_LIST_ID_INT, listId)
         spService.set(LAST_OPEN_LIST_TITLE_STR, listTitle)
     }
@@ -182,4 +202,10 @@ class ItemsViewModel @Inject constructor(
             }
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        itemsObservationJob?.cancel()
+    }
+
 }

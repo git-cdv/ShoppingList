@@ -1,6 +1,5 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -14,7 +13,6 @@ import chkan.ua.domain.usecases.lists.GetListsCountUseCase
 import chkan.ua.domain.usecases.lists.GetListsFlowUseCase
 import chkan.ua.domain.usecases.lists.MoveToTopUseCase
 import chkan.ua.domain.usecases.lists.MoveTop
-import chkan.ua.domain.usecases.share.ShareListUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
@@ -52,7 +50,7 @@ class ListsViewModel @Inject constructor(
         }
     }
 
-    val listsFlow = getListsFlow.run(Unit)
+    val listsFlow = getListsFlow(Unit)
     private var isListsExist = false
 
     private val _isLoadReady = mutableStateOf(false)
@@ -67,7 +65,7 @@ class ListsViewModel @Inject constructor(
             }
         }
     }
-    fun deleteList(id: Int) {
+    fun deleteList(id: String) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
                 deleteList.run(id)
@@ -96,7 +94,7 @@ class ListsViewModel @Inject constructor(
 
     fun getLastOpenedList(): LastOpenedList? {
         return try {
-            val id = spService.get(LAST_OPEN_LIST_ID_INT, Int::class.java) ?: 0
+            val id = spService.get(LAST_OPEN_LIST_ID_INT, String::class.java) ?: ""
             val title = spService.get(LAST_OPEN_LIST_TITLE_STR, String::class.java) ?: ""
             LastOpenedList(id,title)
         } catch (e: Exception) {

@@ -1,7 +1,7 @@
 package chkan.ua.domain.models
 
 data class ListItemsUi(
-    val id: Int,
+    val id: String,
     val title: String,
     val position: Int,
     val count: Int,

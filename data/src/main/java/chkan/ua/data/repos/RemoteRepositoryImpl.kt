@@ -1,12 +1,15 @@
 package chkan.ua.data.repos
 
 import chkan.ua.data.sources.RemoteDataSource
+import chkan.ua.domain.models.Item
 import chkan.ua.domain.models.ListItems
 import chkan.ua.domain.repos.RemoteRepository
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class RemoteRepositoryImpl @Inject constructor (
     private val dataSource: RemoteDataSource
 ) : RemoteRepository {
     override suspend fun createSharedList(userId:String, list: ListItems) = dataSource.createSharedList(userId, list)
+    override fun getListWithItemsFlowById(listId: String): Flow<List<Item>> = dataSource.getListWithItemsFlowById(listId)
 }

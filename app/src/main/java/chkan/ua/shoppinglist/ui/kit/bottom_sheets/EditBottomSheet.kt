@@ -214,7 +214,7 @@ fun EditBottomSheetPreview() {
             ),
             onDismiss = {},
             onEdit = {},
-            Editable(77, "Title")
+            Editable("77", "Title")
         )
     }
 }

@@ -6,9 +6,9 @@ import javax.inject.Inject
 
 class GetItemsFlowUseCase @Inject constructor(
     private val itemsRepository: ItemsRepository
-) : FlowUseCase<Int> {
+) : FlowUseCase<String> {
 
-    override fun run(config: Int) = itemsRepository.getListWithItemsFlowById(config)
+    override fun invoke(config: String) = itemsRepository.getListWithItemsFlowById(config)
 
-    override fun getErrorReason(config: Int?) = "Failed to get lists"
+    override fun getErrorReason(config: String?) = "Failed to get lists"
 }

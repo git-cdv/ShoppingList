@@ -56,6 +56,7 @@ import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
 import chkan.ua.shoppinglist.ui.kit.togglers.ToggleShowCompleted
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -139,6 +140,7 @@ fun ItemsScreen(
                 itemsViewModel.processIntent(
                     ItemsIntent.AddItem(
                         Item(
+                            itemId = UUID.randomUUID().toString(),
                             content = addedItem.content.firstAsTitle(),
                             listId = listId,
                             note = addedItem.note
@@ -168,12 +170,12 @@ fun ItemsScreenContent(
     readyItems: List<Item>,
     isEmptyState: Boolean,
     handleAddItemSheet: (Boolean) -> Unit,
-    onMarkReady: (Int, Boolean) -> Unit,
-    onDeleteItem: (Int) -> Unit,
+    onMarkReady: (String, Boolean) -> Unit,
+    onDeleteItem: (String) -> Unit,
     goToBack: () -> Unit,
     clearReadyItems: () -> Unit,
     onEditItem: (Editable) -> Unit,
-    onMoveToTop: (Int, Int) -> Unit,
+    onMoveToTop: (String, Int) -> Unit,
     onShareList: () -> Unit,
 ) {
     var showConfirmBottomSheet by remember { mutableStateOf(false) }
@@ -260,10 +262,10 @@ fun ItemsScreenContent(
                         text = item.content,
                         note = item.note,
                         modifier = Modifier.animateItem(),
-                        onReady = { onMarkReady.invoke(item.itemId, true) },
-                        onDelete = { onDeleteItem.invoke(item.itemId) },
-                        onEdit = { onEditItem.invoke(Editable(item.itemId, item.content, note = item.note)) },
-                        onMoveToTop = { onMoveToTop.invoke(item.itemId, item.position) },
+                        onReady = { onMarkReady(item.itemId, true) },
+                        onDelete = { onDeleteItem(item.itemId) },
+                        onEdit = { onEditItem(Editable(item.itemId, item.content, note = item.note)) },
+                        onMoveToTop = { onMoveToTop(item.itemId, item.position) },
                         isFirst = index == 0
                     )
                 }
@@ -327,11 +329,11 @@ fun ItemsScreenContentPreview() {
     ShoppingListTheme {
         ItemsScreenContent(
             "Title", listOf(
-            Item(333, "Item 777", 0, 0, false),
-            Item(444, "Item 2", 0, 1, false)
+            Item("333", "Item 777", "0", 0, false),
+            Item("444", "Item 2", "0", 1, false)
         ), listOf(
-            Item(55, "Item 1", 0, 0, false),
-            Item(44774, "Item 2", 0, 1, false)
+            Item("55", "Item 1", "0", 0, false),
+            Item("44774", "Item 2", "0", 1, false)
         ), false, {}, { _, _ -> }, {}, {}, {}, {}, { _, _ -> },{})
     }
 }

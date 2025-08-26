@@ -5,7 +5,7 @@ import androidx.room.Relation
 import chkan.ua.domain.models.ListItems
 
 data class ListWithItems(
-    val listId: Int = 0,
+    val listId: String,
     @ColumnInfo(name = "title")
     val title: String,
     @ColumnInfo(name = "position")

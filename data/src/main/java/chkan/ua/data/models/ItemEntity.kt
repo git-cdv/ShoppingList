@@ -17,9 +17,9 @@ import chkan.ua.domain.models.Item
     ]
 )
 data class ItemEntity(
-    @PrimaryKey(autoGenerate = true)
-    val itemId: Int = 0,
-    val listId: Int,
+    @PrimaryKey
+    val itemId: String,
+    val listId: String,
     val content: String,
     val position: Int = 0,
     val isReady: Boolean = false,
@@ -31,5 +31,5 @@ fun List<ItemEntity>.mapToItems() : List<Item>{
 }
 
 fun Item.toEntity() : ItemEntity {
-    return ItemEntity(listId = this.listId, content = this.content, position = this.position, note = this.note)
+    return ItemEntity(itemId = this.itemId, listId = this.listId, content = this.content, position = this.position, note = this.note)
 }

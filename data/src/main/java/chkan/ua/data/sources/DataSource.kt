@@ -9,20 +9,21 @@ import kotlinx.coroutines.flow.Flow
 
 interface DataSource {
     fun getListsWithItemsFlow(): Flow<List<ListWithItems>>
-    fun getItemsFlowByListId(listId: Int): Flow<List<ItemEntity>>
+    fun getItemsFlowByListId(listId: String): Flow<List<ItemEntity>>
     suspend fun addList(list: ListEntity)
-    suspend fun deleteList(listId: Int)
+    suspend fun deleteList(listId: String)
     suspend fun updateTitle(editable: Editable)
     suspend fun getListCount(): Int
     suspend fun getMaxListPosition(): Int?
     suspend fun getMaxItemPosition(): Int?
     suspend fun addItem(item: ItemEntity)
-    suspend fun deleteItem(itemId: Int)
-    suspend fun markItemReady(itemId: Int, state: Boolean)
-    suspend fun clearReadyItems(listId: Int)
+    suspend fun deleteItem(itemId: String)
+    suspend fun markItemReady(itemId: String, state: Boolean)
+    suspend fun clearReadyItems(listId: String)
     suspend fun updateContent(editable: Editable)
-    suspend fun moveToTop(id: Int, position: Int)
-    suspend fun moveItemToTop(id: Int, position: Int)
-    suspend fun getListWithItemsById(listId: Int): ListWithItems?
-    suspend fun markAsShared(listId: Int, firestoreId: String)
+    suspend fun moveToTop(id: String, position: Int)
+    suspend fun moveItemToTop(id: String, position: Int)
+    suspend fun getListWithItemsById(listId: String): ListWithItems?
+    suspend fun markAsShared(listId: String, firestoreId: String)
+    suspend fun deleteItemsOfList(listId: String)
 }

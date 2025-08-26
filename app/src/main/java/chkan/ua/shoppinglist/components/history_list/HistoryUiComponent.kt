@@ -37,7 +37,7 @@ import chkan.ua.shoppinglist.ui.screens.items.ItemsViewModel
 
 @Composable
 fun HistoryUiComponent(
-    listId: Int,
+    listId: String,
     modifier: Modifier,
     onChoose: (String) -> Unit,
     itemsViewModel: ItemsViewModel = hiltViewModel()

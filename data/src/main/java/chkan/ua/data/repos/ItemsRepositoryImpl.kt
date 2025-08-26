@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 class ItemsRepositoryImpl @Inject constructor (private val dataSource: DataSource) : ItemsRepository {
 
-    override fun getListWithItemsFlowById(listId: Int): Flow<List<Item>> {
+    override fun getListWithItemsFlowById(listId: String): Flow<List<Item>> {
         return dataSource.getItemsFlowByListId(listId).map { it.mapToItems() }
     }
 
@@ -22,7 +22,7 @@ class ItemsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
         dataSource.addItem(itemWithPosition.toEntity())
     }
 
-    override suspend fun deleteItem(itemId: Int) {
+    override suspend fun deleteItem(itemId: String) {
         dataSource.deleteItem(itemId)
     }
 
@@ -30,13 +30,14 @@ class ItemsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
         dataSource.updateContent(editable)
     }
 
-    override suspend fun clearReadyItems(listId: Int) {
+    override suspend fun clearReadyItems(listId: String) {
         dataSource.clearReadyItems(listId)
     }
 
-    override suspend fun markItemReady(itemId: Int, state: Boolean) {
+    override suspend fun markItemReady(itemId: String, state: Boolean) {
         dataSource.markItemReady(itemId,state)
     }
 
-    override suspend fun moveToTop(id: Int, position: Int) = dataSource.moveItemToTop(id, position)
+    override suspend fun moveToTop(itemId: String, position: Int) = dataSource.moveItemToTop(itemId, position)
+    override suspend fun deleteItemsOfList(listId: String) = dataSource.deleteItemsOfList(listId)
 }

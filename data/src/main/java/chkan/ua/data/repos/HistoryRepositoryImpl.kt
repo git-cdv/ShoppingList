@@ -15,7 +15,7 @@ class HistoryRepositoryImpl @Inject constructor (
     private val historyDataSource: HistoryDataSource,
 ) : HistoryRepository {
 
-    override fun getHistory(listId: Int) : Flow<List<HistoryItem>> {
+    override fun getHistory(listId: String) : Flow<List<HistoryItem>> {
         val historyFlow = historyDataSource.getHistory()
         val itemsFlow = dataSource.getItemsFlowByListId(listId)
 
