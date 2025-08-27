@@ -1,4 +1,4 @@
-package chkan.ua.domain.usecases.items.remote
+package chkan.ua.domain.usecases.share
 
 import chkan.ua.core.interfaces.FlowUseCase
 import chkan.ua.domain.repos.RemoteRepository

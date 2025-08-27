@@ -146,7 +146,6 @@ fun ListItemPreview() {
             count = 5,
             readyCount = 2,
             progress = ListProgress(count = 5, readyCount = 2),
-            items = listOf(),
             isShared = false
         ), Modifier,{},{},{},{}, false)
     }

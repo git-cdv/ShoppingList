@@ -52,7 +52,14 @@ interface ListsDao {
     @Transaction
     suspend fun replaceSharedList(listId: String, remoteId: String) {
         val replacedList = getListById(listId) ?: return
-        addList(ListEntity(listId = remoteId, title = replacedList.title, position = replacedList.position, isShared = true))
+        addList(ListEntity(
+            listId = remoteId,
+            title = replacedList.title,
+            position = replacedList.position,
+            isShared = true,
+            totalItems = replacedList.totalItems,
+            readyItems = replacedList.readyItems
+        ))
         deleteListById(listId)
     }
 }

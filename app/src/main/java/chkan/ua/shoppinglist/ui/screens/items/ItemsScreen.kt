@@ -70,12 +70,12 @@ fun ItemsScreen(
     val isShared = args.isShared
 
     LaunchedEffect(Unit) {
-        if(isShared){
+        if (isShared) {
             itemsViewModel.observeRemoteItems(listId)
         } else {
             itemsViewModel.observeItems(listId)
         }
-        itemsViewModel.saveLastOpenedList(listId, listTitle,isShared)
+        itemsViewModel.saveLastOpenedList(listId, listTitle, isShared)
     }
 
     val uiState by itemsViewModel.state.collectAsStateWithLifecycle()
@@ -101,11 +101,11 @@ fun ItemsScreen(
                 scope.launch { addItemSheetState.hide() }
             }
         },
-        onDeleteItem = { id -> itemsViewModel.processIntent(ItemsIntent.DeleteItem(id)) },
-        onMarkReady = { id, state ->
+        onDeleteItem = { item -> itemsViewModel.processIntent(ItemsIntent.DeleteItem(item)) },
+        onMarkReady = { item, state ->
             itemsViewModel.processIntent(
                 ItemsIntent.MarkReady(
-                    id,
+                    item,
                     state
                 )
             )
@@ -144,12 +144,8 @@ fun ItemsScreen(
             addItem = { addedItem ->
                 itemsViewModel.processIntent(
                     ItemsIntent.AddItem(
-                        Item(
-                            itemId = UUID.randomUUID().toString().take(6),
-                            content = addedItem.content.firstAsTitle(),
-                            listId = listId,
-                            note = addedItem.note
-                        )
+                        title = addedItem.content.firstAsTitle(),
+                        note = addedItem.note
                     )
                 )
             },
@@ -175,8 +171,8 @@ fun ItemsScreenContent(
     readyItems: List<Item>,
     isEmptyState: Boolean,
     handleAddItemSheet: (Boolean) -> Unit,
-    onMarkReady: (String, Boolean) -> Unit,
-    onDeleteItem: (String) -> Unit,
+    onMarkReady: (Item, Boolean) -> Unit,
+    onDeleteItem: (Item) -> Unit,
     goToBack: () -> Unit,
     clearReadyItems: () -> Unit,
     onEditItem: (Editable) -> Unit,
@@ -209,7 +205,7 @@ fun ItemsScreenContent(
                     IconButton(
                         onClick = {
                             showConfirmShareBottomSheet = true
-                                  },
+                        },
                         modifier = Modifier.padding(end = dimensionResource(R.dimen.inner_padding))
                     ) {
                         Icon(
@@ -257,7 +253,7 @@ fun ItemsScreenContent(
         } else {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(top = 4.dp,bottom = 144.dp),
+                contentPadding = PaddingValues(top = 4.dp, bottom = 144.dp),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(
@@ -271,9 +267,17 @@ fun ItemsScreenContent(
                         text = item.content,
                         note = item.note,
                         modifier = Modifier.animateItem(),
-                        onReady = { onMarkReady(item.itemId, true) },
-                        onDelete = { onDeleteItem(item.itemId) },
-                        onEdit = { onEditItem(Editable(item.itemId, item.content, note = item.note)) },
+                        onReady = { onMarkReady(item, true) },
+                        onDelete = { onDeleteItem(item) },
+                        onEdit = {
+                            onEditItem(
+                                Editable(
+                                    item.itemId,
+                                    item.content,
+                                    note = item.note
+                                )
+                            )
+                        },
                         onMoveToTop = { onMoveToTop(item.itemId, item.position) },
                         isFirst = index == 0
                     )
@@ -303,8 +307,8 @@ fun ItemsScreenContent(
                         ReadyItem(
                             text = item.content,
                             modifier = Modifier.animateItem(),
-                            onNotReady = { onMarkReady.invoke(item.itemId, false) },
-                            onDeleteItem = { onDeleteItem.invoke(item.itemId) })
+                            onNotReady = { onMarkReady.invoke(item, false) },
+                            onDeleteItem = { onDeleteItem.invoke(item) })
                     }
                 }
             }
@@ -358,11 +362,11 @@ fun ItemsScreenContentPreview() {
     ShoppingListTheme {
         ItemsScreenContent(
             "Title", listOf(
-            Item("333", "Item 777", "0", 0, false),
-            Item("444", "Item 2", "0", 1, false)
-        ), listOf(
-            Item("55", "Item 1", "0", 0, false),
-            Item("44774", "Item 2", "0", 1, false)
-        ), false, {}, { _, _ -> }, {}, {}, {}, {}, { _, _ -> },{})
+                Item("333", "Item 777", "0", 0, false),
+                Item("444", "Item 2", "0", 1, false)
+            ), listOf(
+                Item("55", "Item 1", "0", 0, false),
+                Item("44774", "Item 2", "0", 1, false)
+            ), false, {}, { _, _ -> }, {}, {}, {}, {}, { _, _ -> }, {})
     }
 }

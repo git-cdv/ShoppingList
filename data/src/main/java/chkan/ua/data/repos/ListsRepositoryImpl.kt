@@ -17,7 +17,7 @@ class ListsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
 
     override suspend fun addList(title: String) {
         val position = (dataSource.getMaxListPosition() ?: -1) + 1
-        dataSource.addList(ListEntity(listId = UUID.randomUUID().toString().take(6), title = title,position = position))
+        dataSource.addList(ListEntity(listId = UUID.randomUUID().toString().take(6), title = title,position = position,totalItems = 0, readyItems = 0))
     }
 
     override suspend fun deleteList(listId: String) {

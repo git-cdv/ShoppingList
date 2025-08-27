@@ -3,10 +3,12 @@ package chkan.ua.shoppinglist.ui.screens.items
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.usecases.history.AddItemInHistoryUseCase
+import chkan.ua.domain.usecases.items.ItemConfig
 import chkan.ua.domain.usecases.items.AddItemUseCase
 import chkan.ua.domain.usecases.items.ClearReadyItemsUseCase
 import chkan.ua.domain.usecases.items.DeleteItemUseCase
@@ -15,7 +17,7 @@ import chkan.ua.domain.usecases.items.GetItemsFlowUseCase
 import chkan.ua.domain.usecases.items.MarkReadyConfig
 import chkan.ua.domain.usecases.items.MarkReadyItemUseCase
 import chkan.ua.domain.usecases.items.MoveItemToTopUseCase
-import chkan.ua.domain.usecases.items.remote.GetRemoteItemsFlowUseCase
+import chkan.ua.domain.usecases.share.GetRemoteItemsFlowUseCase
 import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.domain.usecases.share.ShareListUseCase
 import chkan.ua.shoppinglist.components.history_list.HistoryComponent
@@ -39,6 +41,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import java.util.concurrent.Executors
 import javax.inject.Inject
 
@@ -57,13 +60,19 @@ class ItemsViewModel @Inject constructor(
     private val spService: SharedPreferencesService,
     private val moveToTop: MoveItemToTopUseCase,
     private val shareList: ShareListUseCase,
+    savedStateHandle: SavedStateHandle,
 ) : ComponentsViewModel() {
 
     init {
         attachComponent(historyComponent)
     }
 
-    private val _state = MutableStateFlow(ItemsState())
+    private val _state = MutableStateFlow(
+        ItemsState(
+            listId = savedStateHandle.get<String>("listId") ?: "",
+            isShared = savedStateHandle.get<Boolean>("isShared") ?: false
+        )
+    )
     val state: StateFlow<ItemsState> = _state.asStateFlow()
 
     private val _addItemBottomSheetState = mutableStateOf(AddItemBottomSheetState())
@@ -82,7 +91,13 @@ class ItemsViewModel @Inject constructor(
                 //TODO: check on optima
                 //work in main thread (ok for not huge data)
                 val (readyItems, notReadyItems) = items.partition { it.isReady }
-                _state.update { it.copy(isEmpty = items.isEmpty(), notReadyItems = notReadyItems, readyItems = readyItems) }
+                _state.update {
+                    it.copy(
+                        isEmpty = items.isEmpty(),
+                        notReadyItems = notReadyItems,
+                        readyItems = readyItems
+                    )
+                }
             }
             .launchIn(viewModelScope)
     }
@@ -93,7 +108,13 @@ class ItemsViewModel @Inject constructor(
         itemsObservationJob = getRemoteItemsFlow(remoteId)
             .onEach { items ->
                 val (readyItems, notReadyItems) = items.partition { it.isReady }
-                _state.update { it.copy(isEmpty = items.isEmpty(), notReadyItems = notReadyItems, readyItems = readyItems) }
+                _state.update {
+                    it.copy(
+                        isEmpty = items.isEmpty(),
+                        notReadyItems = notReadyItems,
+                        readyItems = readyItems
+                    )
+                }
             }
             .launchIn(viewModelScope)
     }
@@ -101,12 +122,12 @@ class ItemsViewModel @Inject constructor(
 
     fun processIntent(intent: ItemsIntent) {
         when (intent) {
-            is ItemsIntent.AddItem -> addItem(intent.item)
+            is ItemsIntent.AddItem -> addItem(intent.title, intent.note)
             is ItemsIntent.ClearReadyItems -> clearReadyItems(intent.listId)
-            is ItemsIntent.DeleteItem -> deleteItem(intent.id)
+            is ItemsIntent.DeleteItem -> deleteItem(intent.item)
             is ItemsIntent.EditItem -> editItem(intent.editable)
-            is ItemsIntent.MarkReady -> changeReadyInItem(intent.id,intent.state)
-            is ItemsIntent.MoveToTop -> moveToTop(MoveTop(intent.id,intent.position))
+            is ItemsIntent.MarkReady -> changeReadyInItem(intent.item, intent.state)
+            is ItemsIntent.MoveToTop -> moveToTop(MoveTop(intent.id, intent.position))
             is ItemsIntent.ShareList -> createShareList(intent.listId)
         }
     }
@@ -118,11 +139,12 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    fun createShareList(listId: String){
-        viewModelScope.launch (Dispatchers.IO) {
+    fun createShareList(listId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
             shareList(listId)
                 .onSuccess { remoteId ->
                     observeRemoteItems(remoteId)
+                    _state.update { it.copy(isShared = true, listId = remoteId) }
                 }
                 .onFailure {
                     Log.d("SHARE", "Share list creation failed: $it")
@@ -130,45 +152,55 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    private fun addItem(item: Item) {
-        viewModelScope.launch (Dispatchers.IO) {
+    private fun addItem(title: String, note: String?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val config = ItemConfig(
+                Item(
+                    itemId = UUID.randomUUID().toString().take(6),
+                    content = title,
+                    listId = _state.value.listId,
+                    note = note,
+                ), _state.value.isShared
+            )
             try {
-                addItem.run(item)
+                addItem.run(config)
                 delay(2000)
-                addInHistory.run(item.content)
-            } catch (e: Exception){
-                errorHandler.handle(e,addItem.getErrorReason(item))
+                addInHistory.run(title)
+            } catch (e: Exception) {
+                errorHandler.handle(e, addItem.getErrorReason(config))
             }
         }
     }
 
-    private fun deleteItem(id: String) {
-        viewModelScope.launch (Dispatchers.IO) {
+    private fun deleteItem(item: Item) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val config = ItemConfig(item, _state.value.isShared)
             try {
-                deleteItem.run(id)
-            } catch (e: Exception){
-                errorHandler.handle(e,deleteItem.getErrorReason())
+                deleteItem.run(config)
+            } catch (e: Exception) {
+                errorHandler.handle(e, deleteItem.getErrorReason())
             }
         }
     }
 
-    private fun changeReadyInItem(id: String, state: Boolean) {
-        viewModelScope.launch (singleThreadDispatcher) {
-            val config = MarkReadyConfig(id,state)
+    private fun changeReadyInItem(item: Item, state: Boolean) {
+        viewModelScope.launch(singleThreadDispatcher) {
+            val config =
+                MarkReadyConfig(item.itemId, listId = item.listId, state, _state.value.isShared)
             try {
                 markReady.run(config)
-            } catch (e: Exception){
-                errorHandler.handle(e,markReady.getErrorReason(config))
+            } catch (e: Exception) {
+                errorHandler.handle(e, markReady.getErrorReason(config))
             }
         }
     }
 
     private fun clearReadyItems(listId: String) {
-        viewModelScope.launch (Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 clearReadyItems.run(listId)
-            } catch (e: Exception){
-                errorHandler.handle(e,deleteItem.getErrorReason())
+            } catch (e: Exception) {
+                errorHandler.handle(e, deleteItem.getErrorReason())
             }
         }
     }
@@ -186,21 +218,21 @@ class ItemsViewModel @Inject constructor(
     }
 
     private fun editItem(edited: Editable) {
-        viewModelScope.launch (Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 editItem.run(edited)
-            } catch (e: Exception){
-                errorHandler.handle(e,editItem.getErrorReason(edited))
+            } catch (e: Exception) {
+                errorHandler.handle(e, editItem.getErrorReason(edited))
             }
         }
     }
 
     private fun moveToTop(config: MoveTop) {
-        viewModelScope.launch (Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 moveToTop.run(config)
-            } catch (e: Exception){
-                errorHandler.handle(e,moveToTop.getErrorReason())
+            } catch (e: Exception) {
+                errorHandler.handle(e, moveToTop.getErrorReason())
             }
         }
     }

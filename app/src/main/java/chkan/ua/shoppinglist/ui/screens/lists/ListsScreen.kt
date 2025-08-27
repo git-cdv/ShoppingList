@@ -220,16 +220,7 @@ fun ListsScreenContentPreview() {
                     title = "Commodo",
                     position = 1,
                     count = 4,
-                    readyCount = 2,
-                    items = listOf(
-                        Item(
-                            itemId = "5847",
-                            content = "senserit",
-                            listId = "8123",
-                            position = 75556,
-                            isReady = false
-                        )
-                    ), progress = ListProgress(count = 4, readyCount = 2), isShared = false
+                    readyCount = 2, progress = ListProgress(count = 4, readyCount = 2), isShared = false
                 )
             ), {}, {}, {}, { _, _ -> }, {})
     }
