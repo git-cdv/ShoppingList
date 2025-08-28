@@ -3,6 +3,7 @@ package chkan.ua.data.repos
 import chkan.ua.data.sources.RemoteDataSource
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.models.ListItems
+import chkan.ua.domain.models.ListSummary
 import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.repos.RemoteRepository
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,8 @@ class RemoteRepositoryImpl @Inject constructor(
 
     override fun getListWithItemsFlowById(listId: String): Flow<List<Item>> =
         dataSource.getListWithItemsFlowById(listId)
+
+    override fun getAllListsSummaryFlow(userId: String): Flow<List<ListSummary>> = dataSource.getAllListsSummaryFlow(userId)
 
     override suspend fun markItemReady(
         listId: String,
@@ -46,5 +49,13 @@ class RemoteRepositoryImpl @Inject constructor(
         editable: Editable
     ) {
         dataSource.editItem(listId, editable)
+    }
+
+    override suspend fun editList(config: Editable) {
+        dataSource.editList(config)
+    }
+
+    override suspend fun deleteList(listId: String){
+        dataSource.deleteList(listId)
     }
 }

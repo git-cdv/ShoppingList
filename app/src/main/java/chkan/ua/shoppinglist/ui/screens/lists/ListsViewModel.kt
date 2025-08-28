@@ -4,6 +4,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import chkan.ua.domain.models.ListItemsUi
+import chkan.ua.domain.objects.Deletable
 import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.lists.AddListUseCase
@@ -13,6 +15,7 @@ import chkan.ua.domain.usecases.lists.GetListsCountUseCase
 import chkan.ua.domain.usecases.lists.GetListsFlowUseCase
 import chkan.ua.domain.usecases.lists.MoveToTopUseCase
 import chkan.ua.domain.usecases.lists.MoveTop
+import chkan.ua.domain.usecases.share.GetSharedListsFlowUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
@@ -20,13 +23,18 @@ import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companio
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_TITLE_STR
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ListsViewModel @Inject constructor(
     getListsFlow: GetListsFlowUseCase,
+    private val getSharedListsFlow: GetSharedListsFlowUseCase,
     private val addList: AddListUseCase,
     private val getListsCount: GetListsCountUseCase,
     private val deleteList: DeleteListUseCase,
@@ -51,12 +59,27 @@ class ListsViewModel @Inject constructor(
         }
     }
 
-    val listsFlow = getListsFlow(Unit)
+    val localListsFlow = getListsFlow(Unit)
+
+    private val _sharedListsFlow = MutableStateFlow<List<ListItemsUi>>(emptyList())
+    val sharedListsFlow: StateFlow<List<ListItemsUi>> = _sharedListsFlow.asStateFlow()
+
+    private var sharedObservationJob: Job? = null
     private var isListsExist = false
 
     private val _isLoadReady = mutableStateOf(false)
     val isLoadReady: State<Boolean> = _isLoadReady
 
+    fun observeSharedLists() {
+        if (sharedObservationJob?.isActive == true) return
+
+        sharedObservationJob = viewModelScope.launch (Dispatchers.IO) {
+            getSharedListsFlow(Unit).collect {lists ->
+                _sharedListsFlow.value = lists
+                isListsExist = lists.isNotEmpty()
+            }
+        }
+    }
     fun addList(title: String){
         viewModelScope.launch (Dispatchers.IO) {
             try {
@@ -66,10 +89,10 @@ class ListsViewModel @Inject constructor(
             }
         }
     }
-    fun deleteList(id: String) {
+    fun onDeleteList(deletable: Deletable) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
-                deleteList.invoke(id)
+                deleteList(deletable)
             } catch (e: Exception){
                 errorHandler.handle(e,deleteList.getErrorReason())
             }
@@ -105,13 +128,18 @@ class ListsViewModel @Inject constructor(
         }
     }
 
-    fun editList(editable: Editable) {
+    fun onEditList(editable: Editable) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
-                editList.invoke(editable)
+                editList(editable)
             } catch (e: Exception){
                 errorHandler.handle(e,editList.getErrorReason(editable))
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        sharedObservationJob?.cancel()
     }
 }

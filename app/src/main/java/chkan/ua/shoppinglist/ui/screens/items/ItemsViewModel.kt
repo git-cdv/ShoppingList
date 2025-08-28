@@ -59,7 +59,7 @@ class ItemsViewModel @Inject constructor(
     private val errorHandler: ErrorHandler,
     private val historyComponent: HistoryComponent,
     private val spService: SharedPreferencesService,
-    private val moveToTop: MoveItemToTopUseCase,
+    private val moveToTopUseCase: MoveItemToTopUseCase,
     private val shareList: ShareListUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ComponentsViewModel() {
@@ -231,9 +231,9 @@ class ItemsViewModel @Inject constructor(
     private fun moveToTop(config: MoveTop) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                moveToTop(config)
+                moveToTopUseCase(config)
             } catch (e: Exception) {
-                errorHandler.handle(e, moveToTop.getErrorReason())
+                errorHandler.handle(e, moveToTopUseCase.getErrorReason())
             }
         }
     }

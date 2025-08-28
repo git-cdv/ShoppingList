@@ -1,10 +1,10 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -21,22 +21,20 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import chkan.ua.domain.models.Item
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.models.ListProgress
+import chkan.ua.domain.objects.Deletable
 import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.shoppinglist.R
@@ -55,8 +53,9 @@ fun ListsScreen(
     listsViewModel: ListsViewModel = hiltViewModel()
 ) {
     val navController = localNavController.current
-    val lists by listsViewModel.listsFlow.collectAsStateWithLifecycle(initialValue = listOf())
-    var argDeletedIdList by remember { mutableStateOf("") }
+    val lists by listsViewModel.localListsFlow.collectAsStateWithLifecycle(initialValue = listOf())
+    val sharedLists by listsViewModel.sharedListsFlow.collectAsStateWithLifecycle()
+    var argDeletedIdList by remember { mutableStateOf(Deletable()) }
     var editable by remember { mutableStateOf(Editable()) }
 
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -69,12 +68,14 @@ fun ListsScreen(
 
     LaunchedEffect(Unit) {
         listsViewModel.clearLastOpenedList()
+        listsViewModel.observeSharedLists()
     }
 
     ListsScreenContent(
         lists,
-        onDeleteList = { id ->
-            argDeletedIdList = id
+        sharedLists,
+        onDeleteList = { id, isShared ->
+            argDeletedIdList = Deletable(id,isShared)
             showConfirmBottomSheet = true
             scope.launch { confirmSheetState.show() }
         },
@@ -117,7 +118,7 @@ fun ListsScreen(
         EditBottomSheet(
             editSheetState,
             onDismiss = { showEditBottomSheet = false },
-            onEdit = { edited -> listsViewModel.editList(edited) },
+            onEdit = { edited -> listsViewModel.onEditList(edited) },
             editable = editable
         )
     }
@@ -128,7 +129,7 @@ fun ListsScreen(
             question = stringResource(id = R.string.sure_delete_list),
             onConfirm = {
                 scope.launch {
-                    listsViewModel.deleteList(argDeletedIdList)
+                    listsViewModel.onDeleteList(argDeletedIdList)
                     confirmSheetState.hide()
                     showConfirmBottomSheet = false
                 }
@@ -147,7 +148,8 @@ fun ListsScreen(
 @Composable
 fun ListsScreenContent(
     lists: List<ListItemsUi>,
-    onDeleteList: (String) -> Unit,
+    sharedLists: List<ListItemsUi>,
+    onDeleteList: (String,Boolean) -> Unit,
     onCreateList: () -> Unit,
     onEditList: (Editable) -> Unit,
     onMoveToTop: (String, Int) -> Unit,
@@ -199,11 +201,25 @@ fun ListsScreenContent(
                     list = list,
                     modifier = Modifier.animateItem(),
                     onEditList = onEditList,
-                    onDeleteList = { onDeleteList(list.id) },
+                    onDeleteList = { onDeleteList(list.id,false) },
                     onMoveToTop = { onMoveToTop(list.id, list.position) },
                     onCardClick = { goToItems(list) },
                     isFirst = index == 0
                 )
+            }
+            if (sharedLists.isNotEmpty()) {
+                item { Text("Shared") }
+                items(sharedLists, key = { it.id }) { list ->
+                    ListItem(
+                        list = list,
+                        modifier = Modifier.animateItem(),
+                        onEditList = onEditList,
+                        onDeleteList = { onDeleteList(list.id,true) },
+                        onMoveToTop = { },
+                        onCardClick = { goToItems(list) },
+                        isFirst = false
+                    )
+                }
             }
         }
     }
@@ -213,15 +229,16 @@ fun ListsScreenContent(
 @Composable
 fun ListsScreenContentPreview() {
     ShoppingListTheme {
+        val list = listOf(
+            ListItemsUi(
+                id = "6187",
+                title = "Commodo",
+                position = 1,
+                count = 4,
+                readyCount = 2, progress = ListProgress(count = 4, readyCount = 2), isShared = false
+            )
+        )
         ListsScreenContent(
-            listOf(
-                ListItemsUi(
-                    id = "6187",
-                    title = "Commodo",
-                    position = 1,
-                    count = 4,
-                    readyCount = 2, progress = ListProgress(count = 4, readyCount = 2), isShared = false
-                )
-            ), {}, {}, {}, { _, _ -> }, {})
+            list, list, {_,_->}, {}, {}, { _, _ -> }) {}
     }
 }

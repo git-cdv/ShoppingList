@@ -36,46 +36,6 @@ class FirestoreSourceImpl @Inject constructor (
         return docRef.id
     }
 
-    override fun getListWithItemsFlowById(listId: String): Flow<List<Item>> {
-        return callbackFlow {
-            val listenerRegistration = firestore
-                .collection(collectionPath)
-                .document(listId)
-                .addSnapshotListener { documentSnapshot, error ->
-                    if (error != null) {
-                        logger.e(error,"getListWithItemsFlowById e:$error")
-                        close(error)
-                        return@addSnapshotListener
-                    }
-
-                    if (documentSnapshot != null && documentSnapshot.exists()) {
-                        try {
-                            val items = documentSnapshot.get("items") as? List<Map<String, Any>>
-                            val itemsList = items?.map { itemMap ->
-                                Item(
-                                    itemId = itemMap["itemId"] as? String ?: "",
-                                    content = itemMap["content"] as? String ?: "",
-                                    listId = itemMap["listId"] as? String ?: "",
-                                    position = itemMap["position"] as? Int ?: 0,
-                                    isReady = itemMap["ready"] as? Boolean ?: false,
-                                    note = itemMap["note"] as? String,
-                                )
-                            } ?: emptyList()
-
-                            trySend(itemsList)
-                        } catch (e: Exception) {
-                            logger.e(e,"getListWithItemsFlowById e:$e")
-                            close(e)
-                        }
-                    } else {
-                        trySend(emptyList())
-                    }
-                }
-
-            awaitClose { listenerRegistration.remove() }
-        }.flowOn(Dispatchers.IO)
-    }
-
     override fun getAllListsSummaryFlow(userId: String): Flow<List<ListSummary>> {
         return callbackFlow {
             val listenerRegistration = firestore
@@ -109,6 +69,46 @@ class FirestoreSourceImpl @Inject constructor (
                             trySend(listsSummary)
                         } catch (e: Exception) {
                             logger.e(e, "getAllListsSummaryFlow parsing error: $e")
+                            close(e)
+                        }
+                    } else {
+                        trySend(emptyList())
+                    }
+                }
+
+            awaitClose { listenerRegistration.remove() }
+        }.flowOn(Dispatchers.IO)
+    }
+
+    override fun getListWithItemsFlowById(listId: String): Flow<List<Item>> {
+        return callbackFlow {
+            val listenerRegistration = firestore
+                .collection(collectionPath)
+                .document(listId)
+                .addSnapshotListener { documentSnapshot, error ->
+                    if (error != null) {
+                        logger.e(error,"getListWithItemsFlowById e:$error")
+                        close(error)
+                        return@addSnapshotListener
+                    }
+
+                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                        try {
+                            val items = documentSnapshot.get("items") as? List<Map<String, Any>>
+                            val itemsList = items?.map { itemMap ->
+                                Item(
+                                    itemId = itemMap["itemId"] as? String ?: "",
+                                    content = itemMap["content"] as? String ?: "",
+                                    listId = itemMap["listId"] as? String ?: "",
+                                    position = itemMap["position"] as? Int ?: 0,
+                                    isReady = itemMap["ready"] as? Boolean ?: false,
+                                    note = itemMap["note"] as? String,
+                                )
+                            } ?: emptyList()
+
+                            trySend(itemsList)
+                        } catch (e: Exception) {
+                            logger.e(e,"getListWithItemsFlowById e:$e")
                             close(e)
                         }
                     } else {
@@ -238,6 +238,16 @@ class FirestoreSourceImpl @Inject constructor (
 
             transaction.update(docRef, "items", updatedItems)
         }.await()
+    }
+
+    override suspend fun editList(config: Editable) {
+        val docRef = firestore.collection(collectionPath).document(config.id)
+        docRef.update("title", config.title).await()
+    }
+
+    override suspend fun deleteList(listId: String){
+        val docRef = firestore.collection(collectionPath).document(listId)
+        docRef.delete().await()
     }
 
     private fun ListItems.toRemoteModel(createdBy: String, docRefId: String): HashMap<String, Any> {

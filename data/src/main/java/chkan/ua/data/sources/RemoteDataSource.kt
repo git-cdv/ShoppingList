@@ -15,4 +15,6 @@ interface RemoteDataSource {
     suspend fun deleteItem(listId: String, itemId: String, wasReady: Boolean)
     suspend fun clearReadyItems(listId: String)
     suspend fun editItem(listId: String, editable: Editable)
+    suspend fun editList(config: Editable)
+    suspend fun deleteList(listId: String)
 }

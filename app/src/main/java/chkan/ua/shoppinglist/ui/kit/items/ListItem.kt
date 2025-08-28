@@ -123,10 +123,10 @@ fun ListItem(
                     isMenuExpanded = isMenuExpanded,
                     onDismissRequest = { isMenuExpanded = false },
                     listItems = mutableListOf<MenuItem>().apply {
-                        if (!isFirst){
+                        if (!isFirst && !list.isShared){
                             add(MenuItem(title = stringResource(id = R.string.moveToTop), onClick = { onMoveToTop.invoke() }))
                         }
-                        add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onEditList.invoke(Editable(list.id, list.title)) }))
+                        add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onEditList.invoke(Editable(list.id, list.title, isShared = list.isShared)) }))
                         add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onDeleteList.invoke()}))
                     }
                 )
