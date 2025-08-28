@@ -100,13 +100,13 @@ class FirestoreSourceImpl @Inject constructor (
                                     itemId = itemMap["itemId"] as? String ?: "",
                                     content = itemMap["content"] as? String ?: "",
                                     listId = itemMap["listId"] as? String ?: "",
-                                    position = itemMap["position"] as? Int ?: 0,
+                                    position = (itemMap["position"] as? Long)?.toInt() ?: 0,
                                     isReady = itemMap["ready"] as? Boolean ?: false,
                                     note = itemMap["note"] as? String,
                                 )
                             } ?: emptyList()
 
-                            trySend(itemsList)
+                            trySend(itemsList.sortedBy { it.position })
                         } catch (e: Exception) {
                             logger.e(e,"getListWithItemsFlowById e:$e")
                             close(e)
