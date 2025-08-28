@@ -3,6 +3,7 @@ package chkan.ua.data.repos
 import chkan.ua.data.sources.RemoteDataSource
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.models.ListItems
+import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.repos.RemoteRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -38,5 +39,12 @@ class RemoteRepositoryImpl @Inject constructor(
 
     override suspend fun clearReadyItems(listId: String) {
         dataSource.clearReadyItems(listId)
+    }
+
+    override suspend fun editItem(
+        listId: String,
+        editable: Editable
+    ) {
+        dataSource.editItem(listId, editable)
     }
 }

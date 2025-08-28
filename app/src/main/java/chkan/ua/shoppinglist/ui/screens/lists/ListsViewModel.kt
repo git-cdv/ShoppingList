@@ -41,7 +41,7 @@ class ListsViewModel @Inject constructor(
             val splashMinShowTime = 200L
 
             val dataJob = launch {
-                val count = getListsCount.run(Unit)
+                val count = getListsCount.invoke(Unit)
                 isListsExist = count > 0
             }
 
@@ -60,7 +60,7 @@ class ListsViewModel @Inject constructor(
     fun addList(title: String){
         viewModelScope.launch (Dispatchers.IO) {
             try {
-                addList.run(title)
+                addList.invoke(title)
             } catch (e: Exception){
                 errorHandler.handle(e,addList.getErrorReason())
             }
@@ -69,7 +69,7 @@ class ListsViewModel @Inject constructor(
     fun deleteList(id: String) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
-                deleteList.run(id)
+                deleteList.invoke(id)
             } catch (e: Exception){
                 errorHandler.handle(e,deleteList.getErrorReason())
             }
@@ -81,7 +81,7 @@ class ListsViewModel @Inject constructor(
     fun moveToTop(config: MoveTop) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
-                moveToTop.run(config)
+                moveToTop.invoke(config)
             } catch (e: Exception){
                 errorHandler.handle(e,moveToTop.getErrorReason())
             }
@@ -108,7 +108,7 @@ class ListsViewModel @Inject constructor(
     fun editList(editable: Editable) {
         viewModelScope.launch (Dispatchers.IO) {
             try {
-                editList.run(editable)
+                editList.invoke(editable)
             } catch (e: Exception){
                 errorHandler.handle(e,editList.getErrorReason(editable))
             }

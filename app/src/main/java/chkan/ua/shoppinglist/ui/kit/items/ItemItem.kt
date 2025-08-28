@@ -51,7 +51,8 @@ fun ItemItem(
     onDelete: () -> Unit,
     onEdit: () -> Unit,
     onMoveToTop: () -> Unit,
-    isFirst: Boolean
+    isFirst: Boolean,
+    isShared: Boolean,
 ) {
     Card(
         onClick = { onReady.invoke() },
@@ -113,7 +114,7 @@ fun ItemItem(
                     isMenuExpanded = isMenuExpanded,
                     onDismissRequest = { isMenuExpanded = false },
                     listItems = mutableListOf<MenuItem>().apply {
-                        if (!isFirst){
+                        if (!isFirst && !isShared){
                             add(MenuItem(title = stringResource(id = R.string.moveToTop), onClick = { onMoveToTop.invoke() }))
                         }
                         add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onEdit.invoke() }))
@@ -129,6 +130,6 @@ fun ItemItem(
 @Composable
 fun ItemPreview() {
     ShoppingListTheme {
-        ItemItem("Products","Notes",Modifier,{},{},{},{}, false)
+        ItemItem("Products","Notes",Modifier,{},{},{},{}, false,false)
     }
 }

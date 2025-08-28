@@ -10,7 +10,7 @@ class DeleteItemUseCase @Inject constructor(
     private val remoteRepository: RemoteRepository
 ) : SuspendUseCase<ItemConfig> {
 
-    override suspend fun run(config: ItemConfig) {
+    override suspend fun invoke(config: ItemConfig) {
         if (config.isShared){
             remoteRepository.deleteItem(config.item.listId, config.item.itemId,config.item.isReady)
         } else {

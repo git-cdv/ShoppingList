@@ -10,7 +10,7 @@ class MarkReadyItemUseCase @Inject constructor(
     private val remoteRepository: RemoteRepository
 ) : SuspendUseCase<MarkReadyConfig> {
 
-    override suspend fun run(config: MarkReadyConfig) {
+    override suspend fun invoke(config: MarkReadyConfig) {
         if (config.isShared){
             remoteRepository.markItemReady(config.listId, config.itemId,config.state)
         } else {

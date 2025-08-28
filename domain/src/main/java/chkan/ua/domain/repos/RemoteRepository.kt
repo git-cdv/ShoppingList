@@ -2,6 +2,7 @@ package chkan.ua.domain.repos
 
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.models.ListItems
+import chkan.ua.domain.objects.Editable
 import kotlinx.coroutines.flow.Flow
 
 interface RemoteRepository {
@@ -12,4 +13,5 @@ interface RemoteRepository {
     suspend fun addItem(item: Item)
     suspend fun deleteItem(listId: String, itemId: String, wasReady: Boolean)
     suspend fun clearReadyItems(listId: String)
+    suspend fun editItem(listId: String, editable: Editable)
 }

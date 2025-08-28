@@ -8,7 +8,7 @@ class GetListsCountUseCase @Inject constructor(
     private val listsRepository: ListsRepository
 ) : SuspendUseCase<Unit> {
 
-    override suspend fun run(config: Unit) = listsRepository.getListCount()
+    override suspend fun invoke(config: Unit) = listsRepository.getListCount()
 
     override fun getErrorReason(config: Unit?) = "Failed to get list count"
 }

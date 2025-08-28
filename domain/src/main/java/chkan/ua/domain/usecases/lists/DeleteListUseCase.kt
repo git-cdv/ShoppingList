@@ -8,7 +8,7 @@ class DeleteListUseCase @Inject constructor(
     private val listsRepository: ListsRepository
 ) : SuspendUseCase<String> {
 
-    override suspend fun run(config: String) {
+    override suspend fun invoke(config: String) {
         listsRepository.deleteList(config)
     }
 

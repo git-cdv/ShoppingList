@@ -9,7 +9,7 @@ class MoveItemToTopUseCase @Inject constructor(
     private val itemsRepository: ItemsRepository
 ) : SuspendUseCase<MoveTop> {
 
-    override suspend fun run(config: MoveTop) {
+    override suspend fun invoke(config: MoveTop) {
         itemsRepository.moveToTop(config.id, config.position)
     }
 

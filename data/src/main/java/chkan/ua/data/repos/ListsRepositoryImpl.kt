@@ -34,8 +34,4 @@ class ListsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
         return dataSource.getListWithItemsById(listId)?.mapToListItem()
     }
 
-    override suspend fun replaceSharedList(listId: String, remoteId: String) {
-        dataSource.replaceSharedList(listId, remoteId)
-    }
-
 }

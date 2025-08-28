@@ -8,7 +8,7 @@ class MoveToTopUseCase @Inject constructor(
     private val listsRepository: ListsRepository
 ) : SuspendUseCase<MoveTop> {
 
-    override suspend fun run(config: MoveTop) {
+    override suspend fun invoke(config: MoveTop) {
         listsRepository.moveToTop(config.id, config.position)
     }
 

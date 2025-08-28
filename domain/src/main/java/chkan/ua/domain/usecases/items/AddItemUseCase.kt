@@ -11,7 +11,7 @@ class AddItemUseCase @Inject constructor(
     private val remoteRepository: RemoteRepository
 ) : SuspendUseCase<ItemConfig> {
 
-    override suspend fun run(config: ItemConfig) {
+    override suspend fun invoke(config: ItemConfig) {
         if (config.isShared){
             remoteRepository.addItem(config.item)
         } else {

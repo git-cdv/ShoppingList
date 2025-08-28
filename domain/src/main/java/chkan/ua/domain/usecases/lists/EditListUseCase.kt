@@ -9,7 +9,7 @@ class EditListUseCase @Inject constructor(
     private val listsRepository: ListsRepository
 ) : SuspendUseCase<Editable> {
 
-    override suspend fun run(config: Editable) {
+    override suspend fun invoke(config: Editable) {
         listsRepository.updateTitle(config)
     }
 

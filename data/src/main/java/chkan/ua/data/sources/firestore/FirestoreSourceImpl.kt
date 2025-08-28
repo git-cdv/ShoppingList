@@ -5,6 +5,7 @@ import chkan.ua.domain.Logger
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.models.ListItems
 import chkan.ua.domain.models.ListSummary
+import chkan.ua.domain.objects.Editable
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
@@ -207,21 +208,37 @@ class FirestoreSourceImpl @Inject constructor (
         firestore.runTransaction { transaction ->
             val document = transaction.get(docRef)
             val items = document.get("items") as? List<Map<String, Any>> ?: emptyList()
-
-            // Фильтруем только неготовые items
+            
             val notReadyItems = items.filter { !(it["ready"] as? Boolean ?: false) }
             val readyItemsCount = items.size - notReadyItems.size
 
             transaction.update(docRef, mapOf(
                 "items" to notReadyItems,
                 "totalItems" to FieldValue.increment(-readyItemsCount.toLong()),
-                "readyItems" to 0 // Сбрасываем счетчик готовых в 0
+                "readyItems" to 0
             ))
         }.await()
     }
 
+    override suspend fun editItem(listId: String, editable: Editable) {
+        val docRef = firestore.collection(collectionPath).document(listId)
 
+        firestore.runTransaction { transaction ->
+            val document = transaction.get(docRef)
+            val items = document.get("items") as? List<Map<String, Any>> ?: emptyList()
 
+            val updatedItems = items.map { existingItem ->
+                if (existingItem["itemId"] == editable.id) {
+                    existingItem.toMutableMap().apply {
+                        put("content", editable.title)
+                        editable.note?.let { put("note", it) }
+                    }
+                } else existingItem
+            }
+
+            transaction.update(docRef, "items", updatedItems)
+        }.await()
+    }
 
     private fun ListItems.toRemoteModel(createdBy: String, docRefId: String): HashMap<String, Any> {
         val readyCount = this.items.count { it.isReady }

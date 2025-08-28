@@ -10,6 +10,7 @@ import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.usecases.history.AddItemInHistoryUseCase
 import chkan.ua.domain.usecases.items.ItemConfig
 import chkan.ua.domain.usecases.items.AddItemUseCase
+import chkan.ua.domain.usecases.items.ClearReadyConfig
 import chkan.ua.domain.usecases.items.ClearReadyItemsUseCase
 import chkan.ua.domain.usecases.items.DeleteItemUseCase
 import chkan.ua.domain.usecases.items.EditItemUseCase
@@ -52,7 +53,7 @@ class ItemsViewModel @Inject constructor(
     private val addItem: AddItemUseCase,
     private val markReady: MarkReadyItemUseCase,
     private val deleteItem: DeleteItemUseCase,
-    private val editItem: EditItemUseCase,
+    private val editItemUseCase: EditItemUseCase,
     private val clearReadyItems: ClearReadyItemsUseCase,
     private val addInHistory: AddItemInHistoryUseCase,
     private val errorHandler: ErrorHandler,
@@ -163,9 +164,9 @@ class ItemsViewModel @Inject constructor(
                 ), _state.value.isShared
             )
             try {
-                addItem.run(config)
+                addItem(config)
                 delay(2000)
-                addInHistory.run(title)
+                addInHistory(title)
             } catch (e: Exception) {
                 errorHandler.handle(e, addItem.getErrorReason(config))
             }
@@ -176,7 +177,7 @@ class ItemsViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val config = ItemConfig(item, _state.value.isShared)
             try {
-                deleteItem.run(config)
+                deleteItem(config)
             } catch (e: Exception) {
                 errorHandler.handle(e, deleteItem.getErrorReason())
             }
@@ -188,7 +189,7 @@ class ItemsViewModel @Inject constructor(
             val config =
                 MarkReadyConfig(item.itemId, listId = item.listId, state, _state.value.isShared)
             try {
-                markReady.run(config)
+                markReady(config)
             } catch (e: Exception) {
                 errorHandler.handle(e, markReady.getErrorReason(config))
             }
@@ -198,7 +199,7 @@ class ItemsViewModel @Inject constructor(
     private fun clearReadyItems(listId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                clearReadyItems.run(listId)
+                clearReadyItems(ClearReadyConfig(listId, _state.value.isShared))
             } catch (e: Exception) {
                 errorHandler.handle(e, deleteItem.getErrorReason())
             }
@@ -220,9 +221,9 @@ class ItemsViewModel @Inject constructor(
     private fun editItem(edited: Editable) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                editItem.run(edited)
+                editItemUseCase(edited.copy(listId = _state.value.listId, isShared = _state.value.isShared))
             } catch (e: Exception) {
-                errorHandler.handle(e, editItem.getErrorReason(edited))
+                errorHandler.handle(e, editItemUseCase.getErrorReason(edited))
             }
         }
     }
@@ -230,7 +231,7 @@ class ItemsViewModel @Inject constructor(
     private fun moveToTop(config: MoveTop) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                moveToTop.run(config)
+                moveToTop(config)
             } catch (e: Exception) {
                 errorHandler.handle(e, moveToTop.getErrorReason())
             }
