@@ -53,6 +53,7 @@ import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddListBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.EditBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ListItem
+import chkan.ua.shoppinglist.ui.kit.items.ListRole
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
@@ -83,29 +84,37 @@ fun ListsScreen(
     ListsScreenContent(
         lists,
         sharedLists,
-        onDeleteList = { id, isShared ->
-            argDeletedIdList = Deletable(id, isShared)
-            showConfirmBottomSheet = true
-            scope.launch { confirmSheetState.show() }
-        },
-        onCreateList = {
-            showBottomSheet = true
-            scope.launch { sheetState.show() }
-        },
-        onMoveToTop = { id, position -> listsViewModel.moveToTop(MoveTop(id, position)) },
-        goToItems = { list ->
-            navController.navigate(
-                ItemsRoute(
-                    list.id,
-                    list.title,
-                    list.isShared
-                )
-            )
-        },
-        onEditList = { editedList ->
-            editable = editedList
-            showEditBottomSheet = true
-            scope.launch { editSheetState.show() }
+        onListEvent = { event ->
+            when(event){
+                is ListUiEvent.OnCardClick -> {
+                    navController.navigate(
+                        ItemsRoute(
+                            event.list.id,
+                            event.list.title,
+                            event.list.isShared
+                        )
+                    )
+                }
+                ListUiEvent.OnCreateList -> {
+                    showBottomSheet = true
+                    scope.launch { sheetState.show() }
+                }
+                is ListUiEvent.OnDeleteList -> {
+                    argDeletedIdList = Deletable(event.listId, event.isShared)
+                    showConfirmBottomSheet = true
+                    scope.launch { confirmSheetState.show() }
+                }
+                is ListUiEvent.OnEditList -> {
+                    editable = event.editable
+                    showEditBottomSheet = true
+                    scope.launch { editSheetState.show() }
+                }
+                is ListUiEvent.OnMoveToTop -> {
+                    listsViewModel.moveToTop(MoveTop(event.listId, event.position))
+                }
+                is ListUiEvent.OnStopSharing -> {}
+                is ListUiEvent.OnStopFollowing -> {}
+            }
         }
     )
 
@@ -159,11 +168,7 @@ fun ListsScreen(
 fun ListsScreenContent(
     lists: List<ListItemsUi>,
     sharedLists: List<ListItemsUi>,
-    onDeleteList: (String, Boolean) -> Unit,
-    onCreateList: () -> Unit,
-    onEditList: (Editable) -> Unit,
-    onMoveToTop: (String, Int) -> Unit,
-    goToItems: (ListItemsUi) -> Unit
+    onListEvent: (ListUiEvent) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val listState = rememberLazyListState()
@@ -206,7 +211,7 @@ fun ListsScreenContent(
                 exit = fadeOut() + slideOutVertically { it }
             ) {
                 FloatingActionButton(
-                    onClick = { onCreateList.invoke() },
+                    onClick = { onListEvent(ListUiEvent.OnCreateList) },
                     containerColor = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .padding(dimensionResource(id = R.dimen.root_padding))
@@ -232,11 +237,9 @@ fun ListsScreenContent(
                 ListItem(
                     list = list,
                     modifier = Modifier.animateItem(),
-                    onEditList = onEditList,
-                    onDeleteList = { onDeleteList(list.id, false) },
-                    onMoveToTop = { onMoveToTop(list.id, list.position) },
-                    onCardClick = { goToItems(list) },
-                    isFirst = index == 0
+                    onListEvent = onListEvent,
+                    isFirst = index == 0,
+                    role = ListRole.LOCAL
                 )
             }
             if (sharedLists.isNotEmpty()) {
@@ -252,11 +255,9 @@ fun ListsScreenContent(
                     ListItem(
                         list = list,
                         modifier = Modifier.animateItem(),
-                        onEditList = onEditList,
-                        onDeleteList = { onDeleteList(list.id, true) },
-                        onMoveToTop = { },
-                        onCardClick = { goToItems(list) },
-                        isFirst = false
+                        onListEvent = onListEvent,
+                        isFirst = false,
+                        role = if (list.isOwner) ListRole.SHARED_OWNER else ListRole.SHARED_MEMBER
                     )
                 }
             }
@@ -278,6 +279,6 @@ fun ListsScreenContentPreview() {
             )
         )
         ListsScreenContent(
-            list, list, { _, _ -> }, {}, {}, { _, _ -> }) {}
+            list, list, {_->})
     }
 }

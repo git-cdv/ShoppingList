@@ -8,6 +8,7 @@ data class ListItemsUi(
     val readyCount: Int,
     val progress: ListProgress,
     val isShared: Boolean,
+    val isOwner: Boolean = true
 )
 
 fun List<ListItems>.toUiModels() : List<ListItemsUi>{

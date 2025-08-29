@@ -54,6 +54,7 @@ class FirestoreSourceImpl @Inject constructor (
                             val listsSummary = querySnapshot.documents.mapNotNull { document ->
                                 val id = document.getString("id") ?: return@mapNotNull null
                                 val title = document.getString("title") ?: return@mapNotNull null
+                                val createdBy = document.getString("createdBy") ?: return@mapNotNull null
 
                                 // Теперь просто читаем счетчики, не загружая items!
                                 val totalItems = document.getLong("totalItems")?.toInt() ?: 0
@@ -63,7 +64,8 @@ class FirestoreSourceImpl @Inject constructor (
                                     id = id,
                                     title = title,
                                     totalItems = totalItems,
-                                    readyItems = readyItems
+                                    readyItems = readyItems,
+                                    isOwner = userId == createdBy
                                 )
                             }
 

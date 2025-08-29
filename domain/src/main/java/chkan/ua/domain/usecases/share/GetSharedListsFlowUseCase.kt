@@ -32,7 +32,8 @@ private fun List<ListSummary>.toUiModels(): List<ListItemsUi> {
             count = it.totalItems,
             readyCount = it.readyItems,
             progress = ListProgress(it.totalItems, it.readyItems),
-            isShared = true
+            isShared = true,
+            isOwner = it.isOwner
         )
     }
 }

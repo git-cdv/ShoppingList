@@ -36,4 +36,6 @@
     <string name="add_note">Add Note</string>
     <string name="sure_share_list">Would you like to share this list with invited users?</string>
     <string name="shared_lists">Shared Lists</string>
+    <string name="stop_sharing">Stop sharing</string>
+    <string name="unfollow">Unfollow</string>
 </resources>

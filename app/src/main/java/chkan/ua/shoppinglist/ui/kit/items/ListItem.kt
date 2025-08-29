@@ -33,20 +33,19 @@ import chkan.ua.domain.objects.Editable
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.core.models.MenuItem
 import chkan.ua.shoppinglist.ui.kit.BaseDropdownMenu
+import chkan.ua.shoppinglist.ui.screens.lists.ListUiEvent
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 
 @Composable
 fun ListItem(
     list: ListItemsUi,
     modifier: Modifier,
-    onEditList: (Editable) -> Unit,
-    onDeleteList: () -> Unit,
-    onMoveToTop: () -> Unit,
-    onCardClick: () -> Unit,
-    isFirst: Boolean)
-{
+    onListEvent: (ListUiEvent) -> Unit,
+    isFirst: Boolean,
+    role: ListRole
+) {
     Card(
-        onClick = { onCardClick.invoke() },
+        onClick = { onListEvent(ListUiEvent.OnCardClick(list)) },
         shape = RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)),
         modifier = modifier
             .fillMaxWidth()
@@ -122,18 +121,51 @@ fun ListItem(
                 BaseDropdownMenu(
                     isMenuExpanded = isMenuExpanded,
                     onDismissRequest = { isMenuExpanded = false },
-                    listItems = mutableListOf<MenuItem>().apply {
-                        if (!isFirst && !list.isShared){
-                            add(MenuItem(title = stringResource(id = R.string.moveToTop), onClick = { onMoveToTop.invoke() }))
-                        }
-                        add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onEditList.invoke(Editable(list.id, list.title, isShared = list.isShared)) }))
-                        add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onDeleteList.invoke()}))
-                    }
+                    listItems = getMenuItems(
+                        role = role,
+                        list = list,
+                        onListEvent = onListEvent,
+                        isFirst = isFirst
+                    )
                 )
             }
         }
     }
 }
+
+@Composable
+fun getMenuItems(
+    role: ListRole,
+    list: ListItemsUi,
+    onListEvent: (ListUiEvent) -> Unit,
+    isFirst: Boolean,
+): List<MenuItem> {
+    return when (role) {
+        ListRole.LOCAL -> {
+            mutableListOf<MenuItem>().apply {
+                if (!isFirst){
+                    add(MenuItem(title = stringResource(id = R.string.moveToTop), onClick = { onListEvent(ListUiEvent.OnMoveToTop(list.id,list.position)) }))
+                }
+                add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onListEvent(ListUiEvent.OnEditList(Editable(list.id, list.title, isShared = list.isShared))) }))
+                add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onListEvent(ListUiEvent.OnDeleteList(list.id,  list.isShared))}))
+            }
+        }
+        ListRole.SHARED_OWNER -> {
+            mutableListOf<MenuItem>().apply {
+                add(MenuItem(title = stringResource(id = R.string.stop_sharing), onClick = { onListEvent(ListUiEvent.OnStopSharing(list.id))}))
+                add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onListEvent(ListUiEvent.OnEditList(Editable(list.id, list.title, isShared = list.isShared))) }))
+                add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onListEvent(ListUiEvent.OnDeleteList(list.id,  list.isShared))}))
+            }
+        }
+        ListRole.SHARED_MEMBER -> {
+            mutableListOf<MenuItem>().apply {
+                add(MenuItem(title = stringResource(id = R.string.unfollow), onClick = { onListEvent(ListUiEvent.OnStopFollowing(list.id))}))
+            }
+        }
+    }
+}
+
+enum class ListRole {LOCAL, SHARED_OWNER, SHARED_MEMBER}
 
 @Preview(showBackground = true)
 @Composable
@@ -147,6 +179,6 @@ fun ListItemPreview() {
             readyCount = 2,
             progress = ListProgress(count = 5, readyCount = 2),
             isShared = false
-        ), Modifier,{},{},{},{}, false)
+        ), Modifier,{}, false, ListRole.LOCAL)
     }
 }
