@@ -1,5 +1,10 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
@@ -77,7 +84,7 @@ fun ListsScreen(
         lists,
         sharedLists,
         onDeleteList = { id, isShared ->
-            argDeletedIdList = Deletable(id,isShared)
+            argDeletedIdList = Deletable(id, isShared)
             showConfirmBottomSheet = true
             scope.launch { confirmSheetState.show() }
         },
@@ -152,13 +159,28 @@ fun ListsScreen(
 fun ListsScreenContent(
     lists: List<ListItemsUi>,
     sharedLists: List<ListItemsUi>,
-    onDeleteList: (String,Boolean) -> Unit,
+    onDeleteList: (String, Boolean) -> Unit,
     onCreateList: () -> Unit,
     onEditList: (Editable) -> Unit,
     onMoveToTop: (String, Int) -> Unit,
     goToItems: (ListItemsUi) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val listState = rememberLazyListState()
+    var fabVisible by remember { mutableStateOf(true) }
+
+    LaunchedEffect(listState) {
+        var lastScroll = 0
+        snapshotFlow { listState.firstVisibleItemScrollOffset }
+            .collect { offset ->
+                if (offset > lastScroll) {
+                    fabVisible = false // скроллим вниз → скрыть FAB
+                } else if (offset < lastScroll) {
+                    fabVisible = true // скроллим вверх → показать FAB
+                }
+                lastScroll = offset
+            }
+    }
 
     Scaffold(
         modifier = Modifier
@@ -178,43 +200,60 @@ fun ListsScreenContent(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onCreateList.invoke() },
-                containerColor = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .padding(dimensionResource(id = R.dimen.root_padding))
+            AnimatedVisibility(
+                visible = fabVisible,
+                enter = fadeIn() + slideInVertically { it },
+                exit = fadeOut() + slideOutVertically { it }
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add List")
+                FloatingActionButton(
+                    onClick = { onCreateList.invoke() },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .padding(dimensionResource(id = R.dimen.root_padding))
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add List")
+                }
             }
         },
         floatingActionButtonPosition = FabPosition.End
     ) { paddingValue ->
 
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = dimensionResource(R.dimen.root_padding)),
-            contentPadding = PaddingValues(top = paddingValue.calculateTopPadding(), bottom = paddingValue.calculateBottomPadding() + 8.dp),
+            contentPadding = PaddingValues(
+                top = paddingValue.calculateTopPadding(),
+                bottom = paddingValue.calculateBottomPadding() + 8.dp
+            ),
         ) {
             itemsIndexed(lists, key = { _, item -> item.id }) { index, list ->
                 ListItem(
                     list = list,
                     modifier = Modifier.animateItem(),
                     onEditList = onEditList,
-                    onDeleteList = { onDeleteList(list.id,false) },
+                    onDeleteList = { onDeleteList(list.id, false) },
                     onMoveToTop = { onMoveToTop(list.id, list.position) },
                     onCardClick = { goToItems(list) },
                     isFirst = index == 0
                 )
             }
             if (sharedLists.isNotEmpty()) {
-                item { Text("Shared") }
+                item {
+                    Text(
+                        text = stringResource(R.string.shared_lists),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                    )
+                }
                 items(sharedLists, key = { it.id }) { list ->
                     ListItem(
                         list = list,
                         modifier = Modifier.animateItem(),
                         onEditList = onEditList,
-                        onDeleteList = { onDeleteList(list.id,true) },
+                        onDeleteList = { onDeleteList(list.id, true) },
                         onMoveToTop = { },
                         onCardClick = { goToItems(list) },
                         isFirst = false
@@ -239,6 +278,6 @@ fun ListsScreenContentPreview() {
             )
         )
         ListsScreenContent(
-            list, list, {_,_->}, {}, {}, { _, _ -> }) {}
+            list, list, { _, _ -> }, {}, {}, { _, _ -> }) {}
     }
 }

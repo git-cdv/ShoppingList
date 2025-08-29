@@ -35,4 +35,5 @@
     <string name="hide_completed">Hide completed</string>
     <string name="add_note">Add Note</string>
     <string name="sure_share_list">Would you like to share this list with invited users?</string>
+    <string name="shared_lists">Shared Lists</string>
 </resources>
