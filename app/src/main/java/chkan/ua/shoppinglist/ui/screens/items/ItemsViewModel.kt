@@ -148,7 +148,7 @@ class ItemsViewModel @Inject constructor(
                     _state.update { it.copy(isShared = true, listId = remoteId) }
                 }
                 .onFailure {
-                    Log.d("SHARE", "Share list creation failed: $it")
+                    errorHandler.handle(Exception(it),"Error while sharing list. Please try again later.")
                 }
         }
     }

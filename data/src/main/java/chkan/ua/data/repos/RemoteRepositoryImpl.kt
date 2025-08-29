@@ -58,4 +58,6 @@ class RemoteRepositoryImpl @Inject constructor(
     override suspend fun deleteList(listId: String){
         dataSource.deleteList(listId)
     }
+
+    override suspend fun getListWithItemsById(listId: String) = dataSource.getListWithItemsById(listId)
 }

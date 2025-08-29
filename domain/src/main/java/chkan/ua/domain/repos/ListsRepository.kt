@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface ListsRepository {
     fun getListsWithItemsFlow(): Flow<List<ListItems>>
-    suspend fun addList(title: String)
+    suspend fun addList(title: String, listId: String? = null)
     suspend fun deleteList(listId: String)
     suspend fun updateTitle(editable: Editable)
     suspend fun getListCount(): Int

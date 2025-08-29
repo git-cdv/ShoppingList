@@ -1,9 +1,11 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import chkan.ua.domain.Logger
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.objects.Deletable
 import chkan.ua.domain.objects.Editable
@@ -16,6 +18,8 @@ import chkan.ua.domain.usecases.lists.GetListsFlowUseCase
 import chkan.ua.domain.usecases.lists.MoveToTopUseCase
 import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.domain.usecases.share.GetSharedListsFlowUseCase
+import chkan.ua.domain.usecases.share.ShareListUseCase
+import chkan.ua.domain.usecases.share.StopSharingUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
@@ -28,6 +32,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -42,6 +47,9 @@ class ListsViewModel @Inject constructor(
     private val moveToTop: MoveToTopUseCase,
     val errorHandler: ErrorHandler,
     private val spService: SharedPreferencesService,
+    private val stopSharing: StopSharingUseCase,
+    private val logger: Logger,
+    private val shareList: ShareListUseCase,
 ) : ViewModel() {
 
     init {
@@ -135,6 +143,26 @@ class ListsViewModel @Inject constructor(
             } catch (e: Exception){
                 errorHandler.handle(e,editList.getErrorReason(editable))
             }
+        }
+    }
+
+    fun onStopSharing(listId: String) {
+        viewModelScope.launch (Dispatchers.IO) {
+            try {
+                stopSharing(listId)
+            } catch (e: Exception){
+                logger.e(e)
+                errorHandler.handle(e,"Error while stopping sharing list. Please try again later.")
+            }
+        }
+    }
+
+    fun createShareList(listId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            shareList(listId)
+                .onFailure {
+                    errorHandler.handle(Exception(it),"Error while sharing list. Please try again later.")
+                }
         }
     }
 

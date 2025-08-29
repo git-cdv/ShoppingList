@@ -148,13 +148,14 @@ fun getMenuItems(
                 }
                 add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onListEvent(ListUiEvent.OnEditList(Editable(list.id, list.title, isShared = list.isShared))) }))
                 add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onListEvent(ListUiEvent.OnDeleteList(list.id,  list.isShared))}))
+                add(MenuItem(title = stringResource(id = R.string.share_list), onClick = { onListEvent(ListUiEvent.OnShareList(list.id))}))
             }
         }
         ListRole.SHARED_OWNER -> {
             mutableListOf<MenuItem>().apply {
-                add(MenuItem(title = stringResource(id = R.string.stop_sharing), onClick = { onListEvent(ListUiEvent.OnStopSharing(list.id))}))
                 add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onListEvent(ListUiEvent.OnEditList(Editable(list.id, list.title, isShared = list.isShared))) }))
                 add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onListEvent(ListUiEvent.OnDeleteList(list.id,  list.isShared))}))
+                add(MenuItem(title = stringResource(id = R.string.stop_sharing), onClick = { onListEvent(ListUiEvent.OnStopSharing(list.id))}))
             }
         }
         ListRole.SHARED_MEMBER -> {

@@ -17,6 +17,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.Dispatchers
+import java.util.UUID
 
 
 const val collectionPath = "shopping_lists"
@@ -249,6 +250,32 @@ class FirestoreSourceImpl @Inject constructor (
     override suspend fun deleteList(listId: String){
         val docRef = firestore.collection(collectionPath).document(listId)
         docRef.delete().await()
+    }
+
+    override suspend fun getListWithItemsById(listId: String): ListItems {
+        val docRef = firestore.collection(collectionPath).document(listId)
+        val document = docRef.get().await()
+
+        if (!document.exists()) throw Exception("Document not found")
+
+        val newListId = UUID.randomUUID().toString().take(6)
+        val items = (document.get("items") as? List<Map<String, Any>>)?.map { itemMap ->
+            Item(
+                itemId = itemMap["itemId"] as? String ?: "",
+                content = itemMap["content"] as? String ?: "",
+                listId = newListId,
+                isReady = itemMap["ready"] as? Boolean ?: false,
+                note = itemMap["note"] as? String,
+            )
+        } ?: emptyList()
+
+        return ListItems(
+            id = newListId,
+            title = document.getString("title") ?: "",
+            items = items,
+            position = 0,
+            isShared = false
+        )
     }
 
     private fun ListItems.toRemoteModel(createdBy: String, docRefId: String): HashMap<String, Any> {

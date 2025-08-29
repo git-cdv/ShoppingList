@@ -28,6 +28,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -65,15 +66,27 @@ fun ListsScreen(
     val navController = localNavController.current
     val lists by listsViewModel.localListsFlow.collectAsStateWithLifecycle(initialValue = listOf())
     val sharedLists by listsViewModel.sharedListsFlow.collectAsStateWithLifecycle()
+
+    //add list
+    var showAddList by remember { mutableStateOf(false) }
+    val addListState = rememberModalBottomSheetState()
+    //stop sharing confirm
+    var showConfirmStopSharing by remember { mutableStateOf(false) }
+    val confirmStopSharingState = rememberModalBottomSheetState()
+    var argStopSharingIdList by remember { mutableStateOf("") }
+    //start sharing confirm
+    var showConfirmStartSharing by remember { mutableStateOf(false) }
+    val confirmStartSharingState = rememberModalBottomSheetState()
+    var argStartSharingIdList by remember { mutableStateOf("") }
+    //delete list
+    var showConfirmDeleteList by remember { mutableStateOf(false) }
+    val confirmDeleteListState = rememberModalBottomSheetState()
+    //edit list
+    var showEditBottomSheet by remember { mutableStateOf(false) }
+    val editSheetState = rememberModalBottomSheetState()
     var argDeletedIdList by remember { mutableStateOf(Deletable()) }
     var editable by remember { mutableStateOf(Editable()) }
 
-    var showBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
-    var showConfirmBottomSheet by remember { mutableStateOf(false) }
-    val confirmSheetState = rememberModalBottomSheetState()
-    var showEditBottomSheet by remember { mutableStateOf(false) }
-    val editSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -96,13 +109,13 @@ fun ListsScreen(
                     )
                 }
                 ListUiEvent.OnCreateList -> {
-                    showBottomSheet = true
-                    scope.launch { sheetState.show() }
+                    showAddList = true
+                    scope.launch { addListState.show() }
                 }
                 is ListUiEvent.OnDeleteList -> {
                     argDeletedIdList = Deletable(event.listId, event.isShared)
-                    showConfirmBottomSheet = true
-                    scope.launch { confirmSheetState.show() }
+                    showConfirmDeleteList = true
+                    scope.launch { confirmDeleteListState.show() }
                 }
                 is ListUiEvent.OnEditList -> {
                     editable = event.editable
@@ -112,20 +125,29 @@ fun ListsScreen(
                 is ListUiEvent.OnMoveToTop -> {
                     listsViewModel.moveToTop(MoveTop(event.listId, event.position))
                 }
-                is ListUiEvent.OnStopSharing -> {}
+                is ListUiEvent.OnStopSharing -> {
+                    argStopSharingIdList = event.listId
+                    showConfirmStopSharing = true
+                    scope.launch { confirmStopSharingState.show() }
+                }
                 is ListUiEvent.OnStopFollowing -> {}
+                is ListUiEvent.OnShareList -> {
+                    argStartSharingIdList = event.listId
+                    showConfirmStartSharing = true
+                    scope.launch { confirmStartSharingState.show() }
+                }
             }
         }
     )
 
-    if (showBottomSheet) {
+    if (showAddList) {
         AddListBottomSheet(
-            sheetState,
-            onDismiss = { showBottomSheet = false },
+            addListState,
+            onDismiss = { showAddList = false },
             addItem = { text ->
                 listsViewModel.addList(text)
-                scope.launch { sheetState.hide() }.invokeOnCompletion {
-                    showBottomSheet = false
+                scope.launch { addListState.hide() }.invokeOnCompletion {
+                    showAddList = false
                 }
             },
             R.string.first_list_text_placeholder
@@ -142,21 +164,61 @@ fun ListsScreen(
         )
     }
 
-    if (showConfirmBottomSheet) {
+    if (showConfirmDeleteList) {
         ConfirmBottomSheet(
-            confirmSheetState,
+            confirmDeleteListState,
             question = stringResource(id = R.string.sure_delete_list),
             onConfirm = {
                 scope.launch {
                     listsViewModel.onDeleteList(argDeletedIdList)
-                    confirmSheetState.hide()
-                    showConfirmBottomSheet = false
+                    confirmDeleteListState.hide()
+                    showConfirmDeleteList = false
                 }
             },
             onDismiss = {
                 scope.launch {
-                    confirmSheetState.hide()
-                    showConfirmBottomSheet = false
+                    confirmDeleteListState.hide()
+                    showConfirmDeleteList = false
+                }
+            }
+        )
+    }
+
+    if (showConfirmStopSharing) {
+        ConfirmBottomSheet(
+            confirmStopSharingState,
+            question = stringResource(id = R.string.sure_stop_sharing),
+            onConfirm = {
+                scope.launch {
+                    listsViewModel.onStopSharing(argStopSharingIdList)
+                    confirmStopSharingState.hide()
+                    showConfirmStopSharing = false
+                }
+            },
+            onDismiss = {
+                scope.launch {
+                    confirmStopSharingState.hide()
+                    showConfirmStopSharing = false
+                }
+            }
+        )
+    }
+
+    if (showConfirmStartSharing) {
+        ConfirmBottomSheet(
+            confirmStartSharingState,
+            question = stringResource(id = R.string.sure_share_list),
+            onConfirm = {
+                scope.launch {
+                    listsViewModel.createShareList(argStartSharingIdList)
+                    confirmStartSharingState.hide()
+                    showConfirmStartSharing = false
+                }
+            },
+            onDismiss = {
+                scope.launch {
+                    confirmStartSharingState.hide()
+                    showConfirmStartSharing = false
                 }
             }
         )
@@ -173,6 +235,15 @@ fun ListsScreenContent(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val listState = rememberLazyListState()
     var fabVisible by remember { mutableStateOf(true) }
+    var topbarTitleResId by remember { mutableIntStateOf(R.string.lists) }
+
+    LaunchedEffect(lists.isEmpty(), sharedLists.isEmpty()) {
+        topbarTitleResId = if(lists.isEmpty() && sharedLists.isNotEmpty()){
+            R.string.shared_lists
+        }else{
+            R.string.lists
+        }
+    }
 
     LaunchedEffect(listState) {
         var lastScroll = 0
@@ -196,7 +267,7 @@ fun ListsScreenContent(
             TopAppBar(
                 title = {
                     Text(
-                        text = stringResource(id = R.string.lists),
+                        text = stringResource(id = topbarTitleResId),
                         color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.titleLarge,
                     )
@@ -243,13 +314,15 @@ fun ListsScreenContent(
                 )
             }
             if (sharedLists.isNotEmpty()) {
-                item {
-                    Text(
-                        text = stringResource(R.string.shared_lists),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                    )
+                if(lists.isNotEmpty()){
+                    item {
+                        Text(
+                            text = stringResource(R.string.shared_lists),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                        )
+                    }
                 }
                 items(sharedLists, key = { it.id }) { list ->
                     ListItem(

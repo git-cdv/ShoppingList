@@ -3,6 +3,7 @@ package chkan.ua.data.sources
 import chkan.ua.data.models.ItemEntity
 import chkan.ua.data.models.ListEntity
 import chkan.ua.data.models.ListWithItems
+import chkan.ua.domain.models.Item
 import chkan.ua.domain.models.ListItems
 import chkan.ua.domain.objects.Editable
 import kotlinx.coroutines.flow.Flow
@@ -25,4 +26,5 @@ interface DataSource {
     suspend fun moveItemToTop(id: String, position: Int)
     suspend fun getListWithItemsById(listId: String): ListWithItems?
     suspend fun deleteItemsOfList(listId: String)
+    suspend fun addItems(items: List<Item>)
 }

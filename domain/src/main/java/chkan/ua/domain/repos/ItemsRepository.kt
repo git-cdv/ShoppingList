@@ -13,4 +13,5 @@ interface ItemsRepository {
     suspend fun markItemReady(itemId: String, state: Boolean)
     suspend fun moveToTop(itemId: String, position: Int)
     suspend fun deleteItemsOfList(listId: String)
+    suspend fun addItems(items: List<Item>)
 }

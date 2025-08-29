@@ -3,8 +3,10 @@ package chkan.ua.data.sources.room
 import chkan.ua.data.models.ItemEntity
 import chkan.ua.data.models.ListEntity
 import chkan.ua.data.models.ListWithItems
+import chkan.ua.data.models.toEntity
 import chkan.ua.data.sources.DataSource
 import chkan.ua.data.sources.HistoryDataSource
+import chkan.ua.domain.models.Item
 import chkan.ua.domain.models.ListItems
 import chkan.ua.domain.objects.Editable
 import kotlinx.coroutines.flow.Flow
@@ -60,6 +62,10 @@ class RoomSourceImpl @Inject constructor (
 
     override suspend fun deleteItemsOfList(listId: String) {
         itemsDao.deleteItemsOfList(listId)
+    }
+
+    override suspend fun addItems(items: List<Item>) {
+        itemsDao.addItems(items.map { it.toEntity() })
     }
 
     override suspend fun markItemReady(itemId: String, state: Boolean) {

@@ -38,4 +38,6 @@
     <string name="shared_lists">Shared Lists</string>
     <string name="stop_sharing">Stop sharing</string>
     <string name="unfollow">Unfollow</string>
+    <string name="sure_stop_sharing">Are you sure you want to stop sharing list?</string>
+    <string name="share_list">Share list</string>
 </resources>

@@ -31,5 +31,5 @@ fun List<ItemEntity>.mapToItems() : List<Item>{
 }
 
 fun Item.toEntity() : ItemEntity {
-    return ItemEntity(itemId = this.itemId, listId = this.listId, content = this.content, position = this.position, note = this.note)
+    return ItemEntity(itemId = this.itemId, listId = this.listId, content = this.content, isReady = this.isReady, position = this.position, note = this.note)
 }

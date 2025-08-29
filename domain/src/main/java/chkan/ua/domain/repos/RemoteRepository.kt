@@ -17,4 +17,5 @@ interface RemoteRepository {
     suspend fun editItem(listId: String, editable: Editable)
     suspend fun editList(config: Editable)
     suspend fun deleteList(listId: String)
+    suspend fun getListWithItemsById(listId: String) : ListItems
 }
