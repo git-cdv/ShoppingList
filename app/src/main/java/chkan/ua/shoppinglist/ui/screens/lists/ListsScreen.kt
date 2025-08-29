@@ -1,5 +1,6 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,6 +31,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.domain.models.ListItemsUi
@@ -119,7 +121,8 @@ fun ListsScreen(
             editSheetState,
             onDismiss = { showEditBottomSheet = false },
             onEdit = { edited -> listsViewModel.onEditList(edited) },
-            editable = editable
+            editable = editable,
+            isList = true
         )
     }
 
@@ -188,13 +191,10 @@ fun ListsScreenContent(
     ) { paddingValue ->
 
         LazyColumn(
-            Modifier
+            modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    top = paddingValue.calculateTopPadding(),
-                    start = dimensionResource(R.dimen.root_padding),
-                    end = dimensionResource(R.dimen.root_padding)
-                )
+                .padding(horizontal = dimensionResource(R.dimen.root_padding)),
+            contentPadding = PaddingValues(top = paddingValue.calculateTopPadding(), bottom = paddingValue.calculateBottomPadding() + 8.dp),
         ) {
             itemsIndexed(lists, key = { _, item -> item.id }) { index, list ->
                 ListItem(

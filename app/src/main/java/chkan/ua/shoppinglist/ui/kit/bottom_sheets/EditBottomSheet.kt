@@ -59,7 +59,8 @@ fun EditBottomSheet(
     sheetState: SheetState,
     onDismiss: () -> Unit,
     onEdit: (Editable) -> Unit,
-    editable: Editable
+    editable: Editable,
+    isList: Boolean = false,
     ){
     val scope = rememberCoroutineScope()
     val textFieldValueSaver = remember {
@@ -143,7 +144,7 @@ fun EditBottomSheet(
                     .padding(start = dimensionResource(id = R.dimen.root_padding), end = dimensionResource(id = R.dimen.root_padding))
             )
 
-            if (isAddNoteButtonShow) {
+            if (isAddNoteButtonShow && !isList) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier

@@ -1,5 +1,6 @@
 package chkan.ua.data.sources.firestore
 
+import chkan.ua.data.models.RemoteItem
 import chkan.ua.data.sources.RemoteDataSource
 import chkan.ua.domain.Logger
 import chkan.ua.domain.models.Item
@@ -100,13 +101,12 @@ class FirestoreSourceImpl @Inject constructor (
                                     itemId = itemMap["itemId"] as? String ?: "",
                                     content = itemMap["content"] as? String ?: "",
                                     listId = itemMap["listId"] as? String ?: "",
-                                    position = (itemMap["position"] as? Long)?.toInt() ?: 0,
                                     isReady = itemMap["ready"] as? Boolean ?: false,
                                     note = itemMap["note"] as? String,
                                 )
                             } ?: emptyList()
 
-                            trySend(itemsList.sortedBy { it.position })
+                            trySend(itemsList)
                         } catch (e: Exception) {
                             logger.e(e,"getListWithItemsFlowById e:$e")
                             close(e)
@@ -160,7 +160,6 @@ class FirestoreSourceImpl @Inject constructor (
             "itemId" to item.itemId,
             "content" to item.content,
             "listId" to item.listId,
-            "position" to item.position,
             "ready" to item.isReady,
             "note" to item.note
         )
@@ -255,8 +254,15 @@ class FirestoreSourceImpl @Inject constructor (
         return hashMapOf(
             "id" to docRefId,
             "title" to this.title,
-            "position" to this.position,
-            "items" to this.items.map { item -> item.copy(listId = docRefId)},
+            "items" to this.items
+                .sortedBy { it.position }
+                .map { item -> RemoteItem(
+                    itemId = item.itemId,
+                    content = item.content,
+                    listId = docRefId,
+                    isReady = item.isReady,
+                    note = item.note
+                ) },
             "createdBy" to createdBy,
             "createdAt" to FieldValue.serverTimestamp(),
             "membersIds" to listOf(createdBy),
