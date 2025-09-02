@@ -40,4 +40,7 @@ class ItemsRepositoryImpl @Inject constructor (private val dataSource: DataSourc
 
     override suspend fun moveToTop(itemId: String, position: Int) = dataSource.moveItemToTop(itemId, position)
     override suspend fun deleteItemsOfList(listId: String) = dataSource.deleteItemsOfList(listId)
+    override suspend fun addItems(items: List<Item>) {
+        dataSource.addItems(items)
+    }
 }

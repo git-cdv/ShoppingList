@@ -56,7 +56,6 @@ import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
 import chkan.ua.shoppinglist.ui.kit.togglers.ToggleShowCompleted
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,12 +69,12 @@ fun ItemsScreen(
     val isShared = args.isShared
 
     LaunchedEffect(Unit) {
-        if(isShared){
+        if (isShared) {
             itemsViewModel.observeRemoteItems(listId)
         } else {
             itemsViewModel.observeItems(listId)
         }
-        itemsViewModel.saveLastOpenedList(listId, listTitle,isShared)
+        itemsViewModel.saveLastOpenedList(listId, listTitle, isShared)
     }
 
     val uiState by itemsViewModel.state.collectAsStateWithLifecycle()
@@ -90,9 +89,7 @@ fun ItemsScreen(
 
     ItemsScreenContent(
         title = listTitle,
-        items = uiState.notReadyItems,
-        readyItems = uiState.readyItems,
-        isEmptyState = uiState.isEmpty,
+        uiState = uiState,
         handleAddItemSheet = { isShow ->
             itemsViewModel.processAddItemBottomSheetChange(BottomSheetAction.SetIsOpen(isShow))
             if (isShow) {
@@ -101,11 +98,11 @@ fun ItemsScreen(
                 scope.launch { addItemSheetState.hide() }
             }
         },
-        onDeleteItem = { id -> itemsViewModel.processIntent(ItemsIntent.DeleteItem(id)) },
-        onMarkReady = { id, state ->
+        onDeleteItem = { item -> itemsViewModel.processIntent(ItemsIntent.DeleteItem(item)) },
+        onMarkReady = { item, state ->
             itemsViewModel.processIntent(
                 ItemsIntent.MarkReady(
-                    id,
+                    item,
                     state
                 )
             )
@@ -144,12 +141,8 @@ fun ItemsScreen(
             addItem = { addedItem ->
                 itemsViewModel.processIntent(
                     ItemsIntent.AddItem(
-                        Item(
-                            itemId = UUID.randomUUID().toString().take(6),
-                            content = addedItem.content.firstAsTitle(),
-                            listId = listId,
-                            note = addedItem.note
-                        )
+                        title = addedItem.content.firstAsTitle(),
+                        note = addedItem.note
                     )
                 )
             },
@@ -171,12 +164,10 @@ fun ItemsScreen(
 @Composable
 fun ItemsScreenContent(
     title: String,
-    items: List<Item>,
-    readyItems: List<Item>,
-    isEmptyState: Boolean,
+    uiState: ItemsState,
     handleAddItemSheet: (Boolean) -> Unit,
-    onMarkReady: (String, Boolean) -> Unit,
-    onDeleteItem: (String) -> Unit,
+    onMarkReady: (Item, Boolean) -> Unit,
+    onDeleteItem: (Item) -> Unit,
     goToBack: () -> Unit,
     clearReadyItems: () -> Unit,
     onEditItem: (Editable) -> Unit,
@@ -209,7 +200,7 @@ fun ItemsScreenContent(
                     IconButton(
                         onClick = {
                             showConfirmShareBottomSheet = true
-                                  },
+                        },
                         modifier = Modifier.padding(end = dimensionResource(R.dimen.inner_padding))
                     ) {
                         Icon(
@@ -246,18 +237,18 @@ fun ItemsScreenContent(
         floatingActionButtonPosition = FabPosition.End
     ) { paddingValue ->
 
-        LaunchedEffect(isEmptyState) {
-            if (isEmptyState) {
+        LaunchedEffect(uiState.isEmpty) {
+            if (uiState.isEmpty) {
                 handleAddItemSheet.invoke(true)
             }
         }
 
-        if (isEmptyState) {
+        if (uiState.isEmpty) {
             CenteredTextScreen(stringResource(id = R.string.text_empty_items))
         } else {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(top = 4.dp,bottom = 144.dp),
+                contentPadding = PaddingValues(top = 4.dp, bottom = 144.dp),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(
@@ -266,26 +257,35 @@ fun ItemsScreenContent(
                         end = dimensionResource(R.dimen.root_padding)
                     )
             ) {
-                itemsIndexed(items, key = { _, item -> item.itemId }) { index, item ->
+                itemsIndexed(uiState.notReadyItems, key = { _, item -> item.itemId }) { index, item ->
                     ItemItem(
                         text = item.content,
                         note = item.note,
                         modifier = Modifier.animateItem(),
-                        onReady = { onMarkReady(item.itemId, true) },
-                        onDelete = { onDeleteItem(item.itemId) },
-                        onEdit = { onEditItem(Editable(item.itemId, item.content, note = item.note)) },
+                        onReady = { onMarkReady(item, true) },
+                        onDelete = { onDeleteItem(item) },
+                        onEdit = {
+                            onEditItem(
+                                Editable(
+                                    item.itemId,
+                                    item.content,
+                                    note = item.note
+                                )
+                            )
+                        },
                         onMoveToTop = { onMoveToTop(item.itemId, item.position) },
-                        isFirst = index == 0
+                        isFirst = index == 0,
+                        isShared = uiState.isShared
                     )
                 }
 
-                if (readyItems.isNotEmpty()) {
+                if (uiState.readyItems.isNotEmpty()) {
                     item {
                         Spacer(modifier = Modifier.height(8.dp))
                         ToggleShowCompleted(
                             isShowing = isReadyShown,
-                            showText = stringResource(id = R.string.show_completed) + " (${readyItems.size})",
-                            hideText = stringResource(id = R.string.hide_completed) + " (${readyItems.size})",
+                            showText = stringResource(id = R.string.show_completed) + " (${uiState.readyItems.size})",
+                            hideText = stringResource(id = R.string.hide_completed) + " (${uiState.readyItems.size})",
                             onToggle = {
                                 isReadyShown = it
                             },
@@ -299,12 +299,12 @@ fun ItemsScreenContent(
                 }
 
                 if (isReadyShown) {
-                    items(readyItems, key = { it.itemId }) { item ->
+                    items(uiState.readyItems, key = { it.itemId }) { item ->
                         ReadyItem(
                             text = item.content,
                             modifier = Modifier.animateItem(),
-                            onNotReady = { onMarkReady.invoke(item.itemId, false) },
-                            onDeleteItem = { onDeleteItem.invoke(item.itemId) })
+                            onNotReady = { onMarkReady.invoke(item, false) },
+                            onDeleteItem = { onDeleteItem.invoke(item) })
                     }
                 }
             }
@@ -357,12 +357,9 @@ fun ItemsScreenContent(
 fun ItemsScreenContentPreview() {
     ShoppingListTheme {
         ItemsScreenContent(
-            "Title", listOf(
-            Item("333", "Item 777", "0", 0, false),
-            Item("444", "Item 2", "0", 1, false)
-        ), listOf(
-            Item("55", "Item 1", "0", 0, false),
-            Item("44774", "Item 2", "0", 1, false)
-        ), false, {}, { _, _ -> }, {}, {}, {}, {}, { _, _ -> },{})
+            "Title",
+            uiState = ItemsState(),
+            {}, { _, _ -> }, {}, {}, {}, {}, { _, _ -> }, {},
+        )
     }
 }

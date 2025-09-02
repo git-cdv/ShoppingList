@@ -8,7 +8,7 @@ class AddItemInHistoryUseCase @Inject constructor(
     private val historyItem: HistoryRepository
 ) : SuspendUseCase<String> {
 
-    override suspend fun run(config: String) {
+    override suspend fun invoke(config: String) {
         historyItem.incrementOrInsertInHistory(config)
     }
 

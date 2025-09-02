@@ -48,11 +48,4 @@ interface ListsDao {
 
     @Query("SELECT * FROM lists WHERE listId = :id")
     suspend fun getListById(id:String): ListEntity?
-
-    @Transaction
-    suspend fun replaceSharedList(listId: String, remoteId: String) {
-        val replacedList = getListById(listId) ?: return
-        addList(ListEntity(listId = remoteId, title = replacedList.title, position = replacedList.position, isShared = true))
-        deleteListById(listId)
-    }
 }

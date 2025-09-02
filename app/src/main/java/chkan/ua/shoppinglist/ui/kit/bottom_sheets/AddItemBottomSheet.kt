@@ -142,7 +142,7 @@ fun AddItemBottomSheet(
                     text = newText
                     itemsViewModel.processAddItemBottomSheetChange(BottomSheetAction.SetText(newText))
                     isAddNoteButtonShow = newText.isNotBlank() && !isAddNoteFieldShow
-                    if(newText.isBlank()) {
+                    if(newText.isBlank() && textNote.isNullOrBlank()) {
                         isAddNoteFieldShow = false
                     }
                 },

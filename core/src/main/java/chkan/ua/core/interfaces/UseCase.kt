@@ -5,7 +5,7 @@ interface UseCase<T> {
 }
 
 interface SuspendUseCase<T> : UseCase<T> {
-    suspend fun run(config: T) : Any
+    suspend operator fun invoke(config: T) : Any
     override fun getErrorReason(config: T?) : String
 }
 

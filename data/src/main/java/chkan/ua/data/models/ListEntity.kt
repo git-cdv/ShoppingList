@@ -13,5 +13,9 @@ data class ListEntity (
     @ColumnInfo(name = "position")
     val position: Int,
     @ColumnInfo(name = "is_shared")
-    val isShared: Boolean = false
+    val isShared: Boolean = false,
+    @ColumnInfo(name = "totalItems")
+    val totalItems: Int,
+    @ColumnInfo(name = "readyItems")
+    val readyItems: Int,
 )

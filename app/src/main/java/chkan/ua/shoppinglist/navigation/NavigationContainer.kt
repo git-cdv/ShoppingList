@@ -8,22 +8,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import chkan.ua.shoppinglist.session.SessionViewModel
 import chkan.ua.shoppinglist.ui.screens.first_list.FirstListScreen
 import chkan.ua.shoppinglist.ui.screens.items.ItemsScreen
 import chkan.ua.shoppinglist.ui.screens.lists.ListsScreen
-import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 
 @Composable
 fun NavigationContainer(
-    listsViewModel: ListsViewModel = hiltViewModel()
+    sessionViewModel: SessionViewModel
 ) {
     val navController = rememberNavController()
-    val startDestination: Any = if (listsViewModel.isListExist()) ListsRoute else FirstListRoute
+    val startDestination: Any = if (sessionViewModel.isFirstLaunch) FirstListRoute else ListsRoute
 
     CompositionLocalProvider(
         localNavController provides navController
@@ -42,11 +41,11 @@ fun NavigationContainer(
                 val args: ItemsRoute = backStackEntry.toRoute()
                 ItemsScreen(args)
             }
-            composable<ListsRoute> { ListsScreen() }
+            composable<ListsRoute> { ListsScreen(sessionViewModel) }
         }
 
         if (startDestination is ListsRoute){
-            val lastOpenedList = listsViewModel.getLastOpenedList()
+            val lastOpenedList = sessionViewModel.getLastOpenedList()
             if (lastOpenedList != null){
                 navController.navigate(ItemsRoute(lastOpenedList.id,lastOpenedList.title, lastOpenedList.isShared)){
                     popUpTo(ListsRoute) { inclusive = false }

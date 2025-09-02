@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.Flow
 interface ItemsDao {
     @Insert
     suspend fun addItem(item: ItemEntity)
+    @Insert
+    fun addItems(items: List<ItemEntity>)
 
     @Transaction
     @Query("SELECT * FROM items WHERE listId = :listId ORDER BY position ASC")

@@ -21,7 +21,7 @@ class ShareListUseCase @Inject constructor(
                 throw Exception("User is not authenticated")
             } else {
                 val firestoreId = remoteRepository.createSharedList(userId,listWithItems)
-                listsRepository.replaceSharedList(listId,firestoreId)
+                listsRepository.deleteList(listId)
                 Result.success(firestoreId)
             }
         } catch (e: Exception) {

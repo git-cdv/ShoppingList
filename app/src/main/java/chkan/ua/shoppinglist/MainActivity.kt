@@ -7,21 +7,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import chkan.ua.shoppinglist.navigation.NavigationContainer
 import chkan.ua.shoppinglist.session.SessionViewModel
 import chkan.ua.shoppinglist.ui.kit.dialogs.ErrorDialogHandler
-import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    private val listsViewModel: ListsViewModel by viewModels()
     private val sessionViewModel: SessionViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,29 +24,19 @@ class MainActivity : ComponentActivity() {
         sessionViewModel.signInAnonymouslyIfNeed()
         installSplashScreen().apply {
             setKeepOnScreenCondition {
-                !listsViewModel.isLoadReady.value
+                !sessionViewModel.isLoadReady.value
             }
         }
         enableEdgeToEdge()
         setContent {
             ShoppingListTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    if (listsViewModel.isLoadReady.value) {
-                        NavigationContainer()
+                    if (sessionViewModel.isLoadReady.value) {
+                        NavigationContainer(sessionViewModel)
                         ErrorDialogHandler()
                     }
                 }
             }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun StartPreview() {
-    ShoppingListTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            NavigationContainer()
         }
     }
 }
