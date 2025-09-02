@@ -39,7 +39,10 @@ fun NavigationContainer(
                 popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
                 popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) { backStackEntry ->
                 val args: ItemsRoute = backStackEntry.toRoute()
-                ItemsScreen(args)
+                ItemsScreen(
+                    args = args,
+                    sessionViewModel = sessionViewModel
+                )
             }
             composable<ListsRoute> { ListsScreen(sessionViewModel) }
         }

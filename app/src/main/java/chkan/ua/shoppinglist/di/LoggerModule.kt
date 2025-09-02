@@ -27,4 +27,7 @@ class TimberLogger : Logger {
         Timber.e(e, message)
     }
 
+    override fun e(e: Throwable, message: String?) {
+        Timber.e(e, message)
+    }
 }

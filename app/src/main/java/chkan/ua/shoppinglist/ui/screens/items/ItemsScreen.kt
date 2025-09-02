@@ -1,5 +1,7 @@
 package chkan.ua.shoppinglist.ui.screens.items
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,6 +49,8 @@ import chkan.ua.domain.objects.Editable
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
+import chkan.ua.shoppinglist.session.SessionState
+import chkan.ua.shoppinglist.session.SessionViewModel
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.BottomSheetAction
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
@@ -55,14 +60,18 @@ import chkan.ua.shoppinglist.ui.kit.items.ItemItem
 import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
 import chkan.ua.shoppinglist.ui.kit.togglers.ToggleShowCompleted
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
+import chkan.ua.shoppinglist.utils.AppEvent
+import chkan.ua.shoppinglist.utils.EventBus
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemsScreen(
     args: ItemsRoute,
+    sessionViewModel: SessionViewModel,
     itemsViewModel: ItemsViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val navController = localNavController.current
     val listId = args.listId
     val listTitle = args.listTitle
@@ -77,6 +86,21 @@ fun ItemsScreen(
         itemsViewModel.saveLastOpenedList(listId, listTitle, isShared)
     }
 
+    val eventBus: EventBus = itemsViewModel.eventBus
+
+    LaunchedEffect(Unit) {
+        eventBus.events.collect { event ->
+            when (event) {
+                is AppEvent.SharedSuccess -> {
+                    showShareLink(context)
+                    eventBus.consumeEvent()
+                }
+                null -> {}
+            }
+        }
+    }
+
+    val sessionState by sessionViewModel.sessionState.collectAsStateWithLifecycle()
     val uiState by itemsViewModel.state.collectAsStateWithLifecycle()
 
     val addItemBottomSheetState by itemsViewModel.addItemBottomSheetState
@@ -90,6 +114,8 @@ fun ItemsScreen(
     ItemsScreenContent(
         title = listTitle,
         uiState = uiState,
+        sessionState = sessionState,
+        context = context,
         handleAddItemSheet = { isShow ->
             itemsViewModel.processAddItemBottomSheetChange(BottomSheetAction.SetIsOpen(isShow))
             if (isShow) {
@@ -165,6 +191,8 @@ fun ItemsScreen(
 fun ItemsScreenContent(
     title: String,
     uiState: ItemsState,
+    sessionState: SessionState,
+    context: Context,
     handleAddItemSheet: (Boolean) -> Unit,
     onMarkReady: (Item, Boolean) -> Unit,
     onDeleteItem: (Item) -> Unit,
@@ -178,6 +206,7 @@ fun ItemsScreenContent(
     val confirmSheetState = rememberModalBottomSheetState()
     var showConfirmShareBottomSheet by remember { mutableStateOf(false) }
     val confirmShareSheetState = rememberModalBottomSheetState()
+    var showPaywall by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var isReadyShown by remember { mutableStateOf(false) }
@@ -199,7 +228,15 @@ fun ItemsScreenContent(
                 actions = {
                     IconButton(
                         onClick = {
-                            showConfirmShareBottomSheet = true
+                            if (uiState.isShared) {
+                                if (sessionState.isSubscribed == true) {
+                                    showShareLink(context)
+                                } else {
+                                    showPaywall = true
+                                }
+                            } else {
+                                showConfirmShareBottomSheet = true
+                            }
                         },
                         modifier = Modifier.padding(end = dimensionResource(R.dimen.inner_padding))
                     ) {
@@ -250,14 +287,16 @@ fun ItemsScreenContent(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(top = 4.dp, bottom = 144.dp),
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(
                         top = paddingValue.calculateTopPadding(),
                         start = dimensionResource(R.dimen.root_padding),
                         end = dimensionResource(R.dimen.root_padding)
                     )
             ) {
-                itemsIndexed(uiState.notReadyItems, key = { _, item -> item.itemId }) { index, item ->
+                itemsIndexed(
+                    uiState.notReadyItems,
+                    key = { _, item -> item.itemId }) { index, item ->
                     ItemItem(
                         text = item.content,
                         note = item.note,
@@ -336,7 +375,11 @@ fun ItemsScreenContent(
                 question = stringResource(id = R.string.sure_share_list),
                 onConfirm = {
                     scope.launch {
-                        onShareList()
+                        if (sessionState.isSubscribed == true) {
+                            onShareList()
+                        } else {
+                            showPaywall = true
+                        }
                         confirmShareSheetState.hide()
                         showConfirmShareBottomSheet = false
                     }
@@ -352,6 +395,30 @@ fun ItemsScreenContent(
     }
 }
 
+fun showShareLink(context: Context) {
+    generateInviteLink(context) { link ->
+        link?.let {
+            val sharedLink =
+                "${context.getString(R.string.join_my_list)} $link "
+            shareLink(context, sharedLink)
+        }
+    }
+}
+
+fun generateInviteLink(context: Context, onComplete: (String?) -> Unit) {
+    onComplete.invoke("LINK")
+}
+
+fun shareLink(context: Context, link: String) {
+    val sendIntent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, link)
+        type = "text/plain"
+    }
+    val shareIntent = Intent.createChooser(sendIntent, context.getString(R.string.share_invitation))
+    context.startActivity(shareIntent)
+}
+
 @Preview(showBackground = true)
 @Composable
 fun ItemsScreenContentPreview() {
@@ -359,7 +426,8 @@ fun ItemsScreenContentPreview() {
         ItemsScreenContent(
             "Title",
             uiState = ItemsState(),
-            {}, { _, _ -> }, {}, {}, {}, {}, { _, _ -> }, {},
-        )
+            sessionState = SessionState(),
+            context = LocalContext.current,
+            {}, { _, _ -> }, {}, {}, {}, {}, { _, _ -> }, {})
     }
 }

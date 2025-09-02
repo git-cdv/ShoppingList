@@ -30,6 +30,8 @@ import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companio
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_TITLE_STR
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheetState
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.BottomSheetAction
+import chkan.ua.shoppinglist.utils.AppEvent
+import chkan.ua.shoppinglist.utils.EventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -61,6 +63,7 @@ class ItemsViewModel @Inject constructor(
     private val spService: SharedPreferencesService,
     private val moveToTopUseCase: MoveItemToTopUseCase,
     private val shareList: ShareListUseCase,
+    val eventBus: EventBus,
     savedStateHandle: SavedStateHandle,
 ) : ComponentsViewModel() {
 
@@ -146,6 +149,7 @@ class ItemsViewModel @Inject constructor(
                 .onSuccess { remoteId ->
                     observeRemoteItems(remoteId)
                     _state.update { it.copy(isShared = true, listId = remoteId) }
+                    eventBus.sendEvent(AppEvent.SharedSuccess)
                 }
                 .onFailure {
                     errorHandler.handle(Exception(it),"Error while sharing list. Please try again later.")

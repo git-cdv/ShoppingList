@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.auth.SignInAnonymouslyUseCase
+import chkan.ua.domain.usecases.session.ObserveIsSubscribedUseCase
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.IS_FIRST_LAUNCH
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
@@ -14,16 +15,34 @@ import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companio
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class SessionViewModel @Inject constructor(
     private val signInAnonymouslyUseCase: SignInAnonymouslyUseCase,
     private val spService: SharedPreferencesService,
+    private val observeIsSubscribedUseCase: ObserveIsSubscribedUseCase
 ) : ViewModel() {
 
     init {
+        checkFirstLaunch()
+        observeIsSubscribed()
+    }
+    private val _sessionState = MutableStateFlow(SessionState())
+    val sessionState = _sessionState.asStateFlow()
+
+    var isFirstLaunch = false
+
+    private val _isLoadReady = mutableStateOf(false)
+    val isLoadReady: State<Boolean> = _isLoadReady
+
+    private fun checkFirstLaunch() {
         viewModelScope.launch (Dispatchers.IO) {
             val splashMinShowTime = 200L
 
@@ -40,10 +59,14 @@ class SessionViewModel @Inject constructor(
         }
     }
 
-    var isFirstLaunch = false
-
-    private val _isLoadReady = mutableStateOf(false)
-    val isLoadReady: State<Boolean> = _isLoadReady
+    private fun observeIsSubscribed() {
+        viewModelScope.launch {
+            observeIsSubscribedUseCase().distinctUntilChanged().collect { isSubscribed ->
+                Timber.tag("SESSION").d("isSubscribed: $isSubscribed")
+                _sessionState.update { it.copy(isSubscribed = true) }
+            }
+        }
+    }
 
     fun signInAnonymouslyIfNeed(){
         viewModelScope.launch {
