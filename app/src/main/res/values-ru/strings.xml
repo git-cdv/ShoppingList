@@ -1,25 +1,17 @@
 <resources>
     <string name="app_name">ShoppingList</string>
-    <string name="first_list_text_placeholder">напр. продукты или выходные</string>
+    <string name="first_list_text_placeholder">напр. задачи или покупки</string>
     <string name="first_list_text_title">Как назвать ваш список?</string>
     <string name="groceries">Продукты</string>
-    <string name="shopping">Покупки</string>
-    <string name="weekend">Выходные</string>
-    <string name="urgently">Срочно</string>
-    <string name="food">Еда</string>
-    <string name="trip">Поездка</string>
-    <string name="home">Дом</string>
-    <string name="drug">Лекарства</string>
-    <string name="supermarket">Супермаркет</string>
     <string name="delete">Удалить</string>
     <string name="edit">Редактировать</string>
     <string name="lists">Списки</string>
-    <string name="items_text_placeholder">напр. молоко или хлеб</string>
+    <string name="items_text_placeholder">введите элемент</string>
     <string name="clear">Очистить</string>
     <string name="cancel">Отмена</string>
     <string name="confirm">Подтвердить</string>
     <string name="sure_clear_everything">Вы уверены, что хотите очистить все?</string>
-    <string name="text_empty_items">Начните планировать покупки – добавьте товар в список!</string>
+    <string name="text_empty_items">Нажмите \'+\' чтобы добавить элемент</string>
     <string name="more">Еще</string>
     <string name="less">Меньше</string>
     <string name="hide_suggestions">Скрыть предложения</string>
@@ -40,4 +32,9 @@
     <string name="unfollow">Unfollow</string>
     <string name="sure_stop_sharing">Are you sure you want to stop sharing list?</string>
     <string name="share_list">Share list</string>
+    <string name="to_do_list">To-Do List</string>
+    <string name="wishlist">Wishlist</string>
+    <string name="ideas">Ideas</string>
+    <string name="reading_list">Reading List</string>
+    <string name="watchlist">Watchlist</string>
 </resources>

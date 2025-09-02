@@ -1,26 +1,18 @@
 <resources>
     <string name="app_name">ShoppingList</string>
-    <string name="first_list_text_placeholder">e.g grocery list or weekly</string>
+    <string name="first_list_text_placeholder">e.g to-do list or groceries</string>
     <string name="first_list_text_title">What should you name your list?</string>
     <string name="groceries">Groceries</string>
-    <string name="shopping">Shopping</string>
-    <string name="weekend">Weekend</string>
-    <string name="urgently">Urgently</string>
-    <string name="food">Food</string>
-    <string name="trip">Trip</string>
-    <string name="home">Home</string>
-    <string name="drug">Drug</string>
-    <string name="supermarket">Supermarket</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
     <string name="lists">Lists</string>
-    <string name="items_text_placeholder">e.g milk or bread</string>
+    <string name="items_text_placeholder">enter item</string>
     <string name="clear">Clear</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="sure_clear_everything">Are you sure you want to clear everything?</string>
     <string name="sure_delete_list">Are you sure you want to delete list?</string>
-    <string name="text_empty_items">Start planning your shopping – add an item to the list!</string>
+    <string name="text_empty_items">Tap \'+\' to add an item</string>
     <string name="more">More</string>
     <string name="less">Less</string>
     <string name="hide_suggestions">Hide suggestions</string>
@@ -40,4 +32,9 @@
     <string name="unfollow">Unfollow</string>
     <string name="sure_stop_sharing">Are you sure you want to stop sharing list?</string>
     <string name="share_list">Share list</string>
+    <string name="to_do_list">To-Do List</string>
+    <string name="wishlist">Wishlist</string>
+    <string name="ideas">Ideas</string>
+    <string name="reading_list">Reading List</string>
+    <string name="watchlist">Watchlist</string>
 </resources>

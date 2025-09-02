@@ -7,7 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -55,7 +55,7 @@ fun RoundedTextField(
         trailingIcon = {
             if (text.isNotBlank()){
                 Icon(
-                    Icons.Filled.Done,
+                    Icons.Filled.Add,
                     contentDescription = "Done",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier

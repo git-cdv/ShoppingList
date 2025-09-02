@@ -113,6 +113,6 @@ fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Un
 @Composable
 fun FirstListPreview() {
     ShoppingListTheme {
-        FirstListContent(listOf("Products", "Today", "05.11.24", "Home")) {}
+        FirstListContent(listOf("To-Do List", "Groceries", "05.11.24", "Wishlist")) {}
     }
 }
