@@ -50,6 +50,7 @@ import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.navigation.ItemsRoute
 import chkan.ua.shoppinglist.navigation.localNavController
+import chkan.ua.shoppinglist.session.SessionViewModel
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddListBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.EditBottomSheet
@@ -61,6 +62,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListsScreen(
+    sessionViewModel: SessionViewModel,
     listsViewModel: ListsViewModel = hiltViewModel()
 ) {
     val navController = localNavController.current
@@ -90,7 +92,7 @@ fun ListsScreen(
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        listsViewModel.clearLastOpenedList()
+        sessionViewModel.clearLastOpenedList()
         listsViewModel.observeSharedLists()
     }
 
@@ -320,7 +322,7 @@ fun ListsScreenContent(
                             text = stringResource(R.string.shared_lists),
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                            modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
                         )
                     }
                 }

@@ -16,6 +16,7 @@ class SharedPreferencesServiceImpl @Inject constructor (@ApplicationContext cont
         const val LAST_OPEN_LIST_ID_INT = "last_list_id"
         const val LAST_OPEN_LIST_TITLE_STR = "last_list_title"
         const val LAST_OPEN_LIST_IS_SHARED = "last_list_shared"
+        const val IS_FIRST_LAUNCH = "is_first_launch"
     }
 
     private val sp: SharedPreferences =
@@ -23,6 +24,11 @@ class SharedPreferencesServiceImpl @Inject constructor (@ApplicationContext cont
     private val editor: SharedPreferences.Editor = sp.edit()
 
     override fun <T> get(key: String, type: Class<T>): T? {
+
+        if (!sp.contains(key)) {
+            return null
+        }
+
         return when (type) {
             String::class.java -> sp.getString(key, null) as T?
             Int::class.java -> sp.getInt(key, 0) as T?

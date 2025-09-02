@@ -8,6 +8,7 @@ import chkan.ua.domain.repos.RemoteRepository
 import chkan.ua.domain.usecases.auth.AuthManager
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
 class GetSharedListsFlowUseCase @Inject constructor(
@@ -16,9 +17,12 @@ class GetSharedListsFlowUseCase @Inject constructor(
 ) : SuspendUseCase<Unit> {
 
     override suspend fun invoke(config: Unit) =
-        remoteRepository.getAllListsSummaryFlow(authManager.getCurrentUserId()!!)
-            .map { it.toUiModels() }
-            .catch { error -> throw Exception(getErrorReason(config), error) }
+        authManager.getCurrentUserId()?.let { userId ->
+            remoteRepository.getAllListsSummaryFlow(userId)
+                .map { it.toUiModels() }
+                .catch { error -> throw Exception(getErrorReason(config), error) }
+        } ?: flowOf(emptyList())
+
 
     override fun getErrorReason(config: Unit?) = "Failed to get shared lists"
 }
