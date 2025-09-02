@@ -1,6 +1,7 @@
 package chkan.ua.domain.usecases.share
 
 import chkan.ua.core.interfaces.SuspendUseCase
+import chkan.ua.domain.Logger
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.models.ListProgress
 import chkan.ua.domain.models.ListSummary
@@ -14,13 +15,17 @@ import javax.inject.Inject
 class GetSharedListsFlowUseCase @Inject constructor(
     private val remoteRepository: RemoteRepository,
     private val authManager: AuthManager,
+    private val logger: Logger
 ) : SuspendUseCase<Unit> {
 
     override suspend fun invoke(config: Unit) =
         authManager.getCurrentUserId()?.let { userId ->
             remoteRepository.getAllListsSummaryFlow(userId)
                 .map { it.toUiModels() }
-                .catch { error -> throw Exception(getErrorReason(config), error) }
+                .catch { error ->
+                    logger.e(error as Exception,getErrorReason())
+                    emit(emptyList())
+                }
         } ?: flowOf(emptyList())
 
 

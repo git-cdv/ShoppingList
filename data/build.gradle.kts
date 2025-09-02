@@ -59,4 +59,7 @@ dependencies {
     //firebase-auth
     implementation(libs.firebase.auth.ktx)
 
+    //datastore
+    implementation(libs.datastore.preferences)
+
 }
