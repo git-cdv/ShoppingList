@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ShoppingList</string>
+    <string name="app_name">Collab List</string>
     <string name="first_list_text_placeholder">напр. задачи или покупки</string>
     <string name="first_list_text_title">Как назвать ваш список?</string>
     <string name="groceries">Продукты</string>

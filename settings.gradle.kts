@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ShoppingList"
+rootProject.name = "CollabList"
 include(":app")
 include(":data")
 include(":domain")

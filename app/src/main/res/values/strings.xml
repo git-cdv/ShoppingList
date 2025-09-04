@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ShoppingList</string>
+    <string name="app_name">Collab List</string>
     <string name="first_list_text_placeholder">e.g to-do list or groceries</string>
     <string name="first_list_text_title">What should you name your list?</string>
     <string name="groceries">Groceries</string>

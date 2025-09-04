@@ -235,8 +235,6 @@ fun ListsScreenContent(
     onListEvent: (ListUiEvent) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val listState = rememberLazyListState()
-    var fabVisible by remember { mutableStateOf(true) }
     var topbarTitleResId by remember { mutableIntStateOf(R.string.lists) }
 
     LaunchedEffect(lists.isEmpty(), sharedLists.isEmpty()) {
@@ -245,19 +243,6 @@ fun ListsScreenContent(
         }else{
             R.string.lists
         }
-    }
-
-    LaunchedEffect(listState) {
-        var lastScroll = 0
-        snapshotFlow { listState.firstVisibleItemScrollOffset }
-            .collect { offset ->
-                if (offset > lastScroll) {
-                    fabVisible = false // скроллим вниз → скрыть FAB
-                } else if (offset < lastScroll) {
-                    fabVisible = true // скроллим вверх → показать FAB
-                }
-                lastScroll = offset
-            }
     }
 
     Scaffold(
@@ -278,32 +263,25 @@ fun ListsScreenContent(
             )
         },
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = fabVisible,
-                enter = fadeIn() + slideInVertically { it },
-                exit = fadeOut() + slideOutVertically { it }
+            FloatingActionButton(
+                onClick = { onListEvent(ListUiEvent.OnCreateList) },
+                containerColor = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .padding(dimensionResource(id = R.dimen.root_padding))
             ) {
-                FloatingActionButton(
-                    onClick = { onListEvent(ListUiEvent.OnCreateList) },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .padding(dimensionResource(id = R.dimen.root_padding))
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add List")
-                }
+                Icon(Icons.Default.Add, contentDescription = "Add List")
             }
         },
         floatingActionButtonPosition = FabPosition.End
     ) { paddingValue ->
 
         LazyColumn(
-            state = listState,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = dimensionResource(R.dimen.root_padding)),
             contentPadding = PaddingValues(
                 top = paddingValue.calculateTopPadding(),
-                bottom = paddingValue.calculateBottomPadding() + 8.dp
+                bottom = 136.dp
             ),
         ) {
             itemsIndexed(lists, key = { _, item -> item.id }) { index, list ->
