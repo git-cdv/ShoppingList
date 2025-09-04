@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Collab List</string>
+    <string name="app_name">Colistly</string>
     <string name="first_list_text_placeholder">напр. завдання або покупки</string>
     <string name="first_list_text_title">Як назвати ваш список?</string>
     <string name="groceries">Продукти</string>

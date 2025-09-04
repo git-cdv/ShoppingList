@@ -21,7 +21,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.chkan.collablist"
+        applicationId = "com.colistly.app"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

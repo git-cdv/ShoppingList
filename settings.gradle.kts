@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CollabList"
+rootProject.name = "Colistly"
 include(":app")
 include(":data")
 include(":domain")

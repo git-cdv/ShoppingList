@@ -1,6 +1,8 @@
 package chkan.ua.shoppinglist
 
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -21,6 +23,16 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val appLinkIntent = intent
+        val appLinkData: Uri? = appLinkIntent.data
+
+        appLinkData?.let { uri ->
+            Log.d("DeepLink", "uri: $uri")
+            val inviteCode = uri.getQueryParameter("code")
+            Log.d("DeepLink", "Invite code: $inviteCode")
+        }
+
         sessionViewModel.signInAnonymouslyIfNeed()
         installSplashScreen().apply {
             setKeepOnScreenCondition {
