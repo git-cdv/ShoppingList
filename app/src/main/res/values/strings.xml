@@ -70,4 +70,10 @@
     <string name="by_continuing_i_agree_to_the">"By continuing, I agree to the "</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="terms_of_use">Terms of Use</string>
+    <string name="ready_join">Ready to join the list?</string>
+    <string name="join">Join</string>
+    <string name="error_list_not_found">List not found. It may have been deleted or the link is expired.</string>
+    <string name="error_user_already_member">You\'re already a member of this list.</string>
+    <string name="error_unknown">Something went wrong. Please try again later.</string>
+
 </resources>

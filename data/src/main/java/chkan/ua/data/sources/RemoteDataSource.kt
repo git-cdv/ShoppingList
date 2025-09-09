@@ -18,4 +18,6 @@ interface RemoteDataSource {
     suspend fun editList(config: Editable)
     suspend fun deleteList(listId: String)
     suspend fun getListWithItemsById(listId: String) : ListItems
+
+    suspend fun joinSharedList(userId:String, listId:String)
 }

@@ -13,6 +13,7 @@ import chkan.ua.domain.usecases.lists.GetListsFlowUseCase
 import chkan.ua.domain.usecases.lists.MoveToTopUseCase
 import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.domain.usecases.share.GetSharedListsFlowUseCase
+import chkan.ua.domain.usecases.share.JoinListUseCase
 import chkan.ua.domain.usecases.share.ShareListUseCase
 import chkan.ua.domain.usecases.share.StopSharingUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
@@ -37,6 +38,7 @@ class ListsViewModel @Inject constructor(
     private val stopSharing: StopSharingUseCase,
     private val logger: Logger,
     private val shareList: ShareListUseCase,
+    private val joinList: JoinListUseCase,
 ) : ViewModel() {
 
     val localListsFlow = getListsFlow(Unit)
@@ -109,7 +111,7 @@ class ListsViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             shareList(listId)
                 .onFailure {
-                    errorHandler.handle(Exception(it),"Error while sharing list. Please try again later.")
+                    errorHandler.handle(it,"Error while sharing list. Please try again later.")
                 }
         }
     }
@@ -117,5 +119,16 @@ class ListsViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         sharedObservationJob?.cancel()
+    }
+
+    fun onJoinList(inviteCode: String?) {
+        inviteCode?.let { code ->
+            viewModelScope.launch{
+                joinList(code)
+                    .onFailure {
+                        errorHandler.handle(it, it.message)
+                    }
+            }
+        }
     }
 }

@@ -1,5 +1,8 @@
 package chkan.ua.data.sources.firestore
 
+import android.util.Log
+import chkan.ua.core.exceptions.ResourceCode
+import chkan.ua.core.exceptions.UserMessageException
 import chkan.ua.data.models.RemoteItem
 import chkan.ua.data.sources.RemoteDataSource
 import chkan.ua.domain.Logger
@@ -9,6 +12,7 @@ import chkan.ua.domain.models.ListSummary
 import chkan.ua.domain.objects.Editable
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -17,6 +21,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
 
@@ -276,6 +281,36 @@ class FirestoreSourceImpl @Inject constructor (
             position = 0,
             isShared = false
         )
+    }
+
+    override suspend fun joinSharedList(userId: String, listId: String) {
+        withContext(Dispatchers.IO) {
+            try {
+                val docRef = firestore.collection(collectionPath).document(listId)
+
+                val document = docRef.get().await()
+                if (!document.exists()) {
+                    throw UserMessageException(ResourceCode.JOINING_LIST_NOT_FOUND)
+                }
+
+                val currentMembers = document.get("membersIds") as? List<String> ?: emptyList()
+                if (currentMembers.contains(userId)) {
+                    throw UserMessageException(ResourceCode.JOINING_USER_ALREADY_MEMBER)
+                }
+
+                docRef.update("membersIds", FieldValue.arrayUnion(userId)).await()
+            } catch (e: Exception) {
+                if (e is UserMessageException){
+                    throw e
+                }else {
+                    if (e is FirebaseFirestoreException && e.code == FirebaseFirestoreException.Code.PERMISSION_DENIED){
+                        throw UserMessageException(ResourceCode.JOINING_LIST_NOT_FOUND)
+                    } else {
+                        throw UserMessageException(ResourceCode.UNKNOWN_ERROR)
+                    }
+                }
+            }
+        }
     }
 
     private fun ListItems.toRemoteModel(createdBy: String, docRefId: String): HashMap<String, Any> {

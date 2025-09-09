@@ -1,5 +1,8 @@
 package chkan.ua.shoppinglist.session
 
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -36,6 +39,10 @@ class SessionViewModel @Inject constructor(
     }
     private val _sessionState = MutableStateFlow(SessionState())
     val sessionState = _sessionState.asStateFlow()
+
+    private val _inviteCode = MutableStateFlow<String?>(null)
+    val inviteCode = _inviteCode.asStateFlow()
+
 
     var isFirstLaunch = false
 
@@ -90,4 +97,20 @@ class SessionViewModel @Inject constructor(
             null
         }
     }
+
+    fun handleInviteDataIfNeed(intent: Intent) {
+        val appLinkIntent = intent
+        val appLinkData: Uri? = appLinkIntent.data
+
+        appLinkData?.let { uri ->
+            Log.d("DeepLink", "Invite uri: $uri")
+            val inviteCode = uri.getQueryParameter("code")
+            _inviteCode.update { inviteCode }
+        }
+    }
+
+    fun clearInviteData() {
+        _inviteCode.update { null }
+    }
+
 }
