@@ -24,10 +24,12 @@ class TimberLogger : Logger {
     }
 
     override fun e(e: Exception, message: String?) {
+        Timber.tag("ERROR").d("$e + message:$message")
         Timber.e(e, message)
     }
 
     override fun e(e: Throwable, message: String?) {
+        Timber.tag("ERROR").d("$e + message:$message")
         Timber.e(e, message)
     }
 }

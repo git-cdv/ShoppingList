@@ -2,11 +2,11 @@ package chkan.ua.shoppinglist.session
 
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import chkan.ua.domain.Logger
 import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.auth.SignInAnonymouslyUseCase
 import chkan.ua.domain.usecases.session.ObserveIsSubscribedUseCase
@@ -30,13 +30,15 @@ import javax.inject.Inject
 class SessionViewModel @Inject constructor(
     private val signInAnonymouslyUseCase: SignInAnonymouslyUseCase,
     private val spService: SharedPreferencesService,
-    private val observeIsSubscribedUseCase: ObserveIsSubscribedUseCase
+    private val observeIsSubscribedUseCase: ObserveIsSubscribedUseCase,
+    private val logger: Logger
 ) : ViewModel() {
 
     init {
         checkFirstLaunch()
         observeIsSubscribed()
     }
+
     private val _sessionState = MutableStateFlow(SessionState())
     val sessionState = _sessionState.asStateFlow()
 
@@ -50,7 +52,7 @@ class SessionViewModel @Inject constructor(
     val isLoadReady: State<Boolean> = _isLoadReady
 
     private fun checkFirstLaunch() {
-        viewModelScope.launch (Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             val splashMinShowTime = 200L
 
             val dataJob = launch {
@@ -75,7 +77,7 @@ class SessionViewModel @Inject constructor(
         }
     }
 
-    fun signInAnonymouslyIfNeed(){
+    fun signInAnonymouslyIfNeed() {
         viewModelScope.launch {
             signInAnonymouslyUseCase()
         }
@@ -92,7 +94,7 @@ class SessionViewModel @Inject constructor(
             val id = spService.get(LAST_OPEN_LIST_ID_INT, String::class.java) ?: ""
             val title = spService.get(LAST_OPEN_LIST_TITLE_STR, String::class.java) ?: ""
             val isShared = spService.get(LAST_OPEN_LIST_IS_SHARED, Boolean::class.java) ?: false
-            LastOpenedList(id,title,isShared)
+            LastOpenedList(id, title, isShared)
         } catch (e: Exception) {
             null
         }
@@ -103,9 +105,13 @@ class SessionViewModel @Inject constructor(
         val appLinkData: Uri? = appLinkIntent.data
 
         appLinkData?.let { uri ->
-            Log.d("DeepLink", "Invite uri: $uri")
-            val inviteCode = uri.getQueryParameter("code")
-            _inviteCode.update { inviteCode }
+            try {
+                val inviteCode = uri.getQueryParameter("code")
+                val listId = inviteCode?.drop(2)
+                _inviteCode.update { listId }
+            } catch (e: Exception) {
+                logger.e(e, "Error while parsing invite code: $uri")
+            }
         }
     }
 

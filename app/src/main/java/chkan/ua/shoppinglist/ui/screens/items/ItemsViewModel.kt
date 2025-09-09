@@ -149,7 +149,7 @@ class ItemsViewModel @Inject constructor(
                 .onSuccess { remoteId ->
                     observeRemoteItems(remoteId)
                     _state.update { it.copy(isShared = true, listId = remoteId) }
-                    eventBus.sendEvent(AppEvent.SharedSuccess)
+                    eventBus.sendEvent(AppEvent.SharedSuccess(remoteId))
                 }
                 .onFailure {
                     errorHandler.handle(Exception(it),"Error while sharing list. Please try again later.")

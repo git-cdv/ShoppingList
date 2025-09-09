@@ -287,27 +287,40 @@ class FirestoreSourceImpl @Inject constructor (
         withContext(Dispatchers.IO) {
             try {
                 val docRef = firestore.collection(collectionPath).document(listId)
-
-                val document = docRef.get().await()
-                if (!document.exists()) {
-                    throw UserMessageException(ResourceCode.JOINING_LIST_NOT_FOUND)
-                }
-
-                val currentMembers = document.get("membersIds") as? List<String> ?: emptyList()
-                if (currentMembers.contains(userId)) {
-                    throw UserMessageException(ResourceCode.JOINING_USER_ALREADY_MEMBER)
-                }
-
-                docRef.update("membersIds", FieldValue.arrayUnion(userId)).await()
-            } catch (e: Exception) {
-                if (e is UserMessageException){
-                    throw e
-                }else {
-                    if (e is FirebaseFirestoreException && e.code == FirebaseFirestoreException.Code.PERMISSION_DENIED){
-                        throw UserMessageException(ResourceCode.JOINING_LIST_NOT_FOUND)
-                    } else {
-                        throw UserMessageException(ResourceCode.UNKNOWN_ERROR)
+                // Сначала пытаемся прочитать документ
+                try {
+                    val document = docRef.get().await()
+                    if (document.exists()) {
+                        // Если смогли прочитать - значит пользователь уже участник
+                        throw UserMessageException(ResourceCode.JOINING_USER_ALREADY_MEMBER)
                     }
+                } catch (e: FirebaseFirestoreException) {
+                    when (e.code) {
+                        FirebaseFirestoreException.Code.PERMISSION_DENIED -> {
+                            // Если получили PERMISSION_DENIED при чтении,
+                            // значит документ существует, но пользователь не участник
+                            try {
+                                docRef.update("membersIds", FieldValue.arrayUnion(userId)).await()
+                            } catch (updateException: FirebaseFirestoreException) {
+                                when (updateException.code) {
+                                    FirebaseFirestoreException.Code.NOT_FOUND ->
+                                        throw UserMessageException(ResourceCode.JOINING_LIST_NOT_FOUND)
+                                    else -> throw UserMessageException(ResourceCode.UNKNOWN_ERROR)
+                                }
+                            }
+                        }
+                        FirebaseFirestoreException.Code.NOT_FOUND -> {
+                            throw UserMessageException(ResourceCode.JOINING_LIST_NOT_FOUND)
+                        }
+                        else -> throw UserMessageException(ResourceCode.UNKNOWN_ERROR)
+                    }
+                }
+            } catch (e: Exception) {
+                logger.e(e,"joinSharedList e:$e")
+                if (e is UserMessageException) {
+                    throw e
+                } else {
+                    throw UserMessageException(ResourceCode.UNKNOWN_ERROR)
                 }
             }
         }

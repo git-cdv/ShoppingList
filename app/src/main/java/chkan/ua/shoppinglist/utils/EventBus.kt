@@ -36,5 +36,5 @@ class EventBus @Inject constructor() {
 }
 
 sealed class AppEvent {
-    data object SharedSuccess : AppEvent()
+    data class SharedSuccess(val listId: String) : AppEvent()
 }

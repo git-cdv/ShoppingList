@@ -92,7 +92,7 @@ fun ItemsScreen(
         eventBus.events.collect { event ->
             when (event) {
                 is AppEvent.SharedSuccess -> {
-                    showShareLink(context)
+                    showShareLink(context,event.listId)
                     eventBus.consumeEvent()
                 }
                 null -> {}
@@ -230,7 +230,7 @@ fun ItemsScreenContent(
                         onClick = {
                             if (uiState.isShared) {
                                 if (sessionState.isSubscribed == true) {
-                                    showShareLink(context)
+                                    showShareLink(context, uiState.listId)
                                 } else {
                                     showPaywall = true
                                 }
@@ -395,19 +395,13 @@ fun ItemsScreenContent(
     }
 }
 
-fun showShareLink(context: Context) {
-    generateInviteLink(context) { link ->
-        link?.let {
-            val sharedLink =
-                "${context.getString(R.string.join_my_list)} $link "
-            shareLink(context, sharedLink)
-        }
-    }
+fun showShareLink(context:Context, listId: String) {
+    val code = "${listId.first()}${listId.last()}$listId"
+    val sharedLink =
+        "${context.getString(R.string.join_my_list)} https://colistly.web.app/invite?code=$code"
+    shareLink(context, sharedLink)
 }
 
-fun generateInviteLink(context: Context, onComplete: (String?) -> Unit) {
-    onComplete.invoke("LINK")
-}
 
 fun shareLink(context: Context, link: String) {
     val sendIntent = Intent().apply {
