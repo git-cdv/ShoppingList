@@ -1,6 +1,5 @@
 package chkan.ua.shoppinglist
 
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -72,7 +71,6 @@ class MainActivity : ComponentActivity() {
         try {
             Timber.tag("REFERRER").d("Raw referrer: $referrerString")
 
-            // URL декодируем если нужно
             val decodedReferrer = try {
                 java.net.URLDecoder.decode(referrerString, "UTF-8")
             } catch (e: Exception) {
@@ -81,7 +79,6 @@ class MainActivity : ComponentActivity() {
 
             Timber.tag("REFERRER").d("Decoded referrer: $decodedReferrer")
 
-            // Парсим как query параметры
             val uri = "?$decodedReferrer".toUri()
             val inviteCode = uri.getQueryParameter("invite_code")
 
@@ -91,7 +88,6 @@ class MainActivity : ComponentActivity() {
             } else {
                 Timber.tag("REFERRER").d("No invite_code parameter found")
             }
-
         } catch (e: Exception) {
             Timber.tag("REFERRER").e(e, "Error parsing referrer")
         }

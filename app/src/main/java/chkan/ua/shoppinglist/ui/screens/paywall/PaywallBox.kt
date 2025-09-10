@@ -3,15 +3,11 @@ package chkan.ua.shoppinglist.ui.screens.paywall
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,16 +15,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -42,9 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -52,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.ui.kit.buttons.SimpleButton
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import timber.log.Timber
 
@@ -63,15 +52,12 @@ fun PaywallBox(
     onItemSelected: (String) -> Unit,
     onSubscribe: () -> Unit,
     onSubscribeRestore: () -> Unit,
-    onClose: () -> Unit,
-    isInner: Boolean = false,
     modifier: Modifier
 ) {
 
     val context = LocalContext.current
     var textButton by remember { mutableStateOf(context.getString(R.string.continue_text)) }
     val isReview = remember { paywallUiState.isReview }
-    val isHardPaywall = remember { paywallUiState.isHardPaywall }
 
     LaunchedEffect(Unit) {
         if (isReview) {
@@ -79,56 +65,13 @@ fun PaywallBox(
         }
     }
 
-    val transition = remember { Animatable(600f) } // Initial position (outside the screen)
-
-    // Launch appearance animation
-    if (!isInner) {
-        LaunchedEffect(Unit) {
-            transition.animateTo(
-                targetValue = 0f,
-                animationSpec = tween(durationMillis = 700, easing = FastOutSlowInEasing)
-            )
-        }
-    }
-
     Box(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .then(
-                if (!isInner)
-                    Modifier
-                        .graphicsLayer(translationY = transition.value)
-                        .background(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-                        )
-                else
-                    Modifier.background(color = MaterialTheme.colorScheme.surface)
-            )
+            .background(color = MaterialTheme.colorScheme.surface)
 
     ) {
-        if (!isHardPaywall && isInner) {
-            Button(
-                onClick = { onClose.invoke() },
-                modifier = Modifier
-                    .padding(end = 16.dp, top = 10.dp)
-                    .align(Alignment.TopEnd)
-                    .size(28.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                ),
-                shape = RoundedCornerShape(12.dp),
-                contentPadding = PaddingValues(4.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = null
-                )
-            }
-        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -159,9 +102,7 @@ fun PaywallBox(
                     if (isReview) {
                         PaywallItemCardInReview(item, onItemSelected = { selectedItem ->
                             onItemSelected.invoke(selectedItem.id)
-                            if (isReview) {
-                                textButton = collectButtonText(selectedItem, context)
-                            }
+                            textButton = collectButtonText(selectedItem, context)
                         })
                     } else {
                         PaywallItemCardAfterReview(item, onItemSelected = { selectedItem ->
@@ -257,16 +198,11 @@ fun PaywallBox(
     }
 }
 
-@Composable
-fun SimpleButton(text: String, onClicked: () -> Unit, modifier: Modifier) {
-    TODO("Not yet implemented")
-}
-
 fun collectButtonText(item: PaywallItem, context: Context): String {
     val period = when (item.type) {
-        PaywallType.WEEK -> context.getString(R.string.week_small)
-        PaywallType.MONTH -> context.getString(R.string.month_small)
-        PaywallType.YEAR -> context.getString(R.string.year_small)
+        ProductType.WEEK -> context.getString(R.string.week_small)
+        ProductType.MONTH -> context.getString(R.string.month_small)
+        ProductType.YEAR -> context.getString(R.string.year_small)
     }
     return "${context.getString(R.string.subscribe_by)} ${item.price}/$period"
 }
@@ -292,7 +228,7 @@ private fun PayWallBoxPreview() {
             val list = listOf(
                 PaywallItem(
                     id = "1",
-                    type = PaywallType.WEEK,
+                    type = ProductType.WEEK,
                     isSelected = false,
                     price = "$59.99",
                     onlyPrice = "only $1.16/w",
@@ -300,7 +236,7 @@ private fun PayWallBoxPreview() {
                     botName = "botName"
                 ), PaywallItem(
                     id = "1",
-                    type = PaywallType.MONTH,
+                    type = ProductType.MONTH,
                     isSelected = false,
                     price = "$59.99",
                     onlyPrice = "only $1.16/w",
@@ -309,7 +245,7 @@ private fun PayWallBoxPreview() {
                 ),
                 PaywallItem(
                     id = "1",
-                    type = PaywallType.YEAR,
+                    type = ProductType.YEAR,
                     isSelected = true,
                     price = "$59.99",
                     onlyPrice = "only $1.16/w",
@@ -324,8 +260,6 @@ private fun PayWallBoxPreview() {
                 {},
                 {},
                 {},
-                {},
-                isInner = false,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
         }

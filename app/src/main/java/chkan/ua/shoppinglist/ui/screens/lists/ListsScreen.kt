@@ -49,6 +49,8 @@ import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.EditBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ListItem
 import chkan.ua.shoppinglist.ui.kit.items.ListRole
+import chkan.ua.shoppinglist.ui.screens.paywall.PaywallModalBottomSheet
+import chkan.ua.shoppinglist.ui.screens.paywall.PaywallUiState
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
@@ -56,7 +58,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun ListsScreen(
     sessionViewModel: SessionViewModel,
-    listsViewModel: ListsViewModel = hiltViewModel()
+    listsViewModel: ListsViewModel = hiltViewModel(),
+    paywallViewModel: PaywallViewModel = hiltViewModel()
 ) {
     val navController = localNavController.current
     val lists by listsViewModel.localListsFlow.collectAsStateWithLifecycle(initialValue = listOf())
@@ -81,6 +84,8 @@ fun ListsScreen(
     val editSheetState = rememberModalBottomSheetState()
     var argDeletedIdList by remember { mutableStateOf(Deletable()) }
     var editable by remember { mutableStateOf(Editable()) }
+    //paywall
+    var isPaywallSheetOpen by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
@@ -134,6 +139,16 @@ fun ListsScreen(
             }
         }
     )
+
+    if (isPaywallSheetOpen) {
+        PaywallModalBottomSheet(
+            PaywallUiState(),
+            paywallItems,
+            scaffoldState.snackbarHostState,
+            onEvent = { event ->},
+            onDismiss = { isPaywallSheetOpen = false },
+        )
+    }
 
     if (showAddList) {
         AddListBottomSheet(

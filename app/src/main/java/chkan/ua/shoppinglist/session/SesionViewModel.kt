@@ -15,6 +15,7 @@ import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companio
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_IS_SHARED
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_TITLE_STR
+import chkan.ua.shoppinglist.ui.screens.paywall.PaywallCollector
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -31,6 +32,7 @@ class SessionViewModel @Inject constructor(
     private val signInAnonymouslyUseCase: SignInAnonymouslyUseCase,
     private val spService: SharedPreferencesService,
     private val observeIsSubscribedUseCase: ObserveIsSubscribedUseCase,
+    private val paywallCollector: PaywallCollector,
     private val logger: Logger
 ) : ViewModel() {
 
@@ -70,6 +72,9 @@ class SessionViewModel @Inject constructor(
         viewModelScope.launch {
             observeIsSubscribedUseCase().distinctUntilChanged().collect { isSubscribed ->
                 Timber.tag("SESSION_VM").d("isSubscribed: $isSubscribed")
+                if (isSubscribed != true) {
+                    paywallCollector.init()
+                }
                 _sessionState.update { it.copy(isSubscribed = true) }
             }
         }

@@ -100,7 +100,7 @@ fun PaywallItemCardAfterReview(item: PaywallItem, onItemSelected: (PaywallItem) 
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (item.type == PaywallType.YEAR) stringResource(R.string.best_value) else stringResource(
+                        text = if (item.type == ProductType.YEAR) stringResource(R.string.best_value) else stringResource(
                             R.string.popular
                         ),
                         style = if (item.isSelected) MaterialTheme.typography.labelMedium.copy(
@@ -130,7 +130,7 @@ fun PaywallItemCardAfterReview(item: PaywallItem, onItemSelected: (PaywallItem) 
                     color = if (item.isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = if (item.type != PaywallType.MONTH) item.price else item.price + "/m",
+                    text = if (item.type != ProductType.MONTH) item.price else item.price + "/m",
                     style = LableExtraSmallTextStyle,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                     modifier = Modifier.padding(top = 4.dp)
@@ -147,7 +147,7 @@ fun PaywallItemCardAfterReview(item: PaywallItem, onItemSelected: (PaywallItem) 
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (item.type == PaywallType.WEEK) item.onlyPrice else item.onlyPrice + "/w",
+                    text = if (item.type == ProductType.WEEK) item.onlyPrice else item.onlyPrice + "/w",
                     style = LableExtraSmallTextStyle,
                     overflow = TextOverflow.Ellipsis,
                     color = if (item.isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
@@ -164,7 +164,7 @@ fun PaywallItemCardV2AfterReviewPreview() {
         PaywallItemCardAfterReview(
             PaywallItem(
                 id = "1",
-                type = PaywallType.MONTH,
+                type = ProductType.MONTH,
                 isSelected = true,
                 price = "$59.99",
                 onlyPrice = "$1.16",

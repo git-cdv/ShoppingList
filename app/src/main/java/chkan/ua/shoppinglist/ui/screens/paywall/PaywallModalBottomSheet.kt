@@ -21,11 +21,8 @@ fun PaywallModalBottomSheet(
     paywallUiState: PaywallUiState,
     list:List<PaywallItem>,
     snackbarHostState: SnackbarHostState,
-    onItemSelected: (String)->Unit,
-    onSubscribe: ()->Unit,
-    onSubscribeRestore: ()->Unit,
+    onEvent: (PaywallUiEvent)->Unit,
     onDismiss: () -> Unit,
-    onClosePaywall: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -58,10 +55,9 @@ fun PaywallModalBottomSheet(
             modifier = modifier,
             snackbarHostState = snackbarHostState,
             list = list,
-            onItemSelected = onItemSelected,
-            onSubscribe = onSubscribe,
-            onSubscribeRestore = onSubscribeRestore,
-            onClose = onClosePaywall
+            onItemSelected = { onEvent(PaywallUiEvent.ProductSelected(it)) },
+            onSubscribe = { onEvent(PaywallUiEvent.Subscribe) },
+            onSubscribeRestore = { onEvent(PaywallUiEvent.SubscribeRestore) }
         )
     }
 }
@@ -74,11 +70,8 @@ private fun PaywallModalPreview() {
             PaywallUiState(),
             listOf(),
             snackbarHostState = SnackbarHostState(),
-            onItemSelected = {},
-            onSubscribe = {},
-            onSubscribeRestore = {},
+            onEvent = {},
             onDismiss = {},
-            onClosePaywall = {},
         )
     }
 }

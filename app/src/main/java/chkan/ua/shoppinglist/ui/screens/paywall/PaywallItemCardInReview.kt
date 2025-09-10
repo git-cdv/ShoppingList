@@ -61,7 +61,7 @@ fun PaywallItemCardInReview(item: PaywallItem, onItemSelected: (PaywallItem) -> 
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (item.type != PaywallType.WEEK){
+            if (item.type != ProductType.WEEK){
                 val backgroundModifier  = if (item.isSelected){
                     Modifier.background(brush = Brush.radialGradient(
                         colors = listOf(
@@ -85,7 +85,7 @@ fun PaywallItemCardInReview(item: PaywallItem, onItemSelected: (PaywallItem) -> 
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (item.type == PaywallType.YEAR) stringResource(R.string.best_value) else stringResource(R.string.popular),
+                        text = if (item.type == ProductType.YEAR) stringResource(R.string.best_value) else stringResource(R.string.popular),
                         style = MaterialTheme.typography.labelSmall,
                         color = if (item.isSelected) Color.White else MaterialTheme.colorScheme.onSecondaryContainer
                     )
@@ -135,7 +135,7 @@ fun PaywallItemV2CardPreview() {
         PaywallItemCardInReview(
             PaywallItem(
                 id = "1",
-                type = PaywallType.WEEK,
+                type = ProductType.WEEK,
                 isSelected = true,
                 price = "$59.99",
                 onlyPrice = "only $1.16/w",
