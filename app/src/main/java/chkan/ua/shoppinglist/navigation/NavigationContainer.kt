@@ -47,7 +47,7 @@ fun NavigationContainer(
             composable<ListsRoute> { ListsScreen(sessionViewModel) }
         }
 
-        if (startDestination is ListsRoute){
+        if (startDestination is ListsRoute && !sessionViewModel.isLaunchWithInvite()){
             val lastOpenedList = sessionViewModel.getLastOpenedList()
             if (lastOpenedList != null){
                 navController.navigate(ItemsRoute(lastOpenedList.id,lastOpenedList.title, lastOpenedList.isShared)){

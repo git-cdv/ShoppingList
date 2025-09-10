@@ -109,6 +109,9 @@ dependencies {
     // Log
     implementation(libs.timber)
 
+    //install referrer
+    implementation(libs.installreferrer)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -44,8 +44,6 @@ class SessionViewModel @Inject constructor(
 
     private val _inviteCode = MutableStateFlow<String?>(null)
     val inviteCode = _inviteCode.asStateFlow()
-
-
     var isFirstLaunch = false
 
     private val _isLoadReady = mutableStateOf(false)
@@ -71,7 +69,7 @@ class SessionViewModel @Inject constructor(
     private fun observeIsSubscribed() {
         viewModelScope.launch {
             observeIsSubscribedUseCase().distinctUntilChanged().collect { isSubscribed ->
-                Timber.tag("SESSION").d("isSubscribed: $isSubscribed")
+                Timber.tag("SESSION_VM").d("isSubscribed: $isSubscribed")
                 _sessionState.update { it.copy(isSubscribed = true) }
             }
         }
@@ -119,4 +117,12 @@ class SessionViewModel @Inject constructor(
         _inviteCode.update { null }
     }
 
+    fun isLaunchWithInvite(): Boolean {
+        return _inviteCode.value != null
+    }
+
+    fun setInviteCode(code: String) {
+        Timber.tag("SESSION_VM").d("setInviteCode: $code")
+        _inviteCode.update { code.drop(2) }
+    }
 }
