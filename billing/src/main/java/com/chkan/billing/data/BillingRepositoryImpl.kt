@@ -71,18 +71,7 @@ class BillingRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun acknowledgePurchase(purchaseToken: String): Result<Boolean> {
-        val billingResult = billingService.acknowledgePurchase(purchaseToken)
-
-        return if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-            Result.success(true)
-        } else {
-            val error = billingService.getBillingError(billingResult.responseCode)
-            Result.failure(Exception(error.description))
-        }
-    }
-
-    override suspend fun queryActivePurchases(): Result<List<SubscriptionPurchase>> {
+    override suspend fun restorePurchases(): Result<List<SubscriptionPurchase>> {
         val (billingResult, purchasesList) = billingService.querySubscriptionPurchases()
 
         return if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchasesList != null) {
@@ -91,10 +80,6 @@ class BillingRepositoryImpl @Inject constructor(
             val error = billingService.getBillingError(billingResult.responseCode)
             Result.failure(Exception(error.description))
         }
-    }
-
-    override suspend fun restorePurchases(): Result<List<SubscriptionPurchase>> {
-        return queryActivePurchases()
     }
 
     override fun startConnection() {

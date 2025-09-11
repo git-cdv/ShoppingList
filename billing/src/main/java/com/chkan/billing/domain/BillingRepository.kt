@@ -16,8 +16,6 @@ interface BillingRepository {
         productId: String,
         offerToken: String? = null
     ): Result<Boolean>
-    suspend fun acknowledgePurchase(purchaseToken: String): Result<Boolean>
-    suspend fun queryActivePurchases(): Result<List<SubscriptionPurchase>>
     suspend fun restorePurchases(): Result<List<SubscriptionPurchase>>
     fun startConnection()
     fun endConnection()
