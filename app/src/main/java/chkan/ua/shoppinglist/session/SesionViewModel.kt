@@ -9,19 +9,19 @@ import androidx.lifecycle.viewModelScope
 import chkan.ua.domain.Logger
 import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.auth.SignInAnonymouslyUseCase
-import chkan.ua.domain.usecases.session.ObserveIsSubscribedUseCase
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.IS_FIRST_LAUNCH
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_IS_SHARED
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_TITLE_STR
 import chkan.ua.shoppinglist.ui.screens.paywall.PaywallCollector
+import com.chkan.billing.service.SubscriptionState
+import com.chkan.billing.service.SubscriptionStateManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -31,7 +31,7 @@ import javax.inject.Inject
 class SessionViewModel @Inject constructor(
     private val signInAnonymouslyUseCase: SignInAnonymouslyUseCase,
     private val spService: SharedPreferencesService,
-    private val observeIsSubscribedUseCase: ObserveIsSubscribedUseCase,
+    private val subscriptionStateManager: SubscriptionStateManager,
     private val paywallCollector: PaywallCollector,
     private val logger: Logger
 ) : ViewModel() {
@@ -70,12 +70,13 @@ class SessionViewModel @Inject constructor(
 
     private fun observeIsSubscribed() {
         viewModelScope.launch {
-            observeIsSubscribedUseCase().distinctUntilChanged().collect { isSubscribed ->
-                Timber.tag("SESSION_VM").d("isSubscribed: $isSubscribed")
-                if (isSubscribed != true) {
-                    paywallCollector.init()
+            subscriptionStateManager.subscriptionState.collect { state ->
+                Timber.tag("SESSION_VM").d("subscriptionState: $state")
+                when (state) {
+                    SubscriptionState.Active -> { _sessionState.update { it.copy(isSubscribed = true) } }
+                    SubscriptionState.Inactive -> { _sessionState.update { it.copy(isSubscribed = false) } }
+                    SubscriptionState.Loading -> {}
                 }
-                _sessionState.update { it.copy(isSubscribed = true) }
             }
         }
     }
