@@ -103,9 +103,15 @@ dependencies {
     implementation(libs.hilt.compose)
     implementation(libs.kotlinx.serialization.json)
 
-    //crashlytics
+    // Firebase
     implementation (platform(libs.firebase.bom))
+    //Crashlytics
     implementation(libs.firebase.crashlytics)
+    // Firebase Remote Config
+    implementation (libs.firebase.config.ktx)
+    // Firebase Analytics
+    implementation (libs.firebase.analytics.ktx)
+
 
     // Log
     implementation(libs.timber)

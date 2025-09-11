@@ -74,7 +74,7 @@ fun PaywallItemCardAfterReview(item: PaywallItem, onItemSelected: (PaywallItem) 
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (item.type != item.clearTopType) {
+            if (item.type != ProductType.WEEK) {
                 val backgroundModifier = if (item.isSelected) {
                     Modifier.background(
                         brush = Brush.radialGradient(

@@ -51,6 +51,7 @@ import chkan.ua.shoppinglist.ui.kit.items.ListItem
 import chkan.ua.shoppinglist.ui.kit.items.ListRole
 import chkan.ua.shoppinglist.ui.screens.paywall.PaywallModalBottomSheet
 import chkan.ua.shoppinglist.ui.screens.paywall.PaywallUiState
+import chkan.ua.shoppinglist.ui.screens.paywall.PaywallViewModel
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
@@ -141,13 +142,13 @@ fun ListsScreen(
     )
 
     if (isPaywallSheetOpen) {
-        PaywallModalBottomSheet(
+        /*PaywallModalBottomSheet(
             PaywallUiState(),
             paywallItems,
             scaffoldState.snackbarHostState,
             onEvent = { event ->},
             onDismiss = { isPaywallSheetOpen = false },
-        )
+        )*/
     }
 
     if (showAddList) {

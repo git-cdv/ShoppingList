@@ -6,4 +6,5 @@ import androidx.compose.runtime.Immutable
 data class SessionState(
     val isSubscribed: Boolean? = null,
     val isInvited: Boolean? = null,
+    val isLegalEnabled: Boolean = true
 )

@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import chkan.ua.domain.Logger
 import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.auth.SignInAnonymouslyUseCase
+import chkan.ua.shoppinglist.core.remoteconfigs.RemoteConfigManager
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.IS_FIRST_LAUNCH
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
@@ -33,16 +34,18 @@ class SessionViewModel @Inject constructor(
     private val spService: SharedPreferencesService,
     private val subscriptionStateManager: SubscriptionStateManager,
     private val paywallCollector: PaywallCollector,
-    private val logger: Logger
+    private val logger: Logger,
+    private val remoteConfig: RemoteConfigManager
 ) : ViewModel() {
+
+    private val _sessionState = MutableStateFlow(SessionState())
+    val sessionState = _sessionState.asStateFlow()
 
     init {
         checkFirstLaunch()
         observeIsSubscribed()
+        observeRemoteConfig()
     }
-
-    private val _sessionState = MutableStateFlow(SessionState())
-    val sessionState = _sessionState.asStateFlow()
 
     private val _inviteCode = MutableStateFlow<String?>(null)
     val inviteCode = _inviteCode.asStateFlow()
@@ -65,6 +68,16 @@ class SessionViewModel @Inject constructor(
             delay(splashMinShowTime)
             dataJob.join()
             _isLoadReady.value = true
+        }
+    }
+
+    private fun observeRemoteConfig() {
+        viewModelScope.launch {
+            remoteConfig.configState.collect { state ->
+                if(state == RemoteConfigManager.ConfigState.Success){
+                    _sessionState.update { it.copy(isLegalEnabled = remoteConfig.isLegalEnabled()) }
+                }
+            }
         }
     }
 

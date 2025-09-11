@@ -66,11 +66,14 @@ class SubscriptionBillingService @Inject constructor(
     //INIT CONNECTION AND GET ACTIVE SUBSCRIPTIONS FLOW
     private fun initializeBillingClient() {
         if (billingClient == null) {
+            val pendingPurchasesParams = PendingPurchasesParams.newBuilder()
+                .enableOneTimeProducts()
+                .build()
+
+
             billingClient = newBuilder(context)
                 .setListener(this)
-                .enablePendingPurchases(
-                    PendingPurchasesParams.newBuilder().build()
-                )
+                .enablePendingPurchases(pendingPurchasesParams)
                 .enableAutoServiceReconnection()
                 .build()
         }
