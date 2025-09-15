@@ -2,9 +2,13 @@ package com.chkan.billing.data
 
 import android.app.Activity
 import com.android.billingclient.api.BillingClient
+import com.chkan.billing.core.BillingLogger
 import com.chkan.billing.data.SubscriptionMapper.toDomainSubscription
 import com.chkan.billing.data.SubscriptionMapper.toDomainSubscriptionPurchase
 import com.chkan.billing.domain.BillingRepository
+import com.chkan.billing.domain.error.PurchasesError
+import com.chkan.billing.domain.error.PurchasesException
+import com.chkan.billing.domain.error.toPurchasesException
 import com.chkan.billing.domain.model.Subscription
 import com.chkan.billing.domain.model.SubscriptionPurchase
 import com.chkan.billing.service.SubscriptionBillingService
@@ -13,7 +17,8 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class BillingRepositoryImpl @Inject constructor(
-    private val billingService: SubscriptionBillingService
+    private val billingService: SubscriptionBillingService,
+    private val logger: BillingLogger
 ) : BillingRepository {
 
     override val activeSubscriptionsFlow: Flow<Result<List<SubscriptionPurchase>>> =
@@ -41,46 +46,38 @@ class BillingRepositoryImpl @Inject constructor(
         activity: Activity,
         productId: String,
         offerToken: String?
-    ): Result<Boolean> {
-        // Сначала получаем детали подписки
-        val (queryResult, productDetailsList) = billingService.querySubscriptionDetails(listOf(productId))
-
-        if (queryResult.responseCode != BillingClient.BillingResponseCode.OK || productDetailsList.isNullOrEmpty()) {
-            val error = billingService.getBillingError(queryResult.responseCode)
-            return Result.failure(Exception(error.description))
+    ) {
+        val product = try {
+            val (_, productDetailsList) = billingService.querySubscriptionDetails(listOf(productId))
+            productDetailsList?.firstOrNull() ?: throw PurchasesException(
+                PurchasesError.ProductNotAvailableForPurchaseError,
+                message = "Product $productId not found"
+            )
+        } catch (t: Throwable) {
+            throw t.toPurchasesException()
         }
 
-        val productDetails = productDetailsList.first()
-
-        // Если не передан offerToken, берем первый доступный
         val selectedOfferToken = offerToken
-            ?: productDetails.subscriptionOfferDetails?.firstOrNull()?.offerToken
-            ?: return Result.failure(Exception("No offer token available"))
-
-        val billingResult = billingService.launchSubscriptionFlow(
-            activity,
-            productDetails,
-            selectedOfferToken
+            ?: product.subscriptionOfferDetails?.firstOrNull()?.offerToken
+            ?: throw PurchasesException(
+            PurchasesError.ProductNotAvailableForPurchaseError,
+            message = "No offer token available: $productId"
         )
 
-        return if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-            Result.success(true)
-        } else {
-            val error = billingService.getBillingError(billingResult.responseCode)
-            Result.failure(Exception(error.description))
+        try {
+            billingService.launchSubscriptionFlow(
+                activity,
+                product,
+                selectedOfferToken
+            )
+        } catch (e: Exception) {
+            logger.e(e, "Purchase flow failed for product $productId")
+            throw e.toPurchasesException()
         }
     }
 
-    override suspend fun restorePurchases(): Result<List<SubscriptionPurchase>> {
-        val (billingResult, purchasesList) = billingService.querySubscriptionPurchases()
+    override suspend fun restorePurchases() = billingService.restorePurchases()
 
-        return if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchasesList != null) {
-            Result.success(purchasesList.map { it.toDomainSubscriptionPurchase() })
-        } else {
-            val error = billingService.getBillingError(billingResult.responseCode)
-            Result.failure(Exception(error.description))
-        }
-    }
 
     override fun startConnection() {
         billingService.startConnection()

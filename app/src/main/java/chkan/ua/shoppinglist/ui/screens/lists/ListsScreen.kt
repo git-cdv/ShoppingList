@@ -15,12 +15,14 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -50,7 +52,6 @@ import chkan.ua.shoppinglist.ui.kit.bottom_sheets.EditBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ListItem
 import chkan.ua.shoppinglist.ui.kit.items.ListRole
 import chkan.ua.shoppinglist.ui.screens.paywall.PaywallModalBottomSheet
-import chkan.ua.shoppinglist.ui.screens.paywall.PaywallUiState
 import chkan.ua.shoppinglist.ui.screens.paywall.PaywallViewModel
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
@@ -87,6 +88,12 @@ fun ListsScreen(
     var editable by remember { mutableStateOf(Editable()) }
     //paywall
     var isPaywallSheetOpen by remember { mutableStateOf(false) }
+    val paywallSheetState = rememberModalBottomSheetState()
+    val snackbarHostState by remember { mutableStateOf(SnackbarHostState()) }
+    val paywallItems by paywallViewModel.paywallItemsFlow.collectAsState()
+    val paywallUiState by paywallViewModel.paywallUiState.collectAsState()
+    //session
+    val sessionState by sessionViewModel.sessionState.collectAsStateWithLifecycle()
 
     val scope = rememberCoroutineScope()
 
@@ -99,7 +106,7 @@ fun ListsScreen(
         lists,
         sharedLists,
         onListEvent = { event ->
-            when(event){
+            when (event) {
                 is ListUiEvent.OnCardClick -> {
                     navController.navigate(
                         ItemsRoute(
@@ -109,28 +116,39 @@ fun ListsScreen(
                         )
                     )
                 }
+
                 ListUiEvent.OnCreateList -> {
-                    showAddList = true
-                    scope.launch { addListState.show() }
+                    if(sessionState.isSubscribed == true || lists.size < 2){
+                        showAddList = true
+                        scope.launch { addListState.show() }
+                    } else {
+                        isPaywallSheetOpen = true
+                        scope.launch { paywallSheetState.show() }
+                    }
                 }
+
                 is ListUiEvent.OnDeleteList -> {
                     argDeletedIdList = Deletable(event.listId, event.isShared)
                     showConfirmDeleteList = true
                     scope.launch { confirmDeleteListState.show() }
                 }
+
                 is ListUiEvent.OnEditList -> {
                     editable = event.editable
                     showEditBottomSheet = true
                     scope.launch { editSheetState.show() }
                 }
+
                 is ListUiEvent.OnMoveToTop -> {
                     listsViewModel.moveToTop(MoveTop(event.listId, event.position))
                 }
+
                 is ListUiEvent.OnStopSharing -> {
                     argStopSharingIdList = event.listId
                     showConfirmStopSharing = true
                     scope.launch { confirmStopSharingState.show() }
                 }
+
                 is ListUiEvent.OnStopFollowing -> {}
                 is ListUiEvent.OnShareList -> {
                     argStartSharingIdList = event.listId
@@ -142,13 +160,19 @@ fun ListsScreen(
     )
 
     if (isPaywallSheetOpen) {
-        /*PaywallModalBottomSheet(
-            PaywallUiState(),
+        PaywallModalBottomSheet(
+            paywallSheetState,
+            paywallUiState,
             paywallItems,
-            scaffoldState.snackbarHostState,
-            onEvent = { event ->},
-            onDismiss = { isPaywallSheetOpen = false },
-        )*/
+            paywallViewModel.isReview(),
+            snackbarHostState,
+            onEvent = { event -> paywallViewModel.onUiEvent(event)},
+            onDismiss = {
+                scope.launch { paywallSheetState.hide() }.invokeOnCompletion {
+                    isPaywallSheetOpen = false
+                }
+            },
+        )
     }
 
     if (showAddList) {
@@ -247,9 +271,9 @@ fun ListsScreenContent(
     var topbarTitleResId by remember { mutableIntStateOf(R.string.lists) }
 
     LaunchedEffect(lists.isEmpty(), sharedLists.isEmpty()) {
-        topbarTitleResId = if(lists.isEmpty() && sharedLists.isNotEmpty()){
+        topbarTitleResId = if (lists.isEmpty() && sharedLists.isNotEmpty()) {
             R.string.shared_lists
-        }else{
+        } else {
             R.string.lists
         }
     }
@@ -303,7 +327,7 @@ fun ListsScreenContent(
                 )
             }
             if (sharedLists.isNotEmpty()) {
-                if(lists.isNotEmpty()){
+                if (lists.isNotEmpty()) {
                     item {
                         Text(
                             text = stringResource(R.string.shared_lists),
@@ -341,6 +365,6 @@ fun ListsScreenContentPreview() {
             )
         )
         ListsScreenContent(
-            list, list, {_->})
+            list, list, { _ -> })
     }
 }

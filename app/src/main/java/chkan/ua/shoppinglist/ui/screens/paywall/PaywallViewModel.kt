@@ -3,8 +3,14 @@ package chkan.ua.shoppinglist.ui.screens.paywall
 import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import chkan.ua.shoppinglist.core.analytics.Analytics
+import chkan.ua.core.exceptions.ResourceCode
+import chkan.ua.core.exceptions.UserMessageException
+import chkan.ua.shoppinglist.core.services.ErrorHandler
 import chkan.ua.shoppinglist.di.ApplicationScope
+import com.chkan.billing.domain.error.PurchasesError
+import com.chkan.billing.domain.error.PurchasesException
+import com.chkan.billing.domain.usecase.RestorePurchaseUseCase
+import com.chkan.billing.domain.usecase.SubscriptionPurchaseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,83 +26,72 @@ import javax.inject.Inject
 class PaywallViewModel @Inject constructor(
     @ApplicationScope private val applicationScope: CoroutineScope,
     private val paywallCollector: PaywallCollector,
-/*    private val sdkPurchases: Purchases,
-    private val subscribeHandler: SubscribeHandler,
-    private val analytics: Analytics,
-    private val errorMapper: ErrorMapper,
-    private val config: RemoteConfig*/
+    private val purchaseUseCase: SubscriptionPurchaseUseCase,
+    private val restoreUseCase: RestorePurchaseUseCase,
+    private val errorHandler: ErrorHandler,
 ) : ViewModel() {
 
     private val _paywallUiState = MutableStateFlow(PaywallUiState())
     val paywallUiState = _paywallUiState.asStateFlow()
-
-  /*  init {
-        _paywallUiState.update {
-            it.copy(
-                isReview = config.isSubscriptionStyleFull()
-            )
-        }
-    }*/
 
     private var purchasesJob: Job? = null
     private var restoreJob: Job? = null
 
     val paywallItemsFlow = paywallCollector.getItemsFlow()
 
-    fun selectPaywallItem(selectedId: String){
-        paywallCollector.selectItem(selectedId)
+    fun isReview() = paywallCollector.isReview
+    fun onUiEvent(event: PaywallUiEvent) {
+        when (event) {
+            is PaywallUiEvent.ProductSelected -> paywallCollector.selectItem(event.id)
+            is PaywallUiEvent.Subscribe -> onSubscribe(event.activity)
+            PaywallUiEvent.SubscribeRestore -> onSubscribeRestore()
+            PaywallUiEvent.PaywallEventConsumed -> consumeEvent()
+        }
     }
 
-   /* fun onSubscribe(activity: Activity) {
+    fun onSubscribe(activity: Activity) {
         val productId = paywallCollector.getSelectedId()
-        analytics.logEvent(PaywallAnalyticsEvent.SubscriptionSubscribeClicked(config.getActivePaywallName(),productId))
+        //analytics.logEvent(PaywallAnalyticsEvent.SubscriptionSubscribeClicked(config.getActivePaywallName(),productId))
 
         if (purchasesJob?.isActive == true) {
             return
         }
         purchasesJob = applicationScope.launch(Dispatchers.IO) {
             _paywallUiState.update { it.copy(isLoading = true) }
-            try{
-                sdkPurchases.purchase(activity,productId)
-                setIsSubscribed()
+            try {
+                purchaseUseCase.purchase(activity, productId)
                 _paywallUiState.update {
                     it.copy(
                         isLoading = false,
                         event = PaywallEvent.ProductPurchased
                     )
                 }
-                analytics.logEvent(PaywallAnalyticsEvent.SubscriptionPurchased(config.getActivePaywallName(),productId))
-            } catch (e: Throwable){
+                //analytics.logEvent(PaywallAnalyticsEvent.SubscriptionPurchased(config.getActivePaywallName(),productId))
+            } catch (e: Throwable) {
                 Timber.e(e)
-                if (e is PurchasesException){
+                if (e is PurchasesException) {
+                    handleError(e)
                     _paywallUiState.update {
-                        it.copy(
-                            isLoading = false,
-                            event = collectPurchasesErrorEvent(e)
-                        )
+                        it.copy(isLoading = false)
                     }
-                    analytics.logEvent(PaywallAnalyticsEvent.SubscriptionError(config.getActivePaywallName(),productId,e.error.name))
+                    //analytics.logEvent(PaywallAnalyticsEvent.SubscriptionError(config.getActivePaywallName(),productId,e.error.name))
                 } else {
-                    analytics.logEvent(PaywallAnalyticsEvent.SubscriptionError(config.getActivePaywallName(),productId,errorMapper.map(e).short()))
+                    //analytics.logEvent(PaywallAnalyticsEvent.SubscriptionError(config.getActivePaywallName(),productId,errorMapper.map(e).short()))
                 }
             }
         }
     }
 
-    fun setIsSubscribed() {
-        subscribeHandler.setIsSubscribed()
-    }
-
-    private fun collectPurchasesErrorEvent(e: PurchasesException): PaywallEvent? {
-        if (e.error == PurchasesError.PurchaseCancelledError) return null
-        if (e.error == PurchasesError.ProductAlreadyPurchasedError){
-            subscribeHandler.setIsSubscribed()
-            return PaywallEvent.ProductAlreadyPurchasedError
+    private fun handleError(e: PurchasesException) {
+        if (e.error == PurchasesError.ProductAlreadyPurchasedError) {
+            onSubscribeRestore()
         }
-        if (e.error == PurchasesError.NetworkError){
-            return PaywallEvent.NetworkError
+        if (e.error == PurchasesError.NetworkError) {
+            errorHandler.handle(UserMessageException(ResourceCode.NO_INTERNET_CONNECTION))
         }
-        return PaywallEvent.UnknownError
+        if (e.error != PurchasesError.PurchaseCancelledError){
+            errorHandler.handle(UserMessageException(ResourceCode.UNKNOWN_ERROR))
+        }
     }
 
     fun consumeEvent() {
@@ -108,23 +103,23 @@ class PaywallViewModel @Inject constructor(
             return
         }
         restoreJob = viewModelScope.launch {
-            val isSubscribed = subscribeHandler.restore()
-            if (isSubscribed == true){
-                setIsSubscribed()
-                _paywallUiState.update {
-                    it.copy(
-                        isLoading = false,
-                        event = PaywallEvent.ProductPurchased
-                    )
+            restoreUseCase()
+                .onSuccess {
+                    _paywallUiState.update {
+                        it.copy(
+                            isLoading = false,
+                            event = PaywallEvent.ProductPurchased
+                        )
+                    }
                 }
-            } else {
-                _paywallUiState.update {
-                    it.copy(
-                        isLoading = false,
-                        event = PaywallEvent.RestorePurchasesFailed
-                    )
+                .onFailure {
+                    _paywallUiState.update {
+                        it.copy(
+                            isLoading = false,
+                            event = PaywallEvent.RestorePurchasesFailed
+                        )
+                    }
                 }
-            }
         }
-    }*/
+    }
 }

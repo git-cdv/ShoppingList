@@ -34,8 +34,7 @@ class SessionViewModel @Inject constructor(
     private val spService: SharedPreferencesService,
     private val subscriptionStateManager: SubscriptionStateManager,
     private val paywallCollector: PaywallCollector,
-    private val logger: Logger,
-    private val remoteConfig: RemoteConfigManager
+    private val logger: Logger
 ) : ViewModel() {
 
     private val _sessionState = MutableStateFlow(SessionState())
@@ -44,7 +43,6 @@ class SessionViewModel @Inject constructor(
     init {
         checkFirstLaunch()
         observeIsSubscribed()
-        observeRemoteConfig()
     }
 
     private val _inviteCode = MutableStateFlow<String?>(null)
@@ -71,23 +69,16 @@ class SessionViewModel @Inject constructor(
         }
     }
 
-    private fun observeRemoteConfig() {
-        viewModelScope.launch {
-            remoteConfig.configState.collect { state ->
-                if(state == RemoteConfigManager.ConfigState.Success){
-                    _sessionState.update { it.copy(isLegalEnabled = remoteConfig.isLegalEnabled()) }
-                }
-            }
-        }
-    }
-
     private fun observeIsSubscribed() {
         viewModelScope.launch {
             subscriptionStateManager.subscriptionState.collect { state ->
                 Timber.tag("SESSION_VM").d("subscriptionState: $state")
                 when (state) {
                     SubscriptionState.Active -> { _sessionState.update { it.copy(isSubscribed = true) } }
-                    SubscriptionState.Inactive -> { _sessionState.update { it.copy(isSubscribed = false) } }
+                    SubscriptionState.Inactive -> {
+                        _sessionState.update { it.copy(isSubscribed = false) }
+                        paywallCollector.init()
+                    }
                     SubscriptionState.Loading -> {}
                 }
             }

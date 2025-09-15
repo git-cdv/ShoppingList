@@ -19,7 +19,7 @@ import com.chkan.billing.core.BillingLogger
 import com.chkan.billing.di.ApplicationScope
 import com.chkan.billing.di.Dispatcher
 import com.chkan.billing.di.DispatcherType
-import com.chkan.billing.domain.model.BillingError
+import com.chkan.billing.domain.error.BillingError
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -267,7 +267,7 @@ class SubscriptionBillingService @Inject constructor(
                     BillingResponseCode.ITEM_NOT_OWNED -> {
                         logger.d(TAG,"Acknowledgment failed: item not owned")
                         // Refresh purchases and try again
-                        val (billingResult, purchasesList) = querySubscriptionPurchases()
+                        val (_, purchasesList) = querySubscriptionPurchases()
                         purchasesList?.find { it.purchaseToken == purchaseToken }
                             ?.let { freshPurchase ->
                                 if (!freshPurchase.isAcknowledged) {
@@ -331,6 +331,19 @@ class SubscriptionBillingService @Inject constructor(
         client.queryProductDetailsAsync(params) { billingResult, queryProductDetailsResult ->
             val productDetailsList = queryProductDetailsResult.productDetailsList
             continuation.resume(Pair(billingResult, productDetailsList))
+        }
+    }
+
+    suspend fun restorePurchases(): Result<Unit> {
+        val (billingResult, purchasesList) = querySubscriptionPurchases()
+
+        return if (billingResult.responseCode == BillingResponseCode.OK && !purchasesList.isNullOrEmpty()) {
+            _purchasesFlow.tryEmit(Result.success(purchasesList))
+            Result.success(Unit)
+        } else {
+            val error = getBillingError(billingResult.responseCode)
+            logger.e(Exception("Restore purchase failed: ${error.description}"))
+            Result.failure(Exception(error.description))
         }
     }
 

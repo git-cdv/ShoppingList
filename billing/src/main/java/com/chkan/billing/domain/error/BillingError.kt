@@ -1,4 +1,4 @@
-package com.chkan.billing.domain.model
+package com.chkan.billing.domain.error
 
 enum class BillingError(val code: Int, val description: String) {
     SERVICE_TIMEOUT(-3, "The request has reached the maximum timeout before Google Play responds"),

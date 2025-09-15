@@ -7,7 +7,7 @@ import javax.inject.Inject
 class GetSubscriptionsUseCase @Inject constructor(
     private val billingRepository: BillingRepository
 ) {
-    suspend fun getSubscriptions(productIds: List<String>): Result<List<Subscription>> {
+    suspend operator fun invoke(productIds: List<String>): Result<List<Subscription>> {
         return billingRepository.querySubscriptions(productIds)
     }
 }

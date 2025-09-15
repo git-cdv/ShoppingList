@@ -7,8 +7,7 @@ import javax.inject.Inject
 class RestorePurchaseUseCase @Inject constructor(
     private val billingRepository: BillingRepository
 ) {
-
-    suspend fun restore(): Result<List<SubscriptionPurchase>> {
+    suspend operator fun invoke(): Result<Unit> {
         return billingRepository.restorePurchases()
     }
 }
