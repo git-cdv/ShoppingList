@@ -35,7 +35,7 @@ import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 
 @Composable
 fun FirstListScreen(
-    listsViewModel: ListsViewModel = hiltViewModel()
+    listsViewModel: ListsViewModel
 ){
     val navController = localNavController.current
     val today = DateProvider().getTodayByPattern("dd.MM.yy")

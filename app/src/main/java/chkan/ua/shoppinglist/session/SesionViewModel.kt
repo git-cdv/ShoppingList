@@ -9,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import chkan.ua.domain.Logger
 import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.auth.SignInAnonymouslyUseCase
-import chkan.ua.shoppinglist.core.remoteconfigs.RemoteConfigManager
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.IS_FIRST_LAUNCH
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
@@ -25,7 +24,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -72,7 +70,7 @@ class SessionViewModel @Inject constructor(
     private fun observeIsSubscribed() {
         viewModelScope.launch {
             subscriptionStateManager.subscriptionState.collect { state ->
-                Timber.tag("SESSION_VM").d("subscriptionState: $state")
+                logger.d("SESSION_VM","subscriptionState: $state")
                 when (state) {
                     SubscriptionState.Active -> { _sessionState.update { it.copy(isSubscribed = true) } }
                     SubscriptionState.Inactive -> {
@@ -132,7 +130,7 @@ class SessionViewModel @Inject constructor(
     }
 
     fun setInviteCode(code: String) {
-        Timber.tag("SESSION_VM").d("setInviteCode: $code")
+        logger.d("SESSION_VM","setInviteCode: $code")
         _inviteCode.update { code.drop(2) }
     }
 }

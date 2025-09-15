@@ -57,6 +57,8 @@ class ErrorHandlerImpl @Inject constructor(
             ResourceCode.JOINING_USER_ALREADY_MEMBER -> context.getString(R.string.error_user_already_member)
             ResourceCode.UNKNOWN_ERROR -> context.getString(R.string.error_unknown)
             ResourceCode.NO_INTERNET_CONNECTION -> context.getString(R.string.error_no_internet_connection)
+            ResourceCode.SHARING_ERROR_CREATE_SHARED_LIST -> context.getString(R.string.error_create_sharing_list)
+            ResourceCode.SHARING_ERROR_STOP_SHARING_LIST -> context.getString(R.string.error_stop_sharing)
         }
     }
 }

@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun InviteHandler(
     sessionViewModel: SessionViewModel,
-    listsViewModel: ListsViewModel = hiltViewModel()
+    listsViewModel: ListsViewModel
 ) {
     val inviteCode by sessionViewModel.inviteCode.collectAsStateWithLifecycle()
     var showInviteSheet by remember { mutableStateOf(false) }

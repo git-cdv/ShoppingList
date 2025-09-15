@@ -14,7 +14,7 @@ import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 
 @Composable
 fun ErrorDialogHandler(
-    listsViewModel: ListsViewModel = hiltViewModel()
+    listsViewModel: ListsViewModel
 ) {
 
     val handler = listsViewModel.errorHandler

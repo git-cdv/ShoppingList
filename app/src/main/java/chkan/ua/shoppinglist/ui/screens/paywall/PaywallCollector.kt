@@ -67,11 +67,13 @@ class PaywallCollector @Inject constructor(
                 result
                     .onSuccess {
                         val subscriptions = result.getOrElse { throw Exception("Error getting products") }
-                        weeklyPrice = subscriptions[0].price
-                        monthlyPrice = subscriptions[1].price
-                        yearlyPrice = subscriptions[2].price
-                        currency = subscriptions[0].priceCurrencyCode
-                        currencyFormat.currency = Currency.getInstance(currency)
+                        if (subscriptions.isNotEmpty()) {
+                            weeklyPrice = subscriptions[0].price
+                            monthlyPrice = subscriptions[1].price
+                            yearlyPrice = subscriptions[2].price
+                            currency = subscriptions[0].priceCurrencyCode
+                            currencyFormat.currency = Currency.getInstance(currency)
+                        }
                     }
                     .onFailure { logger.e(it) }
             } catch (e: Exception) {

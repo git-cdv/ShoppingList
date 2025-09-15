@@ -60,7 +60,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ListsScreen(
     sessionViewModel: SessionViewModel,
-    listsViewModel: ListsViewModel = hiltViewModel(),
+    listsViewModel: ListsViewModel,
     paywallViewModel: PaywallViewModel = hiltViewModel()
 ) {
     val navController = localNavController.current
@@ -99,7 +99,6 @@ fun ListsScreen(
 
     LaunchedEffect(Unit) {
         sessionViewModel.clearLastOpenedList()
-        listsViewModel.observeSharedLists()
     }
 
     ListsScreenContent(

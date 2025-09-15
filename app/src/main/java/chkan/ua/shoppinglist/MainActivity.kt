@@ -19,10 +19,12 @@ import com.android.installreferrer.api.InstallReferrerStateListener
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import androidx.core.net.toUri
+import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val sessionViewModel: SessionViewModel by viewModels()
+    private val listsViewModel: ListsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,9 +40,9 @@ class MainActivity : ComponentActivity() {
             ShoppingListTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     if (sessionViewModel.isLoadReady.value) {
-                        NavigationContainer(sessionViewModel)
-                        ErrorDialogHandler()
-                        InviteHandler(sessionViewModel)
+                        NavigationContainer(sessionViewModel, listsViewModel)
+                        ErrorDialogHandler(listsViewModel)
+                        InviteHandler(sessionViewModel, listsViewModel)
                         checkInstallReferrerIfNeed(sessionViewModel)
                     }
                 }
