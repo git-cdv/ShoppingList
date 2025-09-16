@@ -3,6 +3,7 @@ package chkan.ua.shoppinglist.ui.screens.lists
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -88,7 +89,7 @@ fun ListsScreen(
     var editable by remember { mutableStateOf(Editable()) }
     //paywall
     var isPaywallSheetOpen by remember { mutableStateOf(false) }
-    val paywallSheetState = rememberModalBottomSheetState()
+    val paywallSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val snackbarHostState by remember { mutableStateOf(SnackbarHostState()) }
     val paywallItems by paywallViewModel.paywallItemsFlow.collectAsState()
     val paywallUiState by paywallViewModel.paywallUiState.collectAsState()
@@ -171,6 +172,7 @@ fun ListsScreen(
                     isPaywallSheetOpen = false
                 }
             },
+            modifier = Modifier.navigationBarsPadding()
         )
     }
 

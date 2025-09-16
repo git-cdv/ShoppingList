@@ -120,13 +120,13 @@ fun PaywallItemCardAfterReview(item: PaywallItem, onItemSelected: (PaywallItem) 
             ) {
                 Text(
                     text = item.topName,
-                    style = if (item.isSelected) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium,
                     color = if (item.isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
                 )
 
                 Text(
                     text = item.botName,
-                    style = if (item.isSelected) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall,
                     color = if (item.isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
                 )
                 Text(
