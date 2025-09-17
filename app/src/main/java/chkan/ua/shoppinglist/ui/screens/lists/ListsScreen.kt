@@ -216,10 +216,14 @@ fun ListsScreen(
             confirmStartSharingState,
             question = stringResource(id = R.string.sure_share_list),
             onConfirm = {
-                scope.launch {
-                    listsViewModel.createShareList(argStartSharingIdList)
-                    confirmStartSharingState.hide()
-                    showConfirmStartSharing = false
+                if (sessionState.isSubscribed == true) {
+                    scope.launch {
+                        listsViewModel.createShareList(argStartSharingIdList)
+                        confirmStartSharingState.hide()
+                        showConfirmStartSharing = false
+                    }
+                } else {
+                    sessionViewModel.showPaywall()
                 }
             },
             onDismiss = {

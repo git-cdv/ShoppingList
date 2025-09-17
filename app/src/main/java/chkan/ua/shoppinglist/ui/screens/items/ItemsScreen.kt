@@ -92,9 +92,10 @@ fun ItemsScreen(
         eventBus.events.collect { event ->
             when (event) {
                 is AppEvent.SharedSuccess -> {
-                    showShareLink(context,event.listId)
+                    showShareLink(context, event.listId)
                     eventBus.consumeEvent()
                 }
+
                 null -> {}
             }
         }
@@ -150,6 +151,9 @@ fun ItemsScreen(
         },
         onShareList = {
             itemsViewModel.processIntent(ItemsIntent.ShareList(listId))
+        },
+        onShowPaywall = {
+            sessionViewModel.showPaywall()
         }
     )
 
@@ -201,12 +205,12 @@ fun ItemsScreenContent(
     onEditItem: (Editable) -> Unit,
     onMoveToTop: (String, Int) -> Unit,
     onShareList: () -> Unit,
+    onShowPaywall: () -> Unit,
 ) {
     var showConfirmBottomSheet by remember { mutableStateOf(false) }
     val confirmSheetState = rememberModalBottomSheetState()
     var showConfirmShareBottomSheet by remember { mutableStateOf(false) }
     val confirmShareSheetState = rememberModalBottomSheetState()
-    var showPaywall by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var isReadyShown by remember { mutableStateOf(false) }
@@ -232,7 +236,7 @@ fun ItemsScreenContent(
                                 if (sessionState.isSubscribed == true) {
                                     showShareLink(context, uiState.listId)
                                 } else {
-                                    showPaywall = true
+                                    onShowPaywall()
                                 }
                             } else {
                                 showConfirmShareBottomSheet = true
@@ -377,11 +381,11 @@ fun ItemsScreenContent(
                     scope.launch {
                         if (sessionState.isSubscribed == true) {
                             onShareList()
+                            confirmShareSheetState.hide()
+                            showConfirmShareBottomSheet = false
                         } else {
-                            showPaywall = true
+                            onShowPaywall()
                         }
-                        confirmShareSheetState.hide()
-                        showConfirmShareBottomSheet = false
                     }
                 },
                 onDismiss = {
@@ -395,7 +399,7 @@ fun ItemsScreenContent(
     }
 }
 
-fun showShareLink(context:Context, listId: String) {
+fun showShareLink(context: Context, listId: String) {
     val code = "${listId.first()}${listId.last()}$listId"
     val sharedLink =
         "${context.getString(R.string.join_my_list)} https://colistly.web.app/invite?code=$code"
@@ -422,6 +426,14 @@ fun ItemsScreenContentPreview() {
             uiState = ItemsState(),
             sessionState = SessionState(),
             context = LocalContext.current,
-            {}, { _, _ -> }, {}, {}, {}, {}, { _, _ -> }, {})
+            {},
+            { _, _ -> },
+            {},
+            {},
+            {},
+            {},
+            { _, _ -> },
+            {},
+            {})
     }
 }
