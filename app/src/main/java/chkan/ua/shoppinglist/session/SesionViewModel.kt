@@ -14,7 +14,7 @@ import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companio
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_IS_SHARED
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_TITLE_STR
-import chkan.ua.shoppinglist.ui.screens.paywall.PaywallCollector
+import chkan.ua.shoppinglist.ui.screens.paywall.data.PaywallCollector
 import com.chkan.billing.service.SubscriptionState
 import com.chkan.billing.service.SubscriptionStateManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,6 +37,9 @@ class SessionViewModel @Inject constructor(
 
     private val _sessionState = MutableStateFlow(SessionState())
     val sessionState = _sessionState.asStateFlow()
+
+    private val _showPaywall = MutableStateFlow(false)
+    val showPaywall = _showPaywall.asStateFlow()
 
     init {
         checkFirstLaunch()
@@ -132,5 +135,13 @@ class SessionViewModel @Inject constructor(
     fun setInviteCode(code: String) {
         logger.d("SESSION_VM","setInviteCode: $code")
         _inviteCode.update { code.drop(2) }
+    }
+
+    fun showPaywall() {
+        _showPaywall.value = true
+    }
+
+    fun hidePaywall() {
+        _showPaywall.value = false
     }
 }

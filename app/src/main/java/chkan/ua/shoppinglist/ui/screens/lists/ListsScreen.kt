@@ -3,7 +3,6 @@ package chkan.ua.shoppinglist.ui.screens.lists
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,14 +15,12 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -52,8 +49,7 @@ import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.EditBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ListItem
 import chkan.ua.shoppinglist.ui.kit.items.ListRole
-import chkan.ua.shoppinglist.ui.screens.paywall.PaywallModalBottomSheet
-import chkan.ua.shoppinglist.ui.screens.paywall.PaywallViewModel
+import chkan.ua.shoppinglist.ui.screens.paywall.data.PaywallViewModel
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
@@ -61,8 +57,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ListsScreen(
     sessionViewModel: SessionViewModel,
-    listsViewModel: ListsViewModel,
-    paywallViewModel: PaywallViewModel = hiltViewModel()
+    listsViewModel: ListsViewModel
 ) {
     val navController = localNavController.current
     val lists by listsViewModel.localListsFlow.collectAsStateWithLifecycle(initialValue = listOf())
@@ -87,12 +82,6 @@ fun ListsScreen(
     val editSheetState = rememberModalBottomSheetState()
     var argDeletedIdList by remember { mutableStateOf(Deletable()) }
     var editable by remember { mutableStateOf(Editable()) }
-    //paywall
-    var isPaywallSheetOpen by remember { mutableStateOf(false) }
-    val paywallSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val snackbarHostState by remember { mutableStateOf(SnackbarHostState()) }
-    val paywallItems by paywallViewModel.paywallItemsFlow.collectAsState()
-    val paywallUiState by paywallViewModel.paywallUiState.collectAsState()
     //session
     val sessionState by sessionViewModel.sessionState.collectAsStateWithLifecycle()
 
@@ -122,8 +111,7 @@ fun ListsScreen(
                         showAddList = true
                         scope.launch { addListState.show() }
                     } else {
-                        isPaywallSheetOpen = true
-                        scope.launch { paywallSheetState.show() }
+                        sessionViewModel.showPaywall()
                     }
                 }
 
@@ -158,23 +146,6 @@ fun ListsScreen(
             }
         }
     )
-
-    if (isPaywallSheetOpen) {
-        PaywallModalBottomSheet(
-            paywallSheetState,
-            paywallUiState,
-            paywallItems,
-            paywallViewModel.isReview(),
-            snackbarHostState,
-            onEvent = { event -> paywallViewModel.onUiEvent(event)},
-            onDismiss = {
-                scope.launch { paywallSheetState.hide() }.invokeOnCompletion {
-                    isPaywallSheetOpen = false
-                }
-            },
-            modifier = Modifier.navigationBarsPadding()
-        )
-    }
 
     if (showAddList) {
         AddListBottomSheet(

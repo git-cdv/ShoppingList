@@ -1,4 +1,4 @@
-package chkan.ua.shoppinglist.ui.screens.paywall
+package chkan.ua.shoppinglist.ui.screens.paywall.data
 
 import android.content.Context
 import chkan.ua.domain.Logger

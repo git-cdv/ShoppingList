@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.ui.screens.paywall.data.PaywallItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

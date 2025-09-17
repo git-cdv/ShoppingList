@@ -44,6 +44,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.ui.kit.buttons.SimpleButton
+import chkan.ua.shoppinglist.ui.screens.paywall.data.PaywallItem
+import chkan.ua.shoppinglist.ui.screens.paywall.data.ProductType
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import timber.log.Timber
 

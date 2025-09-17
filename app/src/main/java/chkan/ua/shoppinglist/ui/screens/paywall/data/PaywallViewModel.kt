@@ -1,4 +1,4 @@
-package chkan.ua.shoppinglist.ui.screens.paywall
+package chkan.ua.shoppinglist.ui.screens.paywall.data
 
 import android.app.Activity
 import androidx.lifecycle.ViewModel
@@ -7,6 +7,9 @@ import chkan.ua.core.exceptions.ResourceCode
 import chkan.ua.core.exceptions.UserMessageException
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import chkan.ua.shoppinglist.di.ApplicationScope
+import chkan.ua.shoppinglist.ui.screens.paywall.PaywallEvent
+import chkan.ua.shoppinglist.ui.screens.paywall.PaywallUiEvent
+import chkan.ua.shoppinglist.ui.screens.paywall.PaywallUiState
 import com.chkan.billing.domain.error.PurchasesError
 import com.chkan.billing.domain.error.PurchasesException
 import com.chkan.billing.domain.usecase.RestorePurchaseUseCase
@@ -68,7 +71,7 @@ class PaywallViewModel @Inject constructor(
                 }
                 //analytics.logEvent(PaywallAnalyticsEvent.SubscriptionPurchased(config.getActivePaywallName(),productId))
             } catch (e: Throwable) {
-                Timber.e(e)
+                Timber.Forest.e(e)
                 if (e is PurchasesException) {
                     handleError(e)
                     _paywallUiState.update {

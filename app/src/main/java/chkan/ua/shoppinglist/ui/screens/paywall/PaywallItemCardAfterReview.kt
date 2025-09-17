@@ -31,6 +31,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.ui.screens.paywall.data.PaywallItem
+import chkan.ua.shoppinglist.ui.screens.paywall.data.ProductType
 import chkan.ua.shoppinglist.ui.theme.LableExtraSmallTextStyle
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 

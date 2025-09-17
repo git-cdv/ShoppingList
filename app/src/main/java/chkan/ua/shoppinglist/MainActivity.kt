@@ -20,11 +20,15 @@ import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import androidx.core.net.toUri
 import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
+import chkan.ua.shoppinglist.ui.screens.paywall.PaywallHandler
+import chkan.ua.shoppinglist.ui.screens.paywall.data.PaywallViewModel
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val sessionViewModel: SessionViewModel by viewModels()
     private val listsViewModel: ListsViewModel by viewModels()
+    private val paywallViewModel: PaywallViewModel by viewModels()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +48,7 @@ class MainActivity : ComponentActivity() {
                         ErrorDialogHandler(listsViewModel)
                         InviteHandler(sessionViewModel, listsViewModel)
                         checkInstallReferrerIfNeed(sessionViewModel)
+                        PaywallHandler(sessionViewModel,paywallViewModel)
                     }
                 }
             }
