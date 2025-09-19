@@ -21,6 +21,8 @@ import chkan.ua.domain.usecases.share.ShareListUseCase
 import chkan.ua.domain.usecases.share.StopSharingUseCase
 import chkan.ua.domain.usecases.share.UnfollowUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
+import chkan.ua.shoppinglist.utils.AppEvent
+import chkan.ua.shoppinglist.utils.EventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -46,6 +48,7 @@ class ListsViewModel @Inject constructor(
     private val joinList: JoinListUseCase,
     private val hasSharedListsUseCase: HasSharedListsUseCase,
     private val unfollow: UnfollowUseCase,
+    val eventBus: EventBus,
 ) : ViewModel() {
 
     init {
@@ -164,6 +167,9 @@ class ListsViewModel @Inject constructor(
     fun onUnfollow(listId: String) {
         viewModelScope.launch{
             unfollow(listId)
+                .onSuccess {
+                    eventBus.sendEvent(AppEvent.GoToBackAfterUnfollow)
+                }
                 .onFailure {
                     errorHandler.handle(it, it.message)
                 }

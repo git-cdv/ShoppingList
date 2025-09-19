@@ -43,7 +43,8 @@ fun NavigationContainer(
                 val args: ItemsRoute = backStackEntry.toRoute()
                 ItemsScreen(
                     args = args,
-                    sessionViewModel = sessionViewModel
+                    sessionViewModel = sessionViewModel,
+                    listsViewModel =listsViewModel
                 )
             }
             composable<ListsRoute> { ListsScreen(sessionViewModel,listsViewModel) }

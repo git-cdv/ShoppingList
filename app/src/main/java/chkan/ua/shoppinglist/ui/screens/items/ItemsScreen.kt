@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.core.extensions.firstAsTitle
+import chkan.ua.core.models.ListRole
 import chkan.ua.core.models.isShared
 import chkan.ua.core.models.toPreferenceString
 import chkan.ua.domain.models.Item
@@ -63,6 +64,7 @@ import chkan.ua.shoppinglist.ui.kit.empty_state.CenteredTextScreen
 import chkan.ua.shoppinglist.ui.kit.items.ItemItem
 import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
 import chkan.ua.shoppinglist.ui.kit.togglers.ToggleShowCompleted
+import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import chkan.ua.shoppinglist.utils.AppEvent
 import chkan.ua.shoppinglist.utils.EventBus
@@ -73,6 +75,7 @@ import kotlinx.coroutines.launch
 fun ItemsScreen(
     args: ItemsRoute,
     sessionViewModel: SessionViewModel,
+    listsViewModel: ListsViewModel,
     itemsViewModel: ItemsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -99,7 +102,10 @@ fun ItemsScreen(
                     showShareLink(context, event.listId)
                     eventBus.consumeEvent()
                 }
-
+                AppEvent.GoToBackAfterUnfollow -> {
+                    eventBus.consumeEvent()
+                    navController.popBackStack()
+                }
                 null -> {}
             }
         }
@@ -115,6 +121,10 @@ fun ItemsScreen(
     val editSheetState = rememberModalBottomSheetState()
     var editable by remember { mutableStateOf(Editable()) }
     val scope = rememberCoroutineScope()
+
+    //unfollow list
+    var showConfirmUnfollowList by remember { mutableStateOf(false) }
+    val confirmUnfollowListState = rememberModalBottomSheetState()
 
     ItemsScreenContent(
         title = listTitle,
@@ -158,6 +168,10 @@ fun ItemsScreen(
         },
         onShowPaywall = {
             sessionViewModel.showPaywall()
+        },
+        onUnfollow = {
+            showConfirmUnfollowList = true
+            scope.launch { confirmUnfollowListState.show() }
         }
     )
 
@@ -192,6 +206,26 @@ fun ItemsScreen(
             editable = editable
         )
     }
+
+    if (showConfirmUnfollowList) {
+        ConfirmBottomSheet(
+            confirmUnfollowListState,
+            question = stringResource(id = R.string.sure_unfollow_list),
+            onConfirm = {
+                scope.launch {
+                    listsViewModel.onUnfollow(listId)
+                    confirmUnfollowListState.hide()
+                    showConfirmUnfollowList = false
+                }
+            },
+            onDismiss = {
+                scope.launch {
+                    confirmUnfollowListState.hide()
+                    showConfirmUnfollowList = false
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -210,6 +244,7 @@ fun ItemsScreenContent(
     onMoveToTop: (String, Int) -> Unit,
     onShareList: () -> Unit,
     onShowPaywall: () -> Unit,
+    onUnfollow: () -> Unit,
 ) {
     var showConfirmBottomSheet by remember { mutableStateOf(false) }
     val confirmSheetState = rememberModalBottomSheetState()
@@ -236,20 +271,25 @@ fun ItemsScreenContent(
                 actions = {
                     IconButton(
                         onClick = {
-                            if (uiState.role.isShared) {
-                                if (sessionState.isSubscribed == true) {
-                                    showShareLink(context, uiState.listId)
-                                } else {
-                                    onShowPaywall()
+                            when (uiState.role) {
+                                ListRole.SHARED_MEMBER -> { onUnfollow() }
+                                ListRole.SHARED_OWNER -> {
+                                    if (sessionState.isSubscribed == true) {
+                                        showShareLink(context, uiState.listId)
+                                    } else {
+                                        onShowPaywall()
+                                    }
                                 }
-                            } else {
-                                showConfirmShareBottomSheet = true
+                                ListRole.LOCAL -> {
+                                    showConfirmShareBottomSheet = true
+                                }
                             }
                         },
                         modifier = Modifier.padding(end = dimensionResource(R.dimen.inner_padding))
                     ) {
+                        val resIcon = if (uiState.role == ListRole.SHARED_MEMBER) R.drawable.ic_unfollow else R.drawable.ic_member_add
                         Icon(
-                            painterResource(R.drawable.ic_member_add),
+                            painterResource(resIcon),
                             tint = MaterialTheme.colorScheme.onSurface,
                             contentDescription = "Share list"
                         )
@@ -437,6 +477,7 @@ fun ItemsScreenContentPreview() {
             {},
             {},
             { _, _ -> },
+            {},
             {},
             {})
     }

@@ -96,7 +96,6 @@ class FirestoreSourceImpl @Inject constructor (
                 .document(listId)
                 .addSnapshotListener { documentSnapshot, error ->
                     if (error != null) {
-                        logger.e(error,"getListWithItemsFlowById e:$error")
                         close(error)
                         return@addSnapshotListener
                     }
@@ -116,7 +115,6 @@ class FirestoreSourceImpl @Inject constructor (
 
                             trySend(itemsList)
                         } catch (e: Exception) {
-                            logger.e(e,"getListWithItemsFlowById e:$e")
                             close(e)
                         }
                     } else {
