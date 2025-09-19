@@ -31,8 +31,7 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data
                     android:scheme="https"
-                    android:host="colistly.web.app"
-                    android:pathPrefix="/invite"/>
+                    android:host="colistly.web.app" />
             </intent-filter>
         </activity>
     </application>

@@ -8,26 +8,30 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import chkan.ua.domain.Logger
 import chkan.ua.shoppinglist.core.services.InviteHandler
 import chkan.ua.shoppinglist.navigation.NavigationContainer
 import chkan.ua.shoppinglist.session.SessionViewModel
 import chkan.ua.shoppinglist.ui.kit.dialogs.ErrorDialogHandler
+import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
+import chkan.ua.shoppinglist.ui.screens.paywall.PaywallHandler
+import chkan.ua.shoppinglist.ui.screens.paywall.data.PaywallViewModel
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
-import androidx.core.net.toUri
-import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
-import chkan.ua.shoppinglist.ui.screens.paywall.PaywallHandler
-import chkan.ua.shoppinglist.ui.screens.paywall.data.PaywallViewModel
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val sessionViewModel: SessionViewModel by viewModels()
     private val listsViewModel: ListsViewModel by viewModels()
     private val paywallViewModel: PaywallViewModel by viewModels()
+
+    @Inject
+    lateinit var logger: Logger
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,7 +80,7 @@ class MainActivity : ComponentActivity() {
 
     private fun parseReferrerString(referrerString: String, sessionViewModel: SessionViewModel) {
         try {
-            Timber.tag("REFERRER").d("Raw referrer: $referrerString")
+            logger.d("REFERRER","Raw referrer: $referrerString")
 
             val decodedReferrer = try {
                 java.net.URLDecoder.decode(referrerString, "UTF-8")
@@ -84,19 +88,19 @@ class MainActivity : ComponentActivity() {
                 referrerString
             }
 
-            Timber.tag("REFERRER").d("Decoded referrer: $decodedReferrer")
+            logger.d("REFERRER","Decoded referrer: $decodedReferrer")
 
             val uri = "?$decodedReferrer".toUri()
             val inviteCode = uri.getQueryParameter("invite_code")
 
             if (!inviteCode.isNullOrEmpty()) {
-                Timber.tag("REFERRER").d("Found invite code: $inviteCode")
+                logger.d("REFERRER","Found invite code: $inviteCode")
                 sessionViewModel.setInviteCode(inviteCode)
             } else {
-                Timber.tag("REFERRER").d("No invite_code parameter found")
+                logger.d("REFERRER","No invite_code parameter found")
             }
         } catch (e: Exception) {
-            Timber.tag("REFERRER").e(e, "Error parsing referrer")
+            logger.e(e, "Error parsing referrer")
         }
     }
 

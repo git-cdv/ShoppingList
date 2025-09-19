@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+const val TAG = "BILLING"
 class BillingRepositoryImpl @Inject constructor(
     private val billingService: SubscriptionBillingService,
     private val logger: BillingLogger
@@ -25,6 +26,7 @@ class BillingRepositoryImpl @Inject constructor(
         billingService.activeSubscriptionsFlow.map { result ->
             if (result.isSuccess) {
                 val purchases = result.getOrNull() ?: emptyList()
+                logger.d(TAG,"Found ${purchases.size} purchases")
                 Result.success(purchases.map { it.toDomainSubscriptionPurchase() })
             } else Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
         }
@@ -33,6 +35,7 @@ class BillingRepositoryImpl @Inject constructor(
 
     override suspend fun querySubscriptions(productIds: List<String>): Result<List<Subscription>> {
         val (billingResult, productDetailsList) = billingService.querySubscriptionDetails(productIds)
+        logger.d(TAG,"Subscriptions: size ${productDetailsList?.size} with response code ${billingResult.responseCode}")
 
         return if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList != null) {
             Result.success(productDetailsList.map { it.toDomainSubscription() })

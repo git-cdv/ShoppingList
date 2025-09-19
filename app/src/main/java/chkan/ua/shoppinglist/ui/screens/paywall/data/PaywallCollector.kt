@@ -67,6 +67,7 @@ class PaywallCollector @Inject constructor(
                 result
                     .onSuccess {
                         val subscriptions = result.getOrElse { throw Exception("Error getting products") }
+                        logger.d("PAYWALL","Subscriptions: $subscriptions")
                         if (subscriptions.isNotEmpty()) {
                             weeklyPrice = subscriptions[0].price
                             monthlyPrice = subscriptions[1].price

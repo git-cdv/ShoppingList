@@ -329,14 +329,16 @@ class SubscriptionBillingService @Inject constructor(
             .build()
 
         client.queryProductDetailsAsync(params) { billingResult, queryProductDetailsResult ->
-            val productDetailsList = queryProductDetailsResult.productDetailsList
+            val productDetailsList = queryProductDetailsResult.productDetailsList.sortedBy { product ->
+                productIds.indexOf(product.productId).takeIf { it != -1 } ?: Int.MAX_VALUE
+            }
             continuation.resume(Pair(billingResult, productDetailsList))
         }
     }
 
     suspend fun restorePurchases(): Result<Unit> {
         val (billingResult, purchasesList) = querySubscriptionPurchases()
-
+        logger.d(TAG,"Restore: size ${purchasesList?.size} with response code ${billingResult.responseCode}")
         return if (billingResult.responseCode == BillingResponseCode.OK && !purchasesList.isNullOrEmpty()) {
             _purchasesFlow.tryEmit(Result.success(purchasesList))
             Result.success(Unit)
@@ -391,7 +393,7 @@ class SubscriptionBillingService @Inject constructor(
     }
 
     private companion object {
-        private const val TAG = "Billing"
+        private const val TAG = "BILLING"
         private const val MAX_RETRY_ATTEMPTS = 3
         private const val INITIAL_RETRY_DELAY_MS = 1000L
 
