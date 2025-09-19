@@ -326,6 +326,11 @@ class FirestoreSourceImpl @Inject constructor (
         }
     }
 
+    override suspend fun unfollow(userId: String, listId: String) {
+        val docRef = firestore.collection(collectionPath).document(listId)
+        docRef.update("membersIds", FieldValue.arrayRemove(userId)).await()
+    }
+
     private fun ListItems.toRemoteModel(createdBy: String, docRefId: String): HashMap<String, Any> {
         val readyCount = this.items.count { it.isReady }
         return hashMapOf(

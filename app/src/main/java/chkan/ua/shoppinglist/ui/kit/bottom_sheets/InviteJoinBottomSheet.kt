@@ -3,7 +3,9 @@ package chkan.ua.shoppinglist.ui.kit.bottom_sheets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.ui.kit.buttons.MyButton
 import chkan.ua.shoppinglist.ui.kit.buttons.MyOutlinedButton
@@ -44,6 +47,15 @@ fun InviteJoinBottomSheet(
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .fillMaxWidth()
+            )
+            Text(
+                text = stringResource(R.string.join_describe),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
                     .padding(bottom = dimensionResource(id = R.dimen.root_padding))
                     .fillMaxWidth()
             )
@@ -57,6 +69,7 @@ fun InviteJoinBottomSheet(
                 MyButton(stringResource(id = R.string.join), Modifier.weight(1f)) { onJoin() }
                 MyOutlinedButton(stringResource(id = R.string.cancel), Modifier.weight(1f)) { onDismiss() }
             }
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

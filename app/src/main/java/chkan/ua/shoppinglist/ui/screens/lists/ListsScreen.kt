@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,7 +34,6 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.models.ListProgress
@@ -49,7 +49,6 @@ import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.EditBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ListItem
 import chkan.ua.shoppinglist.ui.kit.items.ListRole
-import chkan.ua.shoppinglist.ui.screens.paywall.data.PaywallViewModel
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
@@ -77,10 +76,14 @@ fun ListsScreen(
     //delete list
     var showConfirmDeleteList by remember { mutableStateOf(false) }
     val confirmDeleteListState = rememberModalBottomSheetState()
+    var argDeletedIdList by remember { mutableStateOf(Deletable()) }
+    //unfollow list
+    var showConfirmUnfollowList by remember { mutableStateOf(false) }
+    val confirmUnfollowListState = rememberModalBottomSheetState()
+    var argUnfollowIdList by remember { mutableStateOf("") }
     //edit list
     var showEditBottomSheet by remember { mutableStateOf(false) }
     val editSheetState = rememberModalBottomSheetState()
-    var argDeletedIdList by remember { mutableStateOf(Deletable()) }
     var editable by remember { mutableStateOf(Editable()) }
     //session
     val sessionState by sessionViewModel.sessionState.collectAsStateWithLifecycle()
@@ -137,7 +140,11 @@ fun ListsScreen(
                     scope.launch { confirmStopSharingState.show() }
                 }
 
-                is ListUiEvent.OnStopFollowing -> {}
+                is ListUiEvent.OnStopFollowing -> {
+                    argUnfollowIdList = event.listId
+                    showConfirmUnfollowList = true
+                    scope.launch { confirmUnfollowListState.show() }
+                }
                 is ListUiEvent.OnShareList -> {
                     argStartSharingIdList = event.listId
                     showConfirmStartSharing = true
@@ -186,6 +193,26 @@ fun ListsScreen(
                 scope.launch {
                     confirmDeleteListState.hide()
                     showConfirmDeleteList = false
+                }
+            }
+        )
+    }
+
+    if (showConfirmUnfollowList) {
+        ConfirmBottomSheet(
+            confirmUnfollowListState,
+            question = stringResource(id = R.string.sure_unfollow_list),
+            onConfirm = {
+                scope.launch {
+                    listsViewModel.onUnfollow(argUnfollowIdList)
+                    confirmUnfollowListState.hide()
+                    showConfirmUnfollowList = false
+                }
+            },
+            onDismiss = {
+                scope.launch {
+                    confirmUnfollowListState.hide()
+                    showConfirmUnfollowList = false
                 }
             }
         )

@@ -110,6 +110,11 @@ class SessionViewModel @Inject constructor(
     }
 
     fun handleInviteDataIfNeed(intent: Intent) {
+
+        if (intent.getBooleanExtra("invite_processed", false)) {
+            return
+        }
+
         val appLinkIntent = intent
         val appLinkData: Uri? = appLinkIntent.data
 
@@ -118,6 +123,7 @@ class SessionViewModel @Inject constructor(
                 val inviteCode = uri.getQueryParameter("code")
                 val listId = inviteCode?.drop(2)
                 _inviteCode.update { listId }
+                intent.putExtra("invite_processed", true)
             } catch (e: Exception) {
                 logger.e(e, "Error while parsing invite code: $uri")
             }

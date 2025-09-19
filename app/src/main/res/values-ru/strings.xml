@@ -65,7 +65,7 @@
     <string name="by_continuing_i_agree_to_the">"By continuing, I agree to the "</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="terms_of_use">Terms of Use</string>
-    <string name="ready_join">Ready to join the list?</string>
+    <string name="ready_join">You\'ve been invited</string>
     <string name="join">Join</string>
     <string name="error_list_not_found">List not found. It may have been deleted or the link is expired.</string>
     <string name="error_user_already_member">You\'re already a member of this list.</string>
@@ -75,6 +75,8 @@
     <string name="error_create_sharing_list">Error while sharing list. Please try again later.</string>
     <string name="error_stop_sharing">Error while stopping sharing list. Please try again later.</string>
     <string name="unlimited_lists">Unlimited lists</string>
-    <string name="сollaborative_lists">Collaborative lists\n</string>
-    <string name="intelligent_suggestions">Intelligent suggestions\n</string>
+    <string name="сollaborative_lists">Collaborative lists</string>
+    <string name="intelligent_suggestions">Intelligent\nsuggestions</string>
+    <string name="join_describe">Join now to start sharing and editing with others.</string>
+    <string name="sure_unfollow_list">Are you sure you want to unfollow this list?</string>
 </resources>

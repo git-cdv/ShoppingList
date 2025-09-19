@@ -19,6 +19,7 @@ import chkan.ua.domain.usecases.share.HasSharedListsUseCase
 import chkan.ua.domain.usecases.share.JoinListUseCase
 import chkan.ua.domain.usecases.share.ShareListUseCase
 import chkan.ua.domain.usecases.share.StopSharingUseCase
+import chkan.ua.domain.usecases.share.UnfollowUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -44,6 +45,7 @@ class ListsViewModel @Inject constructor(
     private val shareList: ShareListUseCase,
     private val joinList: JoinListUseCase,
     private val hasSharedListsUseCase: HasSharedListsUseCase,
+    private val unfollow: UnfollowUseCase,
 ) : ViewModel() {
 
     init {
@@ -156,6 +158,15 @@ class ListsViewModel @Inject constructor(
                         errorHandler.handle(it, it.message)
                     }
             }
+        }
+    }
+
+    fun onUnfollow(listId: String) {
+        viewModelScope.launch{
+            unfollow(listId)
+                .onFailure {
+                    errorHandler.handle(it, it.message)
+                }
         }
     }
 }

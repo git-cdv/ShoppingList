@@ -61,4 +61,5 @@ class RemoteRepositoryImpl @Inject constructor(
 
     override suspend fun getListWithItemsById(listId: String) = dataSource.getListWithItemsById(listId)
     override suspend fun joinSharedList(userId: String, listId: String) = dataSource.joinSharedList(userId, listId)
+    override suspend fun unfollow(userId: String, listId: String) = dataSource.unfollow(userId, listId)
 }

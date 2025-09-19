@@ -20,4 +20,5 @@ interface RemoteDataSource {
     suspend fun getListWithItemsById(listId: String) : ListItems
 
     suspend fun joinSharedList(userId:String, listId:String)
+    suspend fun unfollow(userId: String, listId: String)
 }
