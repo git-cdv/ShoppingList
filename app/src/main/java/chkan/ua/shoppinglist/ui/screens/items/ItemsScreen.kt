@@ -2,6 +2,7 @@ package chkan.ua.shoppinglist.ui.screens.items
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -44,6 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.core.extensions.firstAsTitle
+import chkan.ua.core.models.isShared
+import chkan.ua.core.models.toPreferenceString
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.objects.Editable
 import chkan.ua.shoppinglist.R
@@ -75,15 +79,15 @@ fun ItemsScreen(
     val navController = localNavController.current
     val listId = args.listId
     val listTitle = args.listTitle
-    val isShared = args.isShared
+    val role = args.role
 
     LaunchedEffect(Unit) {
-        if (isShared) {
+        if (role.isShared) {
             itemsViewModel.observeRemoteItems(listId)
         } else {
             itemsViewModel.observeItems(listId)
         }
-        itemsViewModel.saveLastOpenedList(listId, listTitle, isShared)
+        itemsViewModel.saveLastOpenedList(listId, listTitle, role)
     }
 
     val eventBus: EventBus = itemsViewModel.eventBus
@@ -232,7 +236,7 @@ fun ItemsScreenContent(
                 actions = {
                     IconButton(
                         onClick = {
-                            if (uiState.isShared) {
+                            if (uiState.role.isShared) {
                                 if (sessionState.isSubscribed == true) {
                                     showShareLink(context, uiState.listId)
                                 } else {
@@ -318,7 +322,7 @@ fun ItemsScreenContent(
                         },
                         onMoveToTop = { onMoveToTop(item.itemId, item.position) },
                         isFirst = index == 0,
-                        isShared = uiState.isShared
+                        isShared = uiState.role.isShared
                     )
                 }
 

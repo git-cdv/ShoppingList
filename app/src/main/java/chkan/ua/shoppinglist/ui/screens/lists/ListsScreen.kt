@@ -104,7 +104,7 @@ fun ListsScreen(
                         ItemsRoute(
                             event.list.id,
                             event.list.title,
-                            event.list.role.isShared
+                            event.list.role
                         )
                     )
                 }
