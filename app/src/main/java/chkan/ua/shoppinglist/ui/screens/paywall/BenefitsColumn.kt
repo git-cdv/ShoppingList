@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,13 +32,13 @@ fun BenefitsColumn(items: List<BenefitsItem>, modifier: Modifier = Modifier) {
                     painter = painterResource(item.icon),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 2.dp, end = 8.dp)
+                    modifier = Modifier.padding(start = 2.dp, end = 8.dp).size(28.dp)
                 )
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = item.text,
                     color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.titleSmall,
                     textAlign = TextAlign.Start
                 )
             }

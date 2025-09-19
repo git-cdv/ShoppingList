@@ -74,4 +74,7 @@
     <string name="error_restore_purchases_failed_message">No items are available to restore at this time</string>
     <string name="error_create_sharing_list">Error while sharing list. Please try again later.</string>
     <string name="error_stop_sharing">Error while stopping sharing list. Please try again later.</string>
+    <string name="unlimited_lists">Unlimited lists</string>
+    <string name="сollaborative_lists">Collaborative lists</string>
+    <string name="intelligent_suggestions">Intelligent\nsuggestions</string>
 </resources>

@@ -91,7 +91,7 @@ fun PaywallBox(
                 textAlign = TextAlign.Center,
                 maxLines = 1
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             Row(
                 Modifier
                     .padding(horizontal = 20.dp)
@@ -100,16 +100,12 @@ fun PaywallBox(
                 BenefitsColumn(
                     listOf(
                         BenefitsItem(
-                            R.drawable.ic_shield,
-                            stringResource(R.string.no_annoying_ads)
+                            R.drawable.ic_infinity,
+                            stringResource(R.string.unlimited_lists)
                         ),
                         BenefitsItem(
-                            R.drawable.ic_shield,
-                            stringResource(R.string.no_annoying_ads)
-                        ),
-                        BenefitsItem(
-                            R.drawable.ic_shield,
-                            stringResource(R.string.no_annoying_ads)
+                            R.drawable.ic_share,
+                            stringResource(R.string.сollaborative_lists)
                         )
                     ),
                     Modifier.weight(1f)
@@ -133,22 +129,18 @@ fun PaywallBox(
                 BenefitsColumn(
                     listOf(
                         BenefitsItem(
-                            R.drawable.ic_shield,
-                            stringResource(R.string.no_annoying_ads)
+                            R.drawable.ic_effects,
+                            stringResource(R.string.intelligent_suggestions)
                         ),
                         BenefitsItem(
-                            R.drawable.ic_shield,
-                            stringResource(R.string.no_annoying_ads)
-                        ),
-                        BenefitsItem(
-                            R.drawable.ic_shield,
+                            R.drawable.ic_no_ads,
                             stringResource(R.string.no_annoying_ads)
                         )
                     ),
                     Modifier.weight(1f)
                 )
             }
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -185,34 +177,32 @@ fun PaywallBox(
                 onClicked = { onSubscribe.invoke() },
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
-            if (isReview) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Row(
+                    modifier = Modifier,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_shield),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(R.string.auto_renewable_cancel_anytime),
-                            maxLines = 1,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(R.drawable.ic_shield),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = stringResource(R.string.auto_renewable_cancel_anytime),
+                        maxLines = 1,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.labelSmall
+                    )
                 }
             }
-            Spacer(modifier = Modifier.height(if (isReview) 12.dp else 18.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
