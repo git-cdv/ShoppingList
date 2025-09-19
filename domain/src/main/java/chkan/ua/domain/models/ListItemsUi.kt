@@ -1,5 +1,7 @@
 package chkan.ua.domain.models
 
+import chkan.ua.core.models.ListRole
+
 data class ListItemsUi(
     val id: String,
     val title: String,
@@ -7,8 +9,7 @@ data class ListItemsUi(
     val count: Int,
     val readyCount: Int,
     val progress: ListProgress,
-    val isShared: Boolean,
-    val isOwner: Boolean = true
+    val role: ListRole
 )
 
 fun List<ListItems>.toUiModels() : List<ListItemsUi>{
@@ -19,7 +20,7 @@ fun List<ListItems>.toUiModels() : List<ListItemsUi>{
         count = it.items.size,
         readyCount = it.items.filter { it.isReady }.size,
         progress = ListProgress(it.items.size,it.items.filter { it.isReady }.size),
-        isShared = it.isShared
+        role = it.role
     ) }
 }
 

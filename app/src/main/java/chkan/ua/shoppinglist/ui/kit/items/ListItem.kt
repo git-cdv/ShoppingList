@@ -27,6 +27,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import chkan.ua.core.models.ListRole
+import chkan.ua.core.models.isShared
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.models.ListProgress
 import chkan.ua.domain.objects.Editable
@@ -41,8 +43,7 @@ fun ListItem(
     list: ListItemsUi,
     modifier: Modifier,
     onListEvent: (ListUiEvent) -> Unit,
-    isFirst: Boolean,
-    role: ListRole
+    isFirst: Boolean
 ) {
     Card(
         onClick = { onListEvent(ListUiEvent.OnCardClick(list)) },
@@ -122,7 +123,7 @@ fun ListItem(
                     isMenuExpanded = isMenuExpanded,
                     onDismissRequest = { isMenuExpanded = false },
                     listItems = getMenuItems(
-                        role = role,
+                        role = list.role,
                         list = list,
                         onListEvent = onListEvent,
                         isFirst = isFirst
@@ -146,15 +147,15 @@ fun getMenuItems(
                 if (!isFirst){
                     add(MenuItem(title = stringResource(id = R.string.moveToTop), onClick = { onListEvent(ListUiEvent.OnMoveToTop(list.id,list.position)) }))
                 }
-                add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onListEvent(ListUiEvent.OnEditList(Editable(list.id, list.title, isShared = list.isShared))) }))
-                add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onListEvent(ListUiEvent.OnDeleteList(list.id,  list.isShared))}))
+                add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onListEvent(ListUiEvent.OnEditList(Editable(list.id, list.title, isShared = role.isShared))) }))
+                add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onListEvent(ListUiEvent.OnDeleteList(list.id,  role.isShared))}))
                 add(MenuItem(title = stringResource(id = R.string.share_list), onClick = { onListEvent(ListUiEvent.OnShareList(list.id))}))
             }
         }
         ListRole.SHARED_OWNER -> {
             mutableListOf<MenuItem>().apply {
-                add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onListEvent(ListUiEvent.OnEditList(Editable(list.id, list.title, isShared = list.isShared))) }))
-                add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onListEvent(ListUiEvent.OnDeleteList(list.id,  list.isShared))}))
+                add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onListEvent(ListUiEvent.OnEditList(Editable(list.id, list.title, isShared = role.isShared))) }))
+                add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onListEvent(ListUiEvent.OnDeleteList(list.id,  role.isShared))}))
                 add(MenuItem(title = stringResource(id = R.string.stop_sharing), onClick = { onListEvent(ListUiEvent.OnStopSharing(list.id))}))
             }
         }
@@ -165,8 +166,6 @@ fun getMenuItems(
         }
     }
 }
-
-enum class ListRole {LOCAL, SHARED_OWNER, SHARED_MEMBER}
 
 @Preview(showBackground = true)
 @Composable
@@ -179,7 +178,7 @@ fun ListItemPreview() {
             count = 5,
             readyCount = 2,
             progress = ListProgress(count = 5, readyCount = 2),
-            isShared = false
-        ), Modifier,{}, false, ListRole.LOCAL)
+            role = ListRole.LOCAL,
+        ), Modifier,{}, false)
     }
 }

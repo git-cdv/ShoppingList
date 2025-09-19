@@ -23,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -35,6 +34,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import chkan.ua.core.models.ListRole
+import chkan.ua.core.models.isShared
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.models.ListProgress
 import chkan.ua.domain.objects.Deletable
@@ -48,7 +49,6 @@ import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddListBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.EditBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ListItem
-import chkan.ua.shoppinglist.ui.kit.items.ListRole
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
@@ -104,7 +104,7 @@ fun ListsScreen(
                         ItemsRoute(
                             event.list.id,
                             event.list.title,
-                            event.list.isShared
+                            event.list.role.isShared
                         )
                     )
                 }
@@ -325,8 +325,7 @@ fun ListsScreenContent(
                     list = list,
                     modifier = Modifier.animateItem(),
                     onListEvent = onListEvent,
-                    isFirst = index == 0,
-                    role = ListRole.LOCAL
+                    isFirst = index == 0
                 )
             }
             if (sharedLists.isNotEmpty()) {
@@ -345,8 +344,7 @@ fun ListsScreenContent(
                         list = list,
                         modifier = Modifier.animateItem(),
                         onListEvent = onListEvent,
-                        isFirst = false,
-                        role = if (list.isOwner) ListRole.SHARED_OWNER else ListRole.SHARED_MEMBER
+                        isFirst = false
                     )
                 }
             }
@@ -364,7 +362,7 @@ fun ListsScreenContentPreview() {
                 title = "Commodo",
                 position = 1,
                 count = 4,
-                readyCount = 2, progress = ListProgress(count = 4, readyCount = 2), isShared = false
+                readyCount = 2, progress = ListProgress(count = 4, readyCount = 2), role = ListRole.LOCAL
             )
         )
         ListsScreenContent(
