@@ -39,6 +39,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core"))
     implementation(project(":domain"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -58,5 +59,8 @@ dependencies {
     implementation(libs.firebase.firestore)
     //firebase-auth
     implementation(libs.firebase.auth.ktx)
+
+    //datastore
+    implementation(libs.datastore.preferences)
 
 }

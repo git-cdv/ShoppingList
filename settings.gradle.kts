@@ -19,8 +19,9 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ShoppingList"
+rootProject.name = "Colistly"
 include(":app")
 include(":data")
 include(":domain")
 include(":core")
+include(":billing")

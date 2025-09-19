@@ -2,6 +2,8 @@ package chkan.ua.shoppinglist.ui.screens.lists
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import chkan.ua.core.exceptions.ResourceCode
+import chkan.ua.core.exceptions.UserMessageException
 import chkan.ua.domain.Logger
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.objects.Deletable
@@ -13,6 +15,8 @@ import chkan.ua.domain.usecases.lists.GetListsFlowUseCase
 import chkan.ua.domain.usecases.lists.MoveToTopUseCase
 import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.domain.usecases.share.GetSharedListsFlowUseCase
+import chkan.ua.domain.usecases.share.HasSharedListsUseCase
+import chkan.ua.domain.usecases.share.JoinListUseCase
 import chkan.ua.domain.usecases.share.ShareListUseCase
 import chkan.ua.domain.usecases.share.StopSharingUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
@@ -22,6 +26,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -37,7 +42,13 @@ class ListsViewModel @Inject constructor(
     private val stopSharing: StopSharingUseCase,
     private val logger: Logger,
     private val shareList: ShareListUseCase,
+    private val joinList: JoinListUseCase,
+    private val hasSharedListsUseCase: HasSharedListsUseCase,
 ) : ViewModel() {
+
+    init {
+        observeHasSharedLists()
+    }
 
     val localListsFlow = getListsFlow(Unit)
 
@@ -46,11 +57,23 @@ class ListsViewModel @Inject constructor(
 
     private var sharedObservationJob: Job? = null
 
-    fun observeSharedLists() {
+    private fun observeHasSharedLists() {
+        viewModelScope.launch {
+            hasSharedListsUseCase.observe().distinctUntilChanged().collect { isHasSharedLists ->
+                logger.d("LISTS_VM","isHasSharedLists: $isHasSharedLists")
+                if (isHasSharedLists == true) {
+                    observeSharedLists()
+                }
+            }
+        }
+    }
+
+    private fun observeSharedLists() {
         if (sharedObservationJob?.isActive == true) return
 
         sharedObservationJob = viewModelScope.launch (Dispatchers.IO) {
-            getSharedListsFlow(Unit).collect {lists ->
+            getSharedListsFlow(Unit).collect { lists ->
+                logger.d("LISTS_VM","shared lists size: ${lists.size}")
                 _sharedListsFlow.value = lists
             }
         }
@@ -100,7 +123,7 @@ class ListsViewModel @Inject constructor(
                 stopSharing(listId)
             } catch (e: Exception){
                 logger.e(e)
-                errorHandler.handle(e,"Error while stopping sharing list. Please try again later.")
+                errorHandler.handle(UserMessageException(ResourceCode.SHARING_ERROR_STOP_SHARING_LIST))
             }
         }
     }
@@ -108,8 +131,11 @@ class ListsViewModel @Inject constructor(
     fun createShareList(listId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             shareList(listId)
+                .onSuccess {
+                    hasSharedListsUseCase.setState(true)
+                }
                 .onFailure {
-                    errorHandler.handle(Exception(it),"Error while sharing list. Please try again later.")
+                    errorHandler.handle(UserMessageException(ResourceCode.SHARING_ERROR_CREATE_SHARED_LIST))
                 }
         }
     }
@@ -117,5 +143,19 @@ class ListsViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         sharedObservationJob?.cancel()
+    }
+
+    fun onJoinList(inviteCode: String?) {
+        inviteCode?.let { code ->
+            viewModelScope.launch{
+                joinList(code)
+                    .onSuccess {
+                        hasSharedListsUseCase.setState(true)
+                    }
+                    .onFailure {
+                        errorHandler.handle(it, it.message)
+                    }
+            }
+        }
     }
 }

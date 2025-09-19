@@ -1,10 +1,5 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,7 +27,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
@@ -56,6 +49,7 @@ import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.EditBottomSheet
 import chkan.ua.shoppinglist.ui.kit.items.ListItem
 import chkan.ua.shoppinglist.ui.kit.items.ListRole
+import chkan.ua.shoppinglist.ui.screens.paywall.data.PaywallViewModel
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.launch
 
@@ -63,7 +57,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ListsScreen(
     sessionViewModel: SessionViewModel,
-    listsViewModel: ListsViewModel = hiltViewModel()
+    listsViewModel: ListsViewModel
 ) {
     val navController = localNavController.current
     val lists by listsViewModel.localListsFlow.collectAsStateWithLifecycle(initialValue = listOf())
@@ -88,19 +82,20 @@ fun ListsScreen(
     val editSheetState = rememberModalBottomSheetState()
     var argDeletedIdList by remember { mutableStateOf(Deletable()) }
     var editable by remember { mutableStateOf(Editable()) }
+    //session
+    val sessionState by sessionViewModel.sessionState.collectAsStateWithLifecycle()
 
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         sessionViewModel.clearLastOpenedList()
-        listsViewModel.observeSharedLists()
     }
 
     ListsScreenContent(
         lists,
         sharedLists,
         onListEvent = { event ->
-            when(event){
+            when (event) {
                 is ListUiEvent.OnCardClick -> {
                     navController.navigate(
                         ItemsRoute(
@@ -110,28 +105,38 @@ fun ListsScreen(
                         )
                     )
                 }
+
                 ListUiEvent.OnCreateList -> {
-                    showAddList = true
-                    scope.launch { addListState.show() }
+                    if(sessionState.isSubscribed == true || lists.size < 2){
+                        showAddList = true
+                        scope.launch { addListState.show() }
+                    } else {
+                        sessionViewModel.showPaywall()
+                    }
                 }
+
                 is ListUiEvent.OnDeleteList -> {
                     argDeletedIdList = Deletable(event.listId, event.isShared)
                     showConfirmDeleteList = true
                     scope.launch { confirmDeleteListState.show() }
                 }
+
                 is ListUiEvent.OnEditList -> {
                     editable = event.editable
                     showEditBottomSheet = true
                     scope.launch { editSheetState.show() }
                 }
+
                 is ListUiEvent.OnMoveToTop -> {
                     listsViewModel.moveToTop(MoveTop(event.listId, event.position))
                 }
+
                 is ListUiEvent.OnStopSharing -> {
                     argStopSharingIdList = event.listId
                     showConfirmStopSharing = true
                     scope.launch { confirmStopSharingState.show() }
                 }
+
                 is ListUiEvent.OnStopFollowing -> {}
                 is ListUiEvent.OnShareList -> {
                     argStartSharingIdList = event.listId
@@ -211,10 +216,14 @@ fun ListsScreen(
             confirmStartSharingState,
             question = stringResource(id = R.string.sure_share_list),
             onConfirm = {
-                scope.launch {
-                    listsViewModel.createShareList(argStartSharingIdList)
-                    confirmStartSharingState.hide()
-                    showConfirmStartSharing = false
+                if (sessionState.isSubscribed == true) {
+                    scope.launch {
+                        listsViewModel.createShareList(argStartSharingIdList)
+                        confirmStartSharingState.hide()
+                        showConfirmStartSharing = false
+                    }
+                } else {
+                    sessionViewModel.showPaywall()
                 }
             },
             onDismiss = {
@@ -235,29 +244,14 @@ fun ListsScreenContent(
     onListEvent: (ListUiEvent) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val listState = rememberLazyListState()
-    var fabVisible by remember { mutableStateOf(true) }
     var topbarTitleResId by remember { mutableIntStateOf(R.string.lists) }
 
     LaunchedEffect(lists.isEmpty(), sharedLists.isEmpty()) {
-        topbarTitleResId = if(lists.isEmpty() && sharedLists.isNotEmpty()){
+        topbarTitleResId = if (lists.isEmpty() && sharedLists.isNotEmpty()) {
             R.string.shared_lists
-        }else{
+        } else {
             R.string.lists
         }
-    }
-
-    LaunchedEffect(listState) {
-        var lastScroll = 0
-        snapshotFlow { listState.firstVisibleItemScrollOffset }
-            .collect { offset ->
-                if (offset > lastScroll) {
-                    fabVisible = false // скроллим вниз → скрыть FAB
-                } else if (offset < lastScroll) {
-                    fabVisible = true // скроллим вверх → показать FAB
-                }
-                lastScroll = offset
-            }
     }
 
     Scaffold(
@@ -278,32 +272,25 @@ fun ListsScreenContent(
             )
         },
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = fabVisible,
-                enter = fadeIn() + slideInVertically { it },
-                exit = fadeOut() + slideOutVertically { it }
+            FloatingActionButton(
+                onClick = { onListEvent(ListUiEvent.OnCreateList) },
+                containerColor = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .padding(dimensionResource(id = R.dimen.root_padding))
             ) {
-                FloatingActionButton(
-                    onClick = { onListEvent(ListUiEvent.OnCreateList) },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .padding(dimensionResource(id = R.dimen.root_padding))
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add List")
-                }
+                Icon(Icons.Default.Add, contentDescription = "Add List")
             }
         },
         floatingActionButtonPosition = FabPosition.End
     ) { paddingValue ->
 
         LazyColumn(
-            state = listState,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = dimensionResource(R.dimen.root_padding)),
             contentPadding = PaddingValues(
                 top = paddingValue.calculateTopPadding(),
-                bottom = paddingValue.calculateBottomPadding() + 8.dp
+                bottom = 136.dp
             ),
         ) {
             itemsIndexed(lists, key = { _, item -> item.id }) { index, list ->
@@ -316,7 +303,7 @@ fun ListsScreenContent(
                 )
             }
             if (sharedLists.isNotEmpty()) {
-                if(lists.isNotEmpty()){
+                if (lists.isNotEmpty()) {
                     item {
                         Text(
                             text = stringResource(R.string.shared_lists),
@@ -354,6 +341,6 @@ fun ListsScreenContentPreview() {
             )
         )
         ListsScreenContent(
-            list, list, {_->})
+            list, list, { _ -> })
     }
 }

@@ -18,14 +18,14 @@ keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 
 android {
     namespace = "chkan.ua.shoppinglist"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.chkan.shopping"
+        applicationId = "com.colistly.app"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 35
+        versionCode = 3
+        versionName = "0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -83,6 +83,7 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":domain"))
     implementation(project(":data"))
+    implementation(project(":billing"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -102,12 +103,21 @@ dependencies {
     implementation(libs.hilt.compose)
     implementation(libs.kotlinx.serialization.json)
 
-    //crashlytics
+    // Firebase
     implementation (platform(libs.firebase.bom))
+    //Crashlytics
     implementation(libs.firebase.crashlytics)
+    // Firebase Remote Config
+    implementation (libs.firebase.config.ktx)
+    // Firebase Analytics
+    implementation (libs.firebase.analytics.ktx)
+
 
     // Log
     implementation(libs.timber)
+
+    //install referrer
+    implementation(libs.installreferrer)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

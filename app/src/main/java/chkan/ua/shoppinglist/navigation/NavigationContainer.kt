@@ -16,10 +16,12 @@ import chkan.ua.shoppinglist.session.SessionViewModel
 import chkan.ua.shoppinglist.ui.screens.first_list.FirstListScreen
 import chkan.ua.shoppinglist.ui.screens.items.ItemsScreen
 import chkan.ua.shoppinglist.ui.screens.lists.ListsScreen
+import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 
 @Composable
 fun NavigationContainer(
-    sessionViewModel: SessionViewModel
+    sessionViewModel: SessionViewModel,
+    listsViewModel: ListsViewModel
 ) {
     val navController = rememberNavController()
     val startDestination: Any = if (sessionViewModel.isFirstLaunch) FirstListRoute else ListsRoute
@@ -32,19 +34,22 @@ fun NavigationContainer(
             startDestination = startDestination,
             modifier = Modifier.fillMaxSize()
         ) {
-            composable<FirstListRoute> { FirstListScreen() }
+            composable<FirstListRoute> { FirstListScreen(listsViewModel) }
             composable<ItemsRoute>(
                 enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
                 popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
                 popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) { backStackEntry ->
                 val args: ItemsRoute = backStackEntry.toRoute()
-                ItemsScreen(args)
+                ItemsScreen(
+                    args = args,
+                    sessionViewModel = sessionViewModel
+                )
             }
-            composable<ListsRoute> { ListsScreen(sessionViewModel) }
+            composable<ListsRoute> { ListsScreen(sessionViewModel,listsViewModel) }
         }
 
-        if (startDestination is ListsRoute){
+        if (startDestination is ListsRoute && !sessionViewModel.isLaunchWithInvite()){
             val lastOpenedList = sessionViewModel.getLastOpenedList()
             if (lastOpenedList != null){
                 navController.navigate(ItemsRoute(lastOpenedList.id,lastOpenedList.title, lastOpenedList.isShared)){

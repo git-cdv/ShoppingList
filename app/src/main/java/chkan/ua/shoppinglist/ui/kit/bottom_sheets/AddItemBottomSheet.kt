@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imeNestedScroll
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
@@ -60,6 +61,7 @@ import chkan.ua.shoppinglist.ui.kit.RoundedTextField
 import chkan.ua.shoppinglist.ui.screens.items.ItemsViewModel
 import chkan.ua.shoppinglist.ui.screens.items.NoteTextField
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 interface StubHistoryComponent : StateDelegate<HistoryComponentState>
@@ -79,6 +81,10 @@ fun AddItemBottomSheet(
     val focusRequester = remember { FocusRequester() }
     var wasKeyboardVisible by remember { mutableStateOf(false) }
     val isKeyboardVisible = WindowInsets.isImeVisible
+
+    // Добавляем задержку для плавного закрытия
+    var dismissAfterKeyboardHide by remember { mutableStateOf(false) }
+
     //add note
     var isAddNoteButtonShow by remember { mutableStateOf(false) }
     var isAddNoteFieldShow by remember { mutableStateOf(false) }
@@ -110,20 +116,41 @@ fun AddItemBottomSheet(
             if (sheetState.currentValue == SheetValue.Expanded ||
                 sheetState.currentValue == SheetValue.PartiallyExpanded
             ) {
+                delay(300)
                 focusRequester.requestFocus()
             }
         }
         //dismiss after hide keyboard
-        LaunchedEffect(isKeyboardVisible) {
-            if (wasKeyboardVisible && !isKeyboardVisible && sheetState.currentValue == SheetValue.Expanded) {
-                scope.launch { sheetState.hide() }.invokeOnCompletion { onDismiss.invoke() }
+        LaunchedEffect(isKeyboardVisible, dismissAfterKeyboardHide) {
+            if (wasKeyboardVisible && !isKeyboardVisible &&
+                sheetState.currentValue == SheetValue.Expanded) {
+
+                // Проверяем, есть ли контент или активное взаимодействие
+                if (text.isBlank() && textNote.isNullOrBlank()) {
+                    dismissAfterKeyboardHide = true
+                    // Добавляем небольшую задержку для плавности
+                    delay(150)
+                    scope.launch {
+                        sheetState.hide()
+                    }.invokeOnCompletion {
+                        onDismiss.invoke()
+                    }
+                }
             }
             wasKeyboardVisible = isKeyboardVisible
+
+            // Сбрасываем флаг если клавиатура появилась снова
+            if (isKeyboardVisible) {
+                dismissAfterKeyboardHide = false
+            }
         }
+
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .imePadding()
+                .imeNestedScroll()
         ) {
             HistoryUiComponent(
                 listId = listId,
@@ -161,7 +188,6 @@ fun AddItemBottomSheet(
                 maxLength = 50,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .imePadding()
                     .focusable()
                     .padding(
                         start = dimensionResource(id = R.dimen.root_padding),

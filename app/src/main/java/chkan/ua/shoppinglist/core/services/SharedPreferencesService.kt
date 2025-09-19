@@ -2,6 +2,7 @@ package chkan.ua.shoppinglist.core.services
 
 import android.content.Context
 import android.content.SharedPreferences
+import chkan.ua.core.PREFS_NAME
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -20,7 +21,7 @@ class SharedPreferencesServiceImpl @Inject constructor (@ApplicationContext cont
     }
 
     private val sp: SharedPreferences =
-        context.getSharedPreferences("BasePrefs", Context.MODE_PRIVATE)
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val editor: SharedPreferences.Editor = sp.edit()
 
     override fun <T> get(key: String, type: Class<T>): T? {

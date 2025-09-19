@@ -1,30 +1,64 @@
 package chkan.ua.shoppinglist.core.services
 
-import android.util.Log
-import com.google.firebase.Firebase
-import com.google.firebase.crashlytics.crashlytics
+import android.content.Context
+import chkan.ua.core.exceptions.ResourceCode
+import chkan.ua.core.exceptions.UserMessageException
+import chkan.ua.domain.Logger
+import chkan.ua.shoppinglist.BuildConfig
+import chkan.ua.shoppinglist.R
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 
 interface ErrorHandler {
-    suspend fun handle(e:Exception, reason: String)
-    val errorChannelFlow: Flow<ErrorEvent>
+    fun handle(e: Throwable, reason: String? = null)
+    val errorChannelFlow: Flow<String>
 }
 
-class ErrorHandlerImpl @Inject constructor() : ErrorHandler {
+@Singleton
+class ErrorHandlerImpl @Inject constructor(
+    private val logger: Logger,
+    @ApplicationContext private val context: Context,
+) : ErrorHandler {
 
-    private val errorChannel = Channel<ErrorEvent>()
+    private val errorChannel = Channel<String>()
     override val errorChannelFlow = errorChannel.receiveAsFlow()
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    override suspend fun handle(e: Exception, reason: String) {
-        Log.d("CHKAN", "Error ${e.message} with reason: $reason")
-        Firebase.crashlytics.setCustomKey("Reason", reason)
-        Firebase.crashlytics.recordException(e)
-        errorChannel.send(ErrorEvent(e::class.simpleName ?: "", e.message ?: "", reason))
+    override fun handle(e: Throwable, reason: String?) {
+        logger.e(e, reason)
+        scope.launch {
+            if(BuildConfig.DEBUG){
+                if(e is UserMessageException){
+                    val message = getLocalizeMessage(e.resourceCode)
+                    errorChannel.send(message)
+                } else {
+                    errorChannel.send(reason ?: e.message ?: "Unknown error")
+                }
+            } else {
+                if(e is UserMessageException){
+                    val message = getLocalizeMessage(e.resourceCode)
+                    errorChannel.send(message)
+                }
+            }
+        }
     }
 
+    private fun getLocalizeMessage(resourceCode: ResourceCode) : String {
+        return when(resourceCode){
+            ResourceCode.JOINING_LIST_NOT_FOUND -> context.getString(R.string.error_list_not_found)
+            ResourceCode.JOINING_USER_ALREADY_MEMBER -> context.getString(R.string.error_user_already_member)
+            ResourceCode.UNKNOWN_ERROR -> context.getString(R.string.error_unknown)
+            ResourceCode.NO_INTERNET_CONNECTION -> context.getString(R.string.error_no_internet_connection)
+            ResourceCode.SHARING_ERROR_CREATE_SHARED_LIST -> context.getString(R.string.error_create_sharing_list)
+            ResourceCode.SHARING_ERROR_STOP_SHARING_LIST -> context.getString(R.string.error_stop_sharing)
+        }
+    }
 }
-
-data class ErrorEvent(val exType: String, val exMessage: String, val reason: String)

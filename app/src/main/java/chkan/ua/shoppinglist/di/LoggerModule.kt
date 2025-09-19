@@ -20,11 +20,17 @@ object LoggerModule {
 
 class TimberLogger : Logger {
     override fun d(tag: String, message: String) {
+        Timber.tag("MY_LOGGER").d("D: $tag: $message")
         Timber.tag(tag).d(message)
     }
 
     override fun e(e: Exception, message: String?) {
+        Timber.tag("MY_LOGGER").d("ERROR:$e with: $message")
         Timber.e(e, message)
     }
 
+    override fun e(e: Throwable, message: String?) {
+        Timber.tag("MY_LOGGER").d("ERROR:$e with : $message")
+        Timber.e(e, message)
+    }
 }
