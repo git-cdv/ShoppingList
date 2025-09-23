@@ -76,7 +76,8 @@ fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Un
                 .padding(horizontal = dimensionResource(id = R.dimen.root_padding))
                 .constrainAs(textField) {
                     bottom.linkTo(centerLine)
-                }
+                },
+            maxLength = 105,
         )
 
         Text(
