@@ -21,7 +21,7 @@ class JoinListUseCase @Inject constructor(
                 Result.success(Unit)
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(UserMessageException(ResourceCode.UNKNOWN_ERROR))
         }
     }
 }

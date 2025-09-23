@@ -45,7 +45,6 @@ class ListsViewModel @Inject constructor(
     private val stopSharing: StopSharingUseCase,
     private val logger: Logger,
     private val shareList: ShareListUseCase,
-    private val joinList: JoinListUseCase,
     private val hasSharedListsUseCase: HasSharedListsUseCase,
     private val unfollow: UnfollowUseCase,
     val eventBus: EventBus,
@@ -148,20 +147,6 @@ class ListsViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         sharedObservationJob?.cancel()
-    }
-
-    fun onJoinList(inviteCode: String?) {
-        inviteCode?.let { code ->
-            viewModelScope.launch{
-                joinList(code)
-                    .onSuccess {
-                        hasSharedListsUseCase.setState(true)
-                    }
-                    .onFailure {
-                        errorHandler.handle(it, it.message)
-                    }
-            }
-        }
     }
 
     fun onUnfollow(listId: String) {

@@ -10,6 +10,7 @@ import chkan.ua.core.models.toListRole
 import chkan.ua.domain.Logger
 import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.auth.SignInAnonymouslyUseCase
+import chkan.ua.shoppinglist.ui.screens.invite.InviteAction
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.IS_FIRST_LAUNCH
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
@@ -46,9 +47,6 @@ class SessionViewModel @Inject constructor(
         checkFirstLaunch()
         observeIsSubscribed()
     }
-
-    private val _inviteCode = MutableStateFlow<String?>(null)
-    val inviteCode = _inviteCode.asStateFlow()
     var isFirstLaunch = false
 
     private val _isLoadReady = mutableStateOf(false)
@@ -108,40 +106,6 @@ class SessionViewModel @Inject constructor(
         } catch (e: Exception) {
             null
         }
-    }
-
-    fun handleInviteDataIfNeed(intent: Intent) {
-
-        if (intent.getBooleanExtra("invite_processed", false)) {
-            return
-        }
-
-        val appLinkIntent = intent
-        val appLinkData: Uri? = appLinkIntent.data
-
-        appLinkData?.let { uri ->
-            try {
-                val inviteCode = uri.getQueryParameter("code")
-                val listId = inviteCode?.drop(2)
-                _inviteCode.update { listId }
-                intent.putExtra("invite_processed", true)
-            } catch (e: Exception) {
-                logger.e(e, "Error while parsing invite code: $uri")
-            }
-        }
-    }
-
-    fun clearInviteData() {
-        _inviteCode.update { null }
-    }
-
-    fun isLaunchWithInvite(): Boolean {
-        return _inviteCode.value != null
-    }
-
-    fun setInviteCode(code: String) {
-        logger.d("SESSION_VM","setInviteCode: $code")
-        _inviteCode.update { code.drop(2) }
     }
 
     fun showPaywall() {
