@@ -6,7 +6,7 @@
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
     <string name="lists">Lists</string>
-    <string name="items_text_placeholder">enter item</string>
+    <string name="items_text_placeholder">New item</string>
     <string name="clear">Clear</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>

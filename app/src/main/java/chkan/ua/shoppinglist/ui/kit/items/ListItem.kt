@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -65,6 +66,8 @@ fun ListItem(
                 text = list.title,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .padding(
                         top = dimensionResource(id = R.dimen.root_padding),
@@ -72,6 +75,8 @@ fun ListItem(
                     )
                     .constrainAs(textTitle) {
                         start.linkTo(parent.start)
+                        end.linkTo(menuIcon.start)
+                        width = Dimension.fillToConstraints
                     }
             )
 
@@ -173,7 +178,7 @@ fun ListItemPreview() {
     ShoppingListTheme {
         ListItem(ListItemsUi(
             id = "2138",
-            title = "Item",
+            title = "Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 ",
             position = 2,
             count = 5,
             readyCount = 2,
