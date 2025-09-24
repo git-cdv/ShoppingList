@@ -2,7 +2,6 @@ package chkan.ua.shoppinglist.ui.screens.items
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -10,18 +9,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -113,6 +114,7 @@ fun ItemsScreen(
 
     val sessionState by sessionViewModel.sessionState.collectAsStateWithLifecycle()
     val uiState by itemsViewModel.state.collectAsStateWithLifecycle()
+    val isLoading by itemsViewModel.isLoading.collectAsStateWithLifecycle()
 
     val addItemBottomSheetState by itemsViewModel.addItemBottomSheetState
     val addItemSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -129,6 +131,7 @@ fun ItemsScreen(
     ItemsScreenContent(
         title = listTitle,
         uiState = uiState,
+        isLoading = isLoading,
         sessionState = sessionState,
         context = context,
         handleAddItemSheet = { isShow ->
@@ -245,6 +248,7 @@ fun ItemsScreenContent(
     onShareList: () -> Unit,
     onShowPaywall: () -> Unit,
     onUnfollow: () -> Unit,
+    isLoading: Boolean,
 ) {
     var showConfirmBottomSheet by remember { mutableStateOf(false) }
     val confirmSheetState = rememberModalBottomSheetState()
@@ -271,30 +275,38 @@ fun ItemsScreenContent(
                     )
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            when (uiState.role) {
-                                ListRole.SHARED_MEMBER -> { onUnfollow() }
-                                ListRole.SHARED_OWNER -> {
-                                    if (sessionState.isSubscribed == true) {
-                                        showShareLink(context, uiState.listId)
-                                    } else {
-                                        onShowPaywall()
+                    if(isLoading){
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .padding(end = 20.dp)
+                                .size(24.dp),
+                        )
+                    } else {
+                        IconButton(
+                            onClick = {
+                                when (uiState.role) {
+                                    ListRole.SHARED_MEMBER -> { onUnfollow() }
+                                    ListRole.SHARED_OWNER -> {
+                                        if (sessionState.isSubscribed == true) {
+                                            showShareLink(context, uiState.listId)
+                                        } else {
+                                            onShowPaywall()
+                                        }
+                                    }
+                                    ListRole.LOCAL -> {
+                                        showConfirmShareBottomSheet = true
                                     }
                                 }
-                                ListRole.LOCAL -> {
-                                    showConfirmShareBottomSheet = true
-                                }
-                            }
-                        },
-                        modifier = Modifier.padding(end = dimensionResource(R.dimen.inner_padding))
-                    ) {
-                        val resIcon = if (uiState.role == ListRole.SHARED_MEMBER) R.drawable.ic_unfollow else R.drawable.ic_member_add
-                        Icon(
-                            painterResource(resIcon),
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            contentDescription = "Share list"
-                        )
+                            },
+                            modifier = Modifier.padding(end = dimensionResource(R.dimen.inner_padding))
+                        ) {
+                            val resIcon = if (uiState.role == ListRole.SHARED_MEMBER) R.drawable.ic_unfollow else R.drawable.ic_member_add
+                            Icon(
+                                painterResource(resIcon),
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                contentDescription = "Share list"
+                            )
+                        }
                     }
                 },
                 navigationIcon = {
@@ -481,6 +493,8 @@ fun ItemsScreenContentPreview() {
             { _, _ -> },
             {},
             {},
-            {})
+            {},
+            isLoading = false
+        )
     }
 }

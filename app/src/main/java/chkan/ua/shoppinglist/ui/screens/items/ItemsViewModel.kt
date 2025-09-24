@@ -147,15 +147,17 @@ class ItemsViewModel @Inject constructor(
 
     fun createShareList(listId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            shareList(listId)
-                .onSuccess { remoteId ->
-                    observeRemoteItems(remoteId)
-                    _state.update { it.copy(role = ListRole.SHARED_OWNER, listId = remoteId) }
-                    eventBus.sendEvent(AppEvent.SharedSuccess(remoteId))
-                }
-                .onFailure {
-                    errorHandler.handle(Exception(it),"Error while sharing list. Please try again later.")
-                }
+            withLoading {
+                shareList(listId)
+                    .onSuccess { remoteId ->
+                        observeRemoteItems(remoteId)
+                        _state.update { it.copy(role = ListRole.SHARED_OWNER, listId = remoteId) }
+                        eventBus.sendEvent(AppEvent.SharedSuccess(remoteId))
+                    }
+                    .onFailure {
+                        errorHandler.handle(Exception(it),"Error while sharing list. Please try again later.")
+                    }
+            }
         }
     }
 
@@ -181,9 +183,14 @@ class ItemsViewModel @Inject constructor(
 
     private fun deleteItem(item: Item) {
         viewModelScope.launch(Dispatchers.IO) {
-            val config = ItemConfig(item, _state.value.role.isShared)
+            val isShared = _state.value.role.isShared
+            val config = ItemConfig(item, isShared)
             try {
-                deleteItem(config)
+                if (isShared) {
+                    withLoading { deleteItem(config) }
+                } else {
+                    deleteItem(config)
+                }
             } catch (e: Exception) {
                 errorHandler.handle(e, deleteItem.getErrorReason())
             }
@@ -192,10 +199,15 @@ class ItemsViewModel @Inject constructor(
 
     private fun changeReadyInItem(item: Item, state: Boolean) {
         viewModelScope.launch(singleThreadDispatcher) {
+            val isShared = _state.value.role.isShared
             val config =
-                MarkReadyConfig(item.itemId, listId = item.listId, state, _state.value.role.isShared)
+                MarkReadyConfig(item.itemId, listId = item.listId, state, isShared)
             try {
-                markReady(config)
+                if (isShared) {
+                    withLoading { markReady(config) }
+                } else {
+                    markReady(config)
+                }
             } catch (e: Exception) {
                 errorHandler.handle(e, markReady.getErrorReason(config))
             }
@@ -205,7 +217,14 @@ class ItemsViewModel @Inject constructor(
     private fun clearReadyItems(listId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                clearReadyItems(ClearReadyConfig(listId, _state.value.role.isShared))
+                val isShared = _state.value.role.isShared
+                if (isShared) {
+                    withLoading {
+                        clearReadyItems(ClearReadyConfig(listId, true))
+                    }
+                } else {
+                    clearReadyItems(ClearReadyConfig(listId, false))
+                }
             } catch (e: Exception) {
                 errorHandler.handle(e, deleteItem.getErrorReason())
             }
@@ -227,7 +246,12 @@ class ItemsViewModel @Inject constructor(
     private fun editItem(edited: Editable) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                editItemUseCase(edited.copy(listId = _state.value.listId, isShared = _state.value.role.isShared))
+                val isShared = _state.value.role.isShared
+                if (isShared) {
+                    withLoading { editItemUseCase(edited.copy(listId = _state.value.listId, isShared = true)) }
+                } else {
+                    editItemUseCase(edited.copy(listId = _state.value.listId, isShared = false))
+                }
             } catch (e: Exception) {
                 errorHandler.handle(e, editItemUseCase.getErrorReason(edited))
             }
