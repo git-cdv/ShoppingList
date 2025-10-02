@@ -17,13 +17,12 @@ class UnfollowUseCase @Inject constructor(
         return try {
             val userId = authManager.getCurrentUserId()
             if (userId == null) {
-                throw UserMessageException(ResourceCode.UNKNOWN_ERROR)
+                throw UserMessageException(ResourceCode.UNKNOWN_ERROR,"User is not authenticated")
             } else {
                 remoteRepository.unfollow(userId,listId)
                 Result.success(Unit)
             }
         } catch (e: Exception) {
-            logger.e(e)
             Result.failure(UserMessageException(ResourceCode.UNKNOWN_ERROR))
         }
     }

@@ -15,7 +15,7 @@ class JoinListUseCase @Inject constructor(
         return try {
             val userId = authManager.getCurrentUserId()
             if (userId == null) {
-                throw UserMessageException(ResourceCode.UNKNOWN_ERROR)
+                throw UserMessageException(ResourceCode.UNKNOWN_ERROR,"User is not authenticated")
             } else {
                 remoteRepository.joinSharedList(userId,code)
                 Result.success(Unit)

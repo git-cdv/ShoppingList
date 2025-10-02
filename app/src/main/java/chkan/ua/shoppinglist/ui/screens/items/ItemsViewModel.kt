@@ -4,6 +4,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chkan.ua.core.exceptions.ResourceCode
+import chkan.ua.core.exceptions.UserMessageException
 import chkan.ua.core.models.ListRole
 import chkan.ua.core.models.isShared
 import chkan.ua.core.models.toPreferenceString
@@ -158,7 +160,7 @@ class ItemsViewModel @Inject constructor(
                         eventBus.sendEvent(AppEvent.SharedSuccess(remoteId))
                     }
                     .onFailure {
-                        errorHandler.handle(Exception(it),"Error while sharing list. Please try again later.")
+                        errorHandler.handle(UserMessageException(ResourceCode.SHARING_ERROR_CREATE_SHARED_LIST))
                     }
             }
         }

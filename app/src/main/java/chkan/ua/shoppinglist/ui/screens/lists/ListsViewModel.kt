@@ -126,7 +126,6 @@ class ListsViewModel @Inject constructor(
             try {
                 stopSharing(listId)
             } catch (e: Exception){
-                logger.e(e)
                 errorHandler.handle(UserMessageException(ResourceCode.SHARING_ERROR_STOP_SHARING_LIST))
             }
         }
