@@ -25,6 +25,7 @@ import chkan.ua.domain.usecases.items.MarkReadyItemUseCase
 import chkan.ua.domain.usecases.items.MoveItemToTopUseCase
 import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.domain.usecases.share.GetRemoteItemsFlowUseCase
+import chkan.ua.domain.usecases.share.HasSharedListsUseCase
 import chkan.ua.domain.usecases.share.ShareListUseCase
 import chkan.ua.shoppinglist.components.history_list.HistoryComponent
 import chkan.ua.shoppinglist.core.components.ComponentsViewModel
@@ -70,6 +71,7 @@ class ItemsViewModel @Inject constructor(
     private val shareList: ShareListUseCase,
     val eventBus: EventBus,
     private val logger: Logger,
+    private val hasSharedListsUseCase: HasSharedListsUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ComponentsViewModel() {
 
@@ -158,6 +160,7 @@ class ItemsViewModel @Inject constructor(
                         observeRemoteItems(remoteId)
                         _state.update { it.copy(role = ListRole.SHARED_OWNER, listId = remoteId) }
                         eventBus.sendEvent(AppEvent.SharedSuccess(remoteId))
+                        hasSharedListsUseCase.setState(true)
                     }
                     .onFailure {
                         errorHandler.handle(UserMessageException(ResourceCode.SHARING_ERROR_CREATE_SHARED_LIST))
