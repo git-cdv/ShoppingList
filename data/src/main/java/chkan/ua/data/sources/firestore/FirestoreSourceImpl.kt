@@ -314,11 +314,10 @@ class FirestoreSourceImpl @Inject constructor (
                     }
                 }
             } catch (e: Exception) {
-                logger.e(e,"joinSharedList e:$e")
                 if (e is UserMessageException) {
                     throw e
                 } else {
-                    throw UserMessageException(ResourceCode.UNKNOWN_ERROR)
+                    throw UserMessageException(ResourceCode.UNKNOWN_ERROR, "$e")
                 }
             }
         }
