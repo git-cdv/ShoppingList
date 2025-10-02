@@ -86,6 +86,7 @@ class SubscriptionBillingService @Inject constructor(
         val client = billingClient
         if (client?.isReady == true) {
             _connectionStateFlow.tryEmit(Result.success(true))
+            queryAndEmitCurrentPurchases()
             return
         }
 

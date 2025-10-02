@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import chkan.ua.core.models.ListRole
 import chkan.ua.core.models.isShared
 import chkan.ua.core.models.toPreferenceString
+import chkan.ua.domain.Logger
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.usecases.history.AddItemInHistoryUseCase
@@ -66,6 +67,7 @@ class ItemsViewModel @Inject constructor(
     private val moveToTopUseCase: MoveItemToTopUseCase,
     private val shareList: ShareListUseCase,
     val eventBus: EventBus,
+    private val logger: Logger,
     savedStateHandle: SavedStateHandle,
 ) : ComponentsViewModel() {
 
@@ -127,6 +129,7 @@ class ItemsViewModel @Inject constructor(
 
 
     fun processIntent(intent: ItemsIntent) {
+        logger.d("ITEMS_VM","processIntent: $intent")
         when (intent) {
             is ItemsIntent.AddItem -> addItem(intent.title, intent.note)
             is ItemsIntent.ClearReadyItems -> clearReadyItems(intent.listId)

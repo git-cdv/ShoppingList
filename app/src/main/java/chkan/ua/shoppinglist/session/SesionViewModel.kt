@@ -1,7 +1,5 @@
 package chkan.ua.shoppinglist.session
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -10,7 +8,6 @@ import chkan.ua.core.models.toListRole
 import chkan.ua.domain.Logger
 import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.auth.SignInAnonymouslyUseCase
-import chkan.ua.shoppinglist.ui.screens.invite.InviteAction
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.IS_FIRST_LAUNCH
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
@@ -74,7 +71,10 @@ class SessionViewModel @Inject constructor(
             subscriptionStateManager.subscriptionState.collect { state ->
                 logger.d("SESSION_VM","subscriptionState: $state")
                 when (state) {
-                    SubscriptionState.Active -> { _sessionState.update { it.copy(isSubscribed = true) } }
+                    SubscriptionState.Active -> {
+                        _sessionState.update { it.copy(isSubscribed = true) }
+                        _showPaywall.update { false }
+                    }
                     SubscriptionState.Inactive -> {
                         _sessionState.update { it.copy(isSubscribed = false) }
                         paywallCollector.init()

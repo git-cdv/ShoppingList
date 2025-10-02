@@ -63,15 +63,9 @@ class PaywallViewModel @Inject constructor(
             _paywallUiState.update { it.copy(isLoading = true) }
             try {
                 purchaseUseCase.purchase(activity, productId)
-                _paywallUiState.update {
-                    it.copy(
-                        isLoading = false,
-                        event = PaywallEvent.ProductPurchased
-                    )
-                }
                 //analytics.logEvent(PaywallAnalyticsEvent.SubscriptionPurchased(config.getActivePaywallName(),productId))
             } catch (e: Throwable) {
-                Timber.Forest.e(e)
+                Timber.e(e)
                 if (e is PurchasesException) {
                     handleError(e)
                     _paywallUiState.update {
@@ -108,12 +102,7 @@ class PaywallViewModel @Inject constructor(
         restoreJob = viewModelScope.launch {
             restoreUseCase()
                 .onSuccess {
-                    _paywallUiState.update {
-                        it.copy(
-                            isLoading = false,
-                            event = PaywallEvent.ProductPurchased
-                        )
-                    }
+                    _paywallUiState.update { it.copy(isLoading = false) }
                 }
                 .onFailure {
                     _paywallUiState.update {

@@ -2,7 +2,10 @@ package chkan.ua.shoppinglist.ui.screens.paywall
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SnackbarHostState
@@ -13,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.ui.screens.paywall.data.PaywallItem
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
@@ -35,7 +39,6 @@ fun PaywallModalBottomSheet(
     LaunchedEffect(paywallUiState.event) {
         val event = paywallUiState.event
         when (event) {
-            PaywallEvent.ProductPurchased -> { onDismiss() }
             PaywallEvent.RestorePurchasesFailed -> {
                 snackbarHostState.showSnackbar(
                     message = context.getString(R.string.error_restore_purchases_failed_message),
@@ -64,6 +67,9 @@ fun PaywallModalBottomSheet(
             onSubscribe = { onEvent(PaywallUiEvent.Subscribe(activity)) },
             onSubscribeRestore = { onEvent(PaywallUiEvent.SubscribeRestore) }
         )
+        if (paywallUiState.isLoading) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
+        }
     }
 }
 

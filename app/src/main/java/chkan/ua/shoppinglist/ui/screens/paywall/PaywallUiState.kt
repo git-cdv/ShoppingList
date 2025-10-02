@@ -7,6 +7,5 @@ data class PaywallUiState(
 )
 
 sealed interface PaywallEvent {
-    data object ProductPurchased : PaywallEvent
     data object RestorePurchasesFailed : PaywallEvent
 }

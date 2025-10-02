@@ -22,7 +22,6 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -65,6 +64,7 @@ import chkan.ua.shoppinglist.ui.kit.empty_state.CenteredTextScreen
 import chkan.ua.shoppinglist.ui.kit.items.ItemItem
 import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
 import chkan.ua.shoppinglist.ui.kit.togglers.ToggleShowCompleted
+import chkan.ua.shoppinglist.ui.screens.items.ItemsIntent.*
 import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import chkan.ua.shoppinglist.utils.AppEvent
@@ -85,6 +85,10 @@ fun ItemsScreen(
     val listTitle = args.listTitle
     val role = args.role
 
+    //confirmShare
+    var showConfirmShareBottomSheet by remember { mutableStateOf(false) }
+    val confirmShareSheetState = rememberModalBottomSheetState()
+
     LaunchedEffect(Unit) {
         if (role.isShared) {
             itemsViewModel.observeRemoteItems(listId)
@@ -103,6 +107,7 @@ fun ItemsScreen(
                     showShareLink(context, event.listId)
                     eventBus.consumeEvent()
                 }
+
                 AppEvent.GoToBackAfterUnfollow -> {
                     eventBus.consumeEvent()
                     navController.popBackStack()
@@ -166,15 +171,16 @@ fun ItemsScreen(
                 )
             )
         },
-        onShareList = {
-            itemsViewModel.processIntent(ItemsIntent.ShareList(listId))
-        },
         onShowPaywall = {
             sessionViewModel.showPaywall()
         },
         onUnfollow = {
             showConfirmUnfollowList = true
             scope.launch { confirmUnfollowListState.show() }
+        },
+        onShowConfirmShare = {
+            showConfirmShareBottomSheet = true
+            scope.launch { confirmShareSheetState.show() }
         }
     )
 
@@ -205,7 +211,7 @@ fun ItemsScreen(
         EditBottomSheet(
             editSheetState,
             onDismiss = { showEditBottomSheet = false },
-            onEdit = { edited -> itemsViewModel.processIntent(ItemsIntent.EditItem(edited)) },
+            onEdit = { edited -> itemsViewModel.processIntent(EditItem(edited)) },
             editable = editable
         )
     }
@@ -229,6 +235,29 @@ fun ItemsScreen(
             }
         )
     }
+    if (showConfirmShareBottomSheet) {
+        ConfirmBottomSheet(
+            confirmShareSheetState,
+            question = stringResource(id = R.string.sure_share_list),
+            onConfirm = {
+                scope.launch {
+                    if (sessionState.isSubscribed == true) {
+                        itemsViewModel.processIntent(ShareList(listId))
+                        confirmShareSheetState.hide()
+                        showConfirmShareBottomSheet = false
+                    } else {
+                        sessionViewModel.showPaywall()
+                    }
+                }
+            },
+            onDismiss = {
+                scope.launch {
+                    confirmShareSheetState.hide()
+                    showConfirmShareBottomSheet = false
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -245,15 +274,13 @@ fun ItemsScreenContent(
     clearReadyItems: () -> Unit,
     onEditItem: (Editable) -> Unit,
     onMoveToTop: (String, Int) -> Unit,
-    onShareList: () -> Unit,
     onShowPaywall: () -> Unit,
     onUnfollow: () -> Unit,
+    onShowConfirmShare: () -> Unit,
     isLoading: Boolean,
 ) {
     var showConfirmBottomSheet by remember { mutableStateOf(false) }
     val confirmSheetState = rememberModalBottomSheetState()
-    var showConfirmShareBottomSheet by remember { mutableStateOf(false) }
-    val confirmShareSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var isReadyShown by remember { mutableStateOf(false) }
@@ -275,7 +302,7 @@ fun ItemsScreenContent(
                     )
                 },
                 actions = {
-                    if(isLoading){
+                    if (isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier
                                 .padding(end = 20.dp)
@@ -285,7 +312,10 @@ fun ItemsScreenContent(
                         IconButton(
                             onClick = {
                                 when (uiState.role) {
-                                    ListRole.SHARED_MEMBER -> { onUnfollow() }
+                                    ListRole.SHARED_MEMBER -> {
+                                        onUnfollow()
+                                    }
+
                                     ListRole.SHARED_OWNER -> {
                                         if (sessionState.isSubscribed == true) {
                                             showShareLink(context, uiState.listId)
@@ -293,14 +323,16 @@ fun ItemsScreenContent(
                                             onShowPaywall()
                                         }
                                     }
+
                                     ListRole.LOCAL -> {
-                                        showConfirmShareBottomSheet = true
+                                        onShowConfirmShare()
                                     }
                                 }
                             },
                             modifier = Modifier.padding(end = dimensionResource(R.dimen.inner_padding))
                         ) {
-                            val resIcon = if (uiState.role == ListRole.SHARED_MEMBER) R.drawable.ic_unfollow else R.drawable.ic_member_add
+                            val resIcon =
+                                if (uiState.role == ListRole.SHARED_MEMBER) R.drawable.ic_unfollow else R.drawable.ic_member_add
                             Icon(
                                 painterResource(resIcon),
                                 tint = MaterialTheme.colorScheme.onSurface,
@@ -426,30 +458,6 @@ fun ItemsScreenContent(
                     scope.launch {
                         confirmSheetState.hide()
                         showConfirmBottomSheet = false
-                    }
-                }
-            )
-        }
-
-        if (showConfirmShareBottomSheet) {
-            ConfirmBottomSheet(
-                confirmShareSheetState,
-                question = stringResource(id = R.string.sure_share_list),
-                onConfirm = {
-                    scope.launch {
-                        if (sessionState.isSubscribed == true) {
-                            onShareList()
-                            confirmShareSheetState.hide()
-                            showConfirmShareBottomSheet = false
-                        } else {
-                            onShowPaywall()
-                        }
-                    }
-                },
-                onDismiss = {
-                    scope.launch {
-                        confirmShareSheetState.hide()
-                        showConfirmShareBottomSheet = false
                     }
                 }
             )
