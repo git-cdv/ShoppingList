@@ -23,7 +23,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -62,23 +65,54 @@ fun ListItem(
             val (textTitle, textCounter, progress, menuIcon) = createRefs()
             var isMenuExpanded by remember { mutableStateOf(false) }
 
-            Text(
-                text = list.title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .padding(
-                        top = dimensionResource(id = R.dimen.root_padding),
-                        start = dimensionResource(id = R.dimen.root_padding)
-                    )
-                    .constrainAs(textTitle) {
-                        start.linkTo(parent.start)
-                        end.linkTo(menuIcon.start)
-                        width = Dimension.fillToConstraints
-                    }
-            )
+            if(list.role == ListRole.SHARED_OWNER){
+                Text(
+                    text = buildAnnotatedString {
+                        append(list.title)
+                        append(" ")
+                        withStyle(
+                            style = SpanStyle(
+                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                                fontSize = MaterialTheme.typography.bodySmall.fontSize
+                            )
+                        ) {
+                            append(" (${stringResource(R.string.admin)})")
+                        }
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .padding(
+                            top = dimensionResource(id = R.dimen.root_padding),
+                            start = dimensionResource(id = R.dimen.root_padding)
+                        )
+                        .constrainAs(textTitle) {
+                            start.linkTo(parent.start)
+                            end.linkTo(menuIcon.start)
+                            width = Dimension.fillToConstraints
+                        }
+                )
+            } else {
+                Text(
+                    text = list.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .padding(
+                            top = dimensionResource(id = R.dimen.root_padding),
+                            start = dimensionResource(id = R.dimen.root_padding)
+                        )
+                        .constrainAs(textTitle) {
+                            start.linkTo(parent.start)
+                            end.linkTo(menuIcon.start)
+                            width = Dimension.fillToConstraints
+                        }
+                )
+            }
 
             Text(
                 text = "${list.readyCount}/${list.count}",
@@ -159,9 +193,10 @@ fun getMenuItems(
         }
         ListRole.SHARED_OWNER -> {
             mutableListOf<MenuItem>().apply {
+                add(MenuItem(title = stringResource(id = R.string.add_member), onClick = { onListEvent(ListUiEvent.OnAddShareMember(list.id))}))
+                add(MenuItem(title = stringResource(id = R.string.stop_sharing), onClick = { onListEvent(ListUiEvent.OnStopSharing(list.id))}))
                 add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onListEvent(ListUiEvent.OnEditList(Editable(list.id, list.title, isShared = role.isShared))) }))
                 add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onListEvent(ListUiEvent.OnDeleteList(list.id,  role.isShared))}))
-                add(MenuItem(title = stringResource(id = R.string.stop_sharing), onClick = { onListEvent(ListUiEvent.OnStopSharing(list.id))}))
             }
         }
         ListRole.SHARED_MEMBER -> {

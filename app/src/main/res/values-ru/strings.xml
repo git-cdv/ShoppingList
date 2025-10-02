@@ -80,4 +80,5 @@
     <string name="join_describe">Join now to start sharing and editing with others.</string>
     <string name="sure_unfollow_list">Are you sure you want to unfollow this list?</string>
     <string name="admin">Admin</string>
+    <string name="add_member">Add member</string>
 </resources>
