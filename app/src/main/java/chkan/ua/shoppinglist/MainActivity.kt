@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
             logger.d("REFERRER","Decoded referrer: $decodedReferrer")
 
             val uri = "?$decodedReferrer".toUri()
-            val inviteCode = uri.getQueryParameter("invite_code")
+            val inviteCode = uri.getQueryParameter("code")
 
             if (!inviteCode.isNullOrEmpty()) {
                 logger.d("REFERRER","Found invite code: $inviteCode")
