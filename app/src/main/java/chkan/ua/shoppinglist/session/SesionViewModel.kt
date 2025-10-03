@@ -8,6 +8,7 @@ import chkan.ua.core.models.toListRole
 import chkan.ua.domain.Logger
 import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.auth.SignInAnonymouslyUseCase
+import chkan.ua.domain.usecases.session.IsInvitedUseCase
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.IS_FIRST_LAUNCH
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
@@ -31,6 +32,7 @@ class SessionViewModel @Inject constructor(
     private val spService: SharedPreferencesService,
     private val subscriptionStateManager: SubscriptionStateManager,
     private val paywallCollector: PaywallCollector,
+    private val isInvitedUseCase: IsInvitedUseCase,
     private val logger: Logger
 ) : ViewModel() {
 
@@ -43,7 +45,9 @@ class SessionViewModel @Inject constructor(
     init {
         checkFirstLaunch()
         observeIsSubscribed()
+        checkIsInvited()
     }
+
     var isFirstLaunch = false
 
     private val _isLoadReady = mutableStateOf(false)
@@ -115,4 +119,11 @@ class SessionViewModel @Inject constructor(
     fun hidePaywall() {
         _showPaywall.value = false
     }
+    private fun checkIsInvited() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _sessionState.update { it.copy(isInvited = isInvitedUseCase.get()) }
+        }
+    }
+
+    fun isInvited() = _sessionState.value.isInvited
 }

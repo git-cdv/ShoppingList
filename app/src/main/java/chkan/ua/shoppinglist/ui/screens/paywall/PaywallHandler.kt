@@ -35,6 +35,7 @@ fun PaywallHandler(
             paywallUiState,
             paywallItems,
             paywallViewModel.isReview(),
+            sessionViewModel.isInvited(),
             snackbarHostState,
             onEvent = { event -> paywallViewModel.onUiEvent(event) },
             onDismiss = {

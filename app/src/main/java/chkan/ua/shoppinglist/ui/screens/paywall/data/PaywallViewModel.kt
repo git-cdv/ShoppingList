@@ -48,13 +48,13 @@ class PaywallViewModel @Inject constructor(
     fun onUiEvent(event: PaywallUiEvent) {
         when (event) {
             is PaywallUiEvent.ProductSelected -> paywallCollector.selectItem(event.id)
-            is PaywallUiEvent.Subscribe -> onSubscribe(event.activity)
+            is PaywallUiEvent.Subscribe -> onSubscribe(event.activity, event.role)
             PaywallUiEvent.SubscribeRestore -> onSubscribeRestore()
             PaywallUiEvent.PaywallEventConsumed -> consumeEvent()
         }
     }
 
-    fun onSubscribe(activity: Activity) {
+    fun onSubscribe(activity: Activity, role: String) {
         val productId = paywallCollector.getSelectedId()
         analytics.logEvent("purchase_subscribe_clicked",mapOf("product_id" to productId))
 
@@ -65,7 +65,7 @@ class PaywallViewModel @Inject constructor(
             _paywallUiState.update { it.copy(isLoading = true) }
             try {
                 purchaseUseCase.purchase(activity, productId)
-               // analytics.logEvent("purchase_subscription_purchased",mapOf("product_id" to productId, "role" to ))
+                analytics.logEvent("purchase_subscription_purchased",mapOf("product_id" to productId, "role" to role))
             } catch (e: Throwable) {
                 Timber.e(e)
                 if (e is PurchasesException) {
@@ -73,9 +73,14 @@ class PaywallViewModel @Inject constructor(
                     _paywallUiState.update {
                         it.copy(isLoading = false)
                     }
-                    //analytics.logEvent(PaywallAnalyticsEvent.SubscriptionError(config.getActivePaywallName(),productId,e.error.name))
+                    analytics.logEvent("purchase_error",mapOf("product_id" to productId,"error" to e.error.name))
                 } else {
-                    //analytics.logEvent(PaywallAnalyticsEvent.SubscriptionError(config.getActivePaywallName(),productId,errorMapper.map(e).short()))
+                    val errorInfo = mapOf(
+                        "product_id" to productId,
+                        "error" to e.javaClass.simpleName,
+                        "error_message" to (e.message?.take(100) ?: "No message")
+                    )
+                    analytics.logEvent("purchase_error", errorInfo)
                 }
             }
         }

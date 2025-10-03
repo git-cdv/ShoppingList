@@ -29,6 +29,7 @@ fun PaywallModalBottomSheet(
     paywallUiState: PaywallUiState,
     list:List<PaywallItem>,
     isReview: Boolean,
+    isInvited: Boolean,
     snackbarHostState: SnackbarHostState,
     onEvent: (PaywallUiEvent)->Unit,
     onDismiss: () -> Unit,
@@ -66,7 +67,7 @@ fun PaywallModalBottomSheet(
             snackbarHostState = snackbarHostState,
             list = list,
             onItemSelected = { onEvent(PaywallUiEvent.ProductSelected(it)) },
-            onSubscribe = { onEvent(PaywallUiEvent.Subscribe(activity)) },
+            onSubscribe = { onEvent(PaywallUiEvent.Subscribe(activity, role = if (isInvited) "invited" else "common")) },
             onSubscribeRestore = { onEvent(PaywallUiEvent.SubscribeRestore) }
         )
         if (paywallUiState.isLoading) {

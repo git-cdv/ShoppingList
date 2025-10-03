@@ -5,10 +5,12 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import chkan.ua.domain.Logger
+import chkan.ua.domain.usecases.session.IsInvitedUseCase
 import chkan.ua.domain.usecases.share.HasSharedListsUseCase
 import chkan.ua.domain.usecases.share.JoinListUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,6 +22,7 @@ import javax.inject.Inject
 class InviteViewModel @Inject constructor(
     private val joinList: JoinListUseCase,
     private val hasSharedListsUseCase: HasSharedListsUseCase,
+    private val isInvitedUseCase: IsInvitedUseCase,
     private val errorHandler: ErrorHandler,
     private val logger: Logger,
 ) : ViewModel() {
@@ -28,11 +31,12 @@ class InviteViewModel @Inject constructor(
 
     fun onJoinList(inviteCode: String?) {
         inviteCode?.let { code ->
-            viewModelScope.launch{
+            viewModelScope.launch(Dispatchers.IO) {
                 joinList(code)
                     .onSuccess {
                         hasSharedListsUseCase.setState(true)
                         _inviteState.update { InviteAction.Joined }
+                        isInvitedUseCase.set(true)
                     }
                     .onFailure {
                         errorHandler.handle(it, it.message)
