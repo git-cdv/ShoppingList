@@ -112,7 +112,6 @@ dependencies {
     // Firebase Analytics
     implementation (libs.firebase.analytics.ktx)
 
-
     // Log
     implementation(libs.timber)
 

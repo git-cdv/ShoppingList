@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import chkan.ua.core.exceptions.ResourceCode
 import chkan.ua.core.exceptions.UserMessageException
+import chkan.ua.domain.Analytics
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import chkan.ua.shoppinglist.di.ApplicationScope
 import chkan.ua.shoppinglist.ui.screens.paywall.PaywallEvent
@@ -32,6 +33,7 @@ class PaywallViewModel @Inject constructor(
     private val purchaseUseCase: SubscriptionPurchaseUseCase,
     private val restoreUseCase: RestorePurchaseUseCase,
     private val errorHandler: ErrorHandler,
+    private val analytics: Analytics
 ) : ViewModel() {
 
     private val _paywallUiState = MutableStateFlow(PaywallUiState())
@@ -54,7 +56,7 @@ class PaywallViewModel @Inject constructor(
 
     fun onSubscribe(activity: Activity) {
         val productId = paywallCollector.getSelectedId()
-        //analytics.logEvent(PaywallAnalyticsEvent.SubscriptionSubscribeClicked(config.getActivePaywallName(),productId))
+        analytics.logEvent("purchase_subscribe_clicked",mapOf("product_id" to productId))
 
         if (purchasesJob?.isActive == true) {
             return
@@ -63,7 +65,7 @@ class PaywallViewModel @Inject constructor(
             _paywallUiState.update { it.copy(isLoading = true) }
             try {
                 purchaseUseCase.purchase(activity, productId)
-                //analytics.logEvent(PaywallAnalyticsEvent.SubscriptionPurchased(config.getActivePaywallName(),productId))
+               // analytics.logEvent("purchase_subscription_purchased",mapOf("product_id" to productId, "role" to ))
             } catch (e: Throwable) {
                 Timber.e(e)
                 if (e is PurchasesException) {

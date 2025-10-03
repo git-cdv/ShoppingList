@@ -37,15 +37,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.core.models.ListRole
-import chkan.ua.core.models.isShared
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.models.ListProgress
 import chkan.ua.domain.objects.Deletable
 import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.core.analytics.AnalyticsScreenViewEffect
+import chkan.ua.shoppinglist.core.analytics.LocalAnalytics
 import chkan.ua.shoppinglist.navigation.ItemsRoute
-import chkan.ua.shoppinglist.navigation.localNavController
+import chkan.ua.shoppinglist.navigation.LocalNavController
 import chkan.ua.shoppinglist.session.SessionViewModel
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddListBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
@@ -61,7 +62,8 @@ fun ListsScreen(
     sessionViewModel: SessionViewModel,
     listsViewModel: ListsViewModel
 ) {
-    val navController = localNavController.current
+    AnalyticsScreenViewEffect("ListsScreen")
+    val navController = LocalNavController.current
     val lists by listsViewModel.localListsFlow.collectAsStateWithLifecycle(initialValue = listOf())
     val sharedLists by listsViewModel.sharedListsFlow.collectAsStateWithLifecycle()
 
@@ -93,6 +95,7 @@ fun ListsScreen(
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val analytics = LocalAnalytics.current
 
     LaunchedEffect(Unit) {
         sessionViewModel.clearLastOpenedList()
@@ -119,6 +122,9 @@ fun ListsScreen(
                         scope.launch { addListState.show() }
                     } else {
                         sessionViewModel.showPaywall()
+                        if (lists.size < 2) {
+                            analytics.logEvent("lists_shown_paywall_more_two_lists")
+                        }
                     }
                 }
 
@@ -157,8 +163,8 @@ fun ListsScreen(
 
                 is ListUiEvent.OnAddShareMember -> {
                     if(sessionState.isSubscribed == true){
-                        Log.d("MY_LOGGER", "OnAddShareMember listId: ${event.listId}")
                         showShareLink(context, event.listId)
+                        analytics.logEvent("lists_shown_share_link")
                     } else {
                         sessionViewModel.showPaywall()
                     }
@@ -173,6 +179,7 @@ fun ListsScreen(
             onDismiss = { showAddList = false },
             addItem = { text ->
                 listsViewModel.addList(text)
+                analytics.logEvent("lists_list_added", mapOf("list_name" to text))
                 scope.launch { addListState.hide() }.invokeOnCompletion {
                     showAddList = false
                 }
@@ -256,6 +263,7 @@ fun ListsScreen(
             confirmStartSharingState,
             question = stringResource(id = R.string.sure_share_list),
             onConfirm = {
+                analytics.logEvent("lists_confirm_sharing")
                 if (sessionState.isSubscribed == true) {
                     scope.launch {
                         listsViewModel.createShareList(argStartSharingIdList)

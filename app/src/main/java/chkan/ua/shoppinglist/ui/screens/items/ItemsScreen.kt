@@ -4,14 +4,12 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -54,8 +52,10 @@ import chkan.ua.core.models.isShared
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.objects.Editable
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.core.analytics.AnalyticsScreenViewEffect
+import chkan.ua.shoppinglist.core.analytics.LocalAnalytics
 import chkan.ua.shoppinglist.navigation.ItemsRoute
-import chkan.ua.shoppinglist.navigation.localNavController
+import chkan.ua.shoppinglist.navigation.LocalNavController
 import chkan.ua.shoppinglist.session.SessionState
 import chkan.ua.shoppinglist.session.SessionViewModel
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheet
@@ -81,8 +81,10 @@ fun ItemsScreen(
     listsViewModel: ListsViewModel,
     itemsViewModel: ItemsViewModel = hiltViewModel()
 ) {
+    AnalyticsScreenViewEffect("ItemsScreen")
     val context = LocalContext.current
-    val navController = localNavController.current
+    val navController = LocalNavController.current
+    val analytics = LocalAnalytics.current
     val listId = args.listId
     val listTitle = args.listTitle
     val role = args.role
@@ -108,6 +110,7 @@ fun ItemsScreen(
                 is AppEvent.SharedSuccess -> {
                     showShareLink(context, event.listId)
                     eventBus.consumeEvent()
+                    analytics.logEvent("items_shown_share_link")
                 }
 
                 AppEvent.GoToBackAfterUnfollow -> {
@@ -242,6 +245,7 @@ fun ItemsScreen(
             confirmShareSheetState,
             question = stringResource(id = R.string.sure_share_list),
             onConfirm = {
+                analytics.logEvent("items_confirm_sharing")
                 scope.launch {
                     if (sessionState.isSubscribed == true) {
                         itemsViewModel.processIntent(ShareList(listId))
@@ -286,6 +290,7 @@ fun ItemsScreenContent(
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var isReadyShown by remember { mutableStateOf(false) }
+    val analytics = LocalAnalytics.current
 
     Scaffold(
         modifier = Modifier
@@ -329,6 +334,7 @@ fun ItemsScreenContent(
                                     ListRole.SHARED_OWNER -> {
                                         if (sessionState.isSubscribed == true) {
                                             showShareLink(context, uiState.listId)
+                                            analytics.logEvent("items_shown_share_link")
                                         } else {
                                             onShowPaywall()
                                         }
