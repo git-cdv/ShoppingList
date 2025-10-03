@@ -1,5 +1,6 @@
 package chkan.ua.shoppinglist.navigation
 
+import chkan.ua.core.models.ListRole
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -9,4 +10,4 @@ object FirstListRoute
 object ListsRoute
 
 @Serializable
-data class ItemsRoute(val listId: String, val listTitle: String, val isShared: Boolean)
+data class ItemsRoute(val listId: String, val listTitle: String, val role: ListRole)

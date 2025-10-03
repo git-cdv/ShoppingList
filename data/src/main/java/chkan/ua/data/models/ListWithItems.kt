@@ -2,6 +2,7 @@ package chkan.ua.data.models
 
 import androidx.room.ColumnInfo
 import androidx.room.Relation
+import chkan.ua.core.models.ListRole
 import chkan.ua.domain.models.ListItems
 
 data class ListWithItems(
@@ -16,6 +17,6 @@ data class ListWithItems(
     val isShared: Boolean = false)
 {
     fun mapToListItem() : ListItems{
-        return ListItems(listId, title, position, items.mapToItems(), isShared)
+        return ListItems(listId, title, position, items.mapToItems(), ListRole.LOCAL)
     }
 }

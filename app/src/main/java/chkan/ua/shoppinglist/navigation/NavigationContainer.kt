@@ -8,22 +8,24 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import chkan.ua.shoppinglist.session.SessionViewModel
 import chkan.ua.shoppinglist.ui.screens.first_list.FirstListScreen
+import chkan.ua.shoppinglist.ui.screens.invite.InviteViewModel
 import chkan.ua.shoppinglist.ui.screens.items.ItemsScreen
 import chkan.ua.shoppinglist.ui.screens.lists.ListsScreen
 import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 
 @Composable
 fun NavigationContainer(
+    navController: NavHostController,
     sessionViewModel: SessionViewModel,
-    listsViewModel: ListsViewModel
+    listsViewModel: ListsViewModel,
+    inviteViewModel: InviteViewModel
 ) {
-    val navController = rememberNavController()
     val startDestination: Any = if (sessionViewModel.isFirstLaunch) FirstListRoute else ListsRoute
 
     CompositionLocalProvider(
@@ -43,16 +45,17 @@ fun NavigationContainer(
                 val args: ItemsRoute = backStackEntry.toRoute()
                 ItemsScreen(
                     args = args,
-                    sessionViewModel = sessionViewModel
+                    sessionViewModel = sessionViewModel,
+                    listsViewModel =listsViewModel
                 )
             }
             composable<ListsRoute> { ListsScreen(sessionViewModel,listsViewModel) }
         }
 
-        if (startDestination is ListsRoute && !sessionViewModel.isLaunchWithInvite()){
+        if (startDestination is ListsRoute && !inviteViewModel.isLaunchWithInvite()){
             val lastOpenedList = sessionViewModel.getLastOpenedList()
             if (lastOpenedList != null){
-                navController.navigate(ItemsRoute(lastOpenedList.id,lastOpenedList.title, lastOpenedList.isShared)){
+                navController.navigate(ItemsRoute(lastOpenedList.id,lastOpenedList.title, lastOpenedList.role)){
                     popUpTo(ListsRoute) { inclusive = false }
                 }
             }

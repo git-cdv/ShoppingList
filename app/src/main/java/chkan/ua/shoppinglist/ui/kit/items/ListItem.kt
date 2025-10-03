@@ -23,10 +23,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import chkan.ua.core.models.ListRole
+import chkan.ua.core.models.isShared
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.models.ListProgress
 import chkan.ua.domain.objects.Editable
@@ -41,8 +47,7 @@ fun ListItem(
     list: ListItemsUi,
     modifier: Modifier,
     onListEvent: (ListUiEvent) -> Unit,
-    isFirst: Boolean,
-    role: ListRole
+    isFirst: Boolean
 ) {
     Card(
         onClick = { onListEvent(ListUiEvent.OnCardClick(list)) },
@@ -60,19 +65,54 @@ fun ListItem(
             val (textTitle, textCounter, progress, menuIcon) = createRefs()
             var isMenuExpanded by remember { mutableStateOf(false) }
 
-            Text(
-                text = list.title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .padding(
-                        top = dimensionResource(id = R.dimen.root_padding),
-                        start = dimensionResource(id = R.dimen.root_padding)
-                    )
-                    .constrainAs(textTitle) {
-                        start.linkTo(parent.start)
-                    }
-            )
+            if(list.role == ListRole.SHARED_OWNER){
+                Text(
+                    text = buildAnnotatedString {
+                        append(list.title)
+                        append(" ")
+                        withStyle(
+                            style = SpanStyle(
+                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                                fontSize = MaterialTheme.typography.bodySmall.fontSize
+                            )
+                        ) {
+                            append(" (${stringResource(R.string.admin)})")
+                        }
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .padding(
+                            top = dimensionResource(id = R.dimen.root_padding),
+                            start = dimensionResource(id = R.dimen.root_padding)
+                        )
+                        .constrainAs(textTitle) {
+                            start.linkTo(parent.start)
+                            end.linkTo(menuIcon.start)
+                            width = Dimension.fillToConstraints
+                        }
+                )
+            } else {
+                Text(
+                    text = list.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .padding(
+                            top = dimensionResource(id = R.dimen.root_padding),
+                            start = dimensionResource(id = R.dimen.root_padding)
+                        )
+                        .constrainAs(textTitle) {
+                            start.linkTo(parent.start)
+                            end.linkTo(menuIcon.start)
+                            width = Dimension.fillToConstraints
+                        }
+                )
+            }
 
             Text(
                 text = "${list.readyCount}/${list.count}",
@@ -122,7 +162,7 @@ fun ListItem(
                     isMenuExpanded = isMenuExpanded,
                     onDismissRequest = { isMenuExpanded = false },
                     listItems = getMenuItems(
-                        role = role,
+                        role = list.role,
                         list = list,
                         onListEvent = onListEvent,
                         isFirst = isFirst
@@ -146,16 +186,17 @@ fun getMenuItems(
                 if (!isFirst){
                     add(MenuItem(title = stringResource(id = R.string.moveToTop), onClick = { onListEvent(ListUiEvent.OnMoveToTop(list.id,list.position)) }))
                 }
-                add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onListEvent(ListUiEvent.OnEditList(Editable(list.id, list.title, isShared = list.isShared))) }))
-                add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onListEvent(ListUiEvent.OnDeleteList(list.id,  list.isShared))}))
+                add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onListEvent(ListUiEvent.OnEditList(Editable(list.id, list.title, isShared = role.isShared))) }))
+                add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onListEvent(ListUiEvent.OnDeleteList(list.id,  role.isShared))}))
                 add(MenuItem(title = stringResource(id = R.string.share_list), onClick = { onListEvent(ListUiEvent.OnShareList(list.id))}))
             }
         }
         ListRole.SHARED_OWNER -> {
             mutableListOf<MenuItem>().apply {
-                add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onListEvent(ListUiEvent.OnEditList(Editable(list.id, list.title, isShared = list.isShared))) }))
-                add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onListEvent(ListUiEvent.OnDeleteList(list.id,  list.isShared))}))
+                add(MenuItem(title = stringResource(id = R.string.add_member), onClick = { onListEvent(ListUiEvent.OnAddShareMember(list.id))}))
                 add(MenuItem(title = stringResource(id = R.string.stop_sharing), onClick = { onListEvent(ListUiEvent.OnStopSharing(list.id))}))
+                add(MenuItem(title = stringResource(id = R.string.edit), onClick = { onListEvent(ListUiEvent.OnEditList(Editable(list.id, list.title, isShared = role.isShared))) }))
+                add(MenuItem(title = stringResource(id = R.string.delete), onClick = { onListEvent(ListUiEvent.OnDeleteList(list.id,  role.isShared))}))
             }
         }
         ListRole.SHARED_MEMBER -> {
@@ -166,20 +207,18 @@ fun getMenuItems(
     }
 }
 
-enum class ListRole {LOCAL, SHARED_OWNER, SHARED_MEMBER}
-
 @Preview(showBackground = true)
 @Composable
 fun ListItemPreview() {
     ShoppingListTheme {
         ListItem(ListItemsUi(
             id = "2138",
-            title = "Item",
+            title = "Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 ",
             position = 2,
             count = 5,
             readyCount = 2,
             progress = ListProgress(count = 5, readyCount = 2),
-            isShared = false
-        ), Modifier,{}, false, ListRole.LOCAL)
+            role = ListRole.LOCAL,
+        ), Modifier,{}, false)
     }
 }

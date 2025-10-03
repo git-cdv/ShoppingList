@@ -16,7 +16,7 @@ class SharedPreferencesServiceImpl @Inject constructor (@ApplicationContext cont
     companion object {
         const val LAST_OPEN_LIST_ID_INT = "last_list_id"
         const val LAST_OPEN_LIST_TITLE_STR = "last_list_title"
-        const val LAST_OPEN_LIST_IS_SHARED = "last_list_shared"
+        const val LAST_OPEN_LIST_ROLE = "last_list_role"
         const val IS_FIRST_LAUNCH = "is_first_launch"
     }
 

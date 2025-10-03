@@ -1,4 +1,4 @@
-package chkan.ua.shoppinglist.core.services
+package chkan.ua.shoppinglist.ui.screens.invite
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -9,48 +9,61 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import chkan.ua.shoppinglist.session.SessionViewModel
+import androidx.navigation.NavHostController
+import chkan.ua.shoppinglist.navigation.FirstListRoute
+import chkan.ua.shoppinglist.navigation.ListsRoute
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.InviteJoinBottomSheet
-import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 import kotlinx.coroutines.launch
 
+sealed class InviteAction {
+    object None : InviteAction()
+    data class Joining(val code: String) : InviteAction()
+    object Joined : InviteAction()
+    object Error : InviteAction()
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InviteHandler(
-    sessionViewModel: SessionViewModel,
-    listsViewModel: ListsViewModel
+    inviteViewModel: InviteViewModel,
+    navController: NavHostController
 ) {
-    val inviteCode by sessionViewModel.inviteCode.collectAsStateWithLifecycle()
+    val inviteState by inviteViewModel.inviteState.collectAsStateWithLifecycle()
     var showInviteSheet by remember { mutableStateOf(false) }
     val inviteSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(inviteCode) {
-        if (inviteCode != null) {
+    LaunchedEffect(inviteState) {
+        if (inviteState is InviteAction.Joining) {
             showInviteSheet = true
             scope.launch { inviteSheetState.show() }
         }
+        if (inviteState is InviteAction.Joined) {
+            if(navController.currentBackStackEntry?.destination?.route?.contains("FirstListRoute") == true) {
+                navController.navigate(ListsRoute){
+                    popUpTo(FirstListRoute) { inclusive = true }
+                }
+            }
+        }
     }
 
-    if (showInviteSheet && inviteCode != null) {
+    if (showInviteSheet && inviteState is InviteAction.Joining) {
         InviteJoinBottomSheet(
             sheetState = inviteSheetState,
             onJoin = {
                 scope.launch {
-                    listsViewModel.onJoinList(inviteCode)
+                    inviteViewModel.onJoinList((inviteState as? InviteAction.Joining)?.code)
                     inviteSheetState.hide()
                     showInviteSheet = false
-                    sessionViewModel.clearInviteData()
+                    inviteViewModel.clearInviteData()
                 }
             },
             onDismiss = {
                 scope.launch {
                     inviteSheetState.hide()
                     showInviteSheet = false
-                    sessionViewModel.clearInviteData()
+                    inviteViewModel.clearInviteData()
                 }
             }
         )

@@ -21,7 +21,6 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.hilt.navigation.compose.hiltViewModel
 import chkan.ua.core.services.DateProvider
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.core.services.SuggestionsProvider
@@ -77,7 +76,8 @@ fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Un
                 .padding(horizontal = dimensionResource(id = R.dimen.root_padding))
                 .constrainAs(textField) {
                     bottom.linkTo(centerLine)
-                }
+                },
+            maxLength = 105,
         )
 
         Text(

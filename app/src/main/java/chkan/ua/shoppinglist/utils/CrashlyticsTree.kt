@@ -16,3 +16,12 @@ class CrashlyticsTree : Timber.Tree() {
         t?.let { crashlytics.recordException(it) }
     }
 }
+
+class ReleaseTree : Timber.Tree() {
+    override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+        Log.println(priority, tag ?: "MY_LOGGER", message)
+        t?.let {
+            Log.println(priority, tag ?: "MY_LOGGER", Log.getStackTraceString(it))
+        }
+    }
+}

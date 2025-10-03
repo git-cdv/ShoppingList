@@ -1,32 +1,38 @@
 package chkan.ua.shoppinglist.ui.screens.items
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chkan.ua.core.exceptions.ResourceCode
+import chkan.ua.core.exceptions.UserMessageException
+import chkan.ua.core.models.ListRole
+import chkan.ua.core.models.isShared
+import chkan.ua.core.models.toPreferenceString
+import chkan.ua.domain.Logger
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.objects.Editable
 import chkan.ua.domain.usecases.history.AddItemInHistoryUseCase
-import chkan.ua.domain.usecases.items.ItemConfig
 import chkan.ua.domain.usecases.items.AddItemUseCase
 import chkan.ua.domain.usecases.items.ClearReadyConfig
 import chkan.ua.domain.usecases.items.ClearReadyItemsUseCase
 import chkan.ua.domain.usecases.items.DeleteItemUseCase
 import chkan.ua.domain.usecases.items.EditItemUseCase
 import chkan.ua.domain.usecases.items.GetItemsFlowUseCase
+import chkan.ua.domain.usecases.items.ItemConfig
 import chkan.ua.domain.usecases.items.MarkReadyConfig
 import chkan.ua.domain.usecases.items.MarkReadyItemUseCase
 import chkan.ua.domain.usecases.items.MoveItemToTopUseCase
-import chkan.ua.domain.usecases.share.GetRemoteItemsFlowUseCase
 import chkan.ua.domain.usecases.lists.MoveTop
+import chkan.ua.domain.usecases.share.GetRemoteItemsFlowUseCase
+import chkan.ua.domain.usecases.share.HasSharedListsUseCase
 import chkan.ua.domain.usecases.share.ShareListUseCase
 import chkan.ua.shoppinglist.components.history_list.HistoryComponent
 import chkan.ua.shoppinglist.core.components.ComponentsViewModel
 import chkan.ua.shoppinglist.core.services.ErrorHandler
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
-import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_IS_SHARED
+import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ROLE
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_TITLE_STR
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheetState
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.BottomSheetAction
@@ -64,6 +70,8 @@ class ItemsViewModel @Inject constructor(
     private val moveToTopUseCase: MoveItemToTopUseCase,
     private val shareList: ShareListUseCase,
     val eventBus: EventBus,
+    private val logger: Logger,
+    private val hasSharedListsUseCase: HasSharedListsUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ComponentsViewModel() {
 
@@ -74,7 +82,7 @@ class ItemsViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         ItemsState(
             listId = savedStateHandle.get<String>("listId") ?: "",
-            isShared = savedStateHandle.get<Boolean>("isShared") ?: false
+            role = savedStateHandle.get<ListRole>("role") ?: ListRole.LOCAL
         )
     )
     val state: StateFlow<ItemsState> = _state.asStateFlow()
@@ -125,6 +133,7 @@ class ItemsViewModel @Inject constructor(
 
 
     fun processIntent(intent: ItemsIntent) {
+        logger.d("ITEMS_VM","processIntent: $intent")
         when (intent) {
             is ItemsIntent.AddItem -> addItem(intent.title, intent.note)
             is ItemsIntent.ClearReadyItems -> clearReadyItems(intent.listId)
@@ -145,15 +154,18 @@ class ItemsViewModel @Inject constructor(
 
     fun createShareList(listId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            shareList(listId)
-                .onSuccess { remoteId ->
-                    observeRemoteItems(remoteId)
-                    _state.update { it.copy(isShared = true, listId = remoteId) }
-                    eventBus.sendEvent(AppEvent.SharedSuccess(remoteId))
-                }
-                .onFailure {
-                    errorHandler.handle(Exception(it),"Error while sharing list. Please try again later.")
-                }
+            withLoading {
+                shareList(listId)
+                    .onSuccess { remoteId ->
+                        observeRemoteItems(remoteId)
+                        _state.update { it.copy(role = ListRole.SHARED_OWNER, listId = remoteId) }
+                        eventBus.sendEvent(AppEvent.SharedSuccess(remoteId))
+                        hasSharedListsUseCase.setState(true)
+                    }
+                    .onFailure {
+                        errorHandler.handle(UserMessageException(ResourceCode.SHARING_ERROR_CREATE_SHARED_LIST))
+                    }
+            }
         }
     }
 
@@ -165,7 +177,7 @@ class ItemsViewModel @Inject constructor(
                     content = title,
                     listId = _state.value.listId,
                     note = note,
-                ), _state.value.isShared
+                ), _state.value.role.isShared
             )
             try {
                 addItem(config)
@@ -179,9 +191,14 @@ class ItemsViewModel @Inject constructor(
 
     private fun deleteItem(item: Item) {
         viewModelScope.launch(Dispatchers.IO) {
-            val config = ItemConfig(item, _state.value.isShared)
+            val isShared = _state.value.role.isShared
+            val config = ItemConfig(item, isShared)
             try {
-                deleteItem(config)
+                if (isShared) {
+                    withLoading { deleteItem(config) }
+                } else {
+                    deleteItem(config)
+                }
             } catch (e: Exception) {
                 errorHandler.handle(e, deleteItem.getErrorReason())
             }
@@ -190,10 +207,15 @@ class ItemsViewModel @Inject constructor(
 
     private fun changeReadyInItem(item: Item, state: Boolean) {
         viewModelScope.launch(singleThreadDispatcher) {
+            val isShared = _state.value.role.isShared
             val config =
-                MarkReadyConfig(item.itemId, listId = item.listId, state, _state.value.isShared)
+                MarkReadyConfig(item.itemId, listId = item.listId, state, isShared)
             try {
-                markReady(config)
+                if (isShared) {
+                    withLoading { markReady(config) }
+                } else {
+                    markReady(config)
+                }
             } catch (e: Exception) {
                 errorHandler.handle(e, markReady.getErrorReason(config))
             }
@@ -203,7 +225,14 @@ class ItemsViewModel @Inject constructor(
     private fun clearReadyItems(listId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                clearReadyItems(ClearReadyConfig(listId, _state.value.isShared))
+                val isShared = _state.value.role.isShared
+                if (isShared) {
+                    withLoading {
+                        clearReadyItems(ClearReadyConfig(listId, true))
+                    }
+                } else {
+                    clearReadyItems(ClearReadyConfig(listId, false))
+                }
             } catch (e: Exception) {
                 errorHandler.handle(e, deleteItem.getErrorReason())
             }
@@ -216,16 +245,21 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    fun saveLastOpenedList(listId: String, listTitle: String, isShared: Boolean) {
+    fun saveLastOpenedList(listId: String, listTitle: String, role: ListRole) {
         spService.set(LAST_OPEN_LIST_ID_INT, listId)
         spService.set(LAST_OPEN_LIST_TITLE_STR, listTitle)
-        spService.set(LAST_OPEN_LIST_IS_SHARED, isShared)
+        spService.set(LAST_OPEN_LIST_ROLE, role.toPreferenceString())
     }
 
     private fun editItem(edited: Editable) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                editItemUseCase(edited.copy(listId = _state.value.listId, isShared = _state.value.isShared))
+                val isShared = _state.value.role.isShared
+                if (isShared) {
+                    withLoading { editItemUseCase(edited.copy(listId = _state.value.listId, isShared = true)) }
+                } else {
+                    editItemUseCase(edited.copy(listId = _state.value.listId, isShared = false))
+                }
             } catch (e: Exception) {
                 errorHandler.handle(e, editItemUseCase.getErrorReason(edited))
             }

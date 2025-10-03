@@ -1,9 +1,11 @@
 package chkan.ua.domain.models
 
+import chkan.ua.core.models.ListRole
+
 data class ListItems (
     val id: String,
     val title: String,
     val position: Int,
     val items: List<Item>,
-    val isShared: Boolean,
+    val role: ListRole
 )

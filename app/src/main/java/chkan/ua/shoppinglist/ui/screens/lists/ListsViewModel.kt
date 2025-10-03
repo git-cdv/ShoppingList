@@ -19,7 +19,10 @@ import chkan.ua.domain.usecases.share.HasSharedListsUseCase
 import chkan.ua.domain.usecases.share.JoinListUseCase
 import chkan.ua.domain.usecases.share.ShareListUseCase
 import chkan.ua.domain.usecases.share.StopSharingUseCase
+import chkan.ua.domain.usecases.share.UnfollowUseCase
 import chkan.ua.shoppinglist.core.services.ErrorHandler
+import chkan.ua.shoppinglist.utils.AppEvent
+import chkan.ua.shoppinglist.utils.EventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -42,8 +45,9 @@ class ListsViewModel @Inject constructor(
     private val stopSharing: StopSharingUseCase,
     private val logger: Logger,
     private val shareList: ShareListUseCase,
-    private val joinList: JoinListUseCase,
     private val hasSharedListsUseCase: HasSharedListsUseCase,
+    private val unfollow: UnfollowUseCase,
+    val eventBus: EventBus,
 ) : ViewModel() {
 
     init {
@@ -122,7 +126,6 @@ class ListsViewModel @Inject constructor(
             try {
                 stopSharing(listId)
             } catch (e: Exception){
-                logger.e(e)
                 errorHandler.handle(UserMessageException(ResourceCode.SHARING_ERROR_STOP_SHARING_LIST))
             }
         }
@@ -145,17 +148,15 @@ class ListsViewModel @Inject constructor(
         sharedObservationJob?.cancel()
     }
 
-    fun onJoinList(inviteCode: String?) {
-        inviteCode?.let { code ->
-            viewModelScope.launch{
-                joinList(code)
-                    .onSuccess {
-                        hasSharedListsUseCase.setState(true)
-                    }
-                    .onFailure {
-                        errorHandler.handle(it, it.message)
-                    }
-            }
+    fun onUnfollow(listId: String) {
+        viewModelScope.launch{
+            unfollow(listId)
+                .onSuccess {
+                    eventBus.sendEvent(AppEvent.GoToBackAfterUnfollow)
+                }
+                .onFailure {
+                    errorHandler.handle(it, it.message)
+                }
         }
     }
 }

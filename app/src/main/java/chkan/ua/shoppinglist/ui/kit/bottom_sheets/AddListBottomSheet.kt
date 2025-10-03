@@ -84,6 +84,7 @@ fun AddListBottomSheet(
                         text = ""
                     }
                 },
+                maxLength = 95,
                 modifier = Modifier
                     .fillMaxWidth()
                     .imePadding()

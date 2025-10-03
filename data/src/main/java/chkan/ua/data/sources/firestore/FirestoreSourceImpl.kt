@@ -1,8 +1,8 @@
 package chkan.ua.data.sources.firestore
 
-import android.util.Log
 import chkan.ua.core.exceptions.ResourceCode
 import chkan.ua.core.exceptions.UserMessageException
+import chkan.ua.core.models.ListRole
 import chkan.ua.data.models.RemoteItem
 import chkan.ua.data.sources.RemoteDataSource
 import chkan.ua.domain.Logger
@@ -13,16 +13,16 @@ import chkan.ua.domain.objects.Editable
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 
 
 const val collectionPath = "shopping_lists"
@@ -96,7 +96,6 @@ class FirestoreSourceImpl @Inject constructor (
                 .document(listId)
                 .addSnapshotListener { documentSnapshot, error ->
                     if (error != null) {
-                        logger.e(error,"getListWithItemsFlowById e:$error")
                         close(error)
                         return@addSnapshotListener
                     }
@@ -116,7 +115,6 @@ class FirestoreSourceImpl @Inject constructor (
 
                             trySend(itemsList)
                         } catch (e: Exception) {
-                            logger.e(e,"getListWithItemsFlowById e:$e")
                             close(e)
                         }
                     } else {
@@ -279,7 +277,7 @@ class FirestoreSourceImpl @Inject constructor (
             title = document.getString("title") ?: "",
             items = items,
             position = 0,
-            isShared = false
+            role = ListRole.LOCAL
         )
     }
 
@@ -316,14 +314,18 @@ class FirestoreSourceImpl @Inject constructor (
                     }
                 }
             } catch (e: Exception) {
-                logger.e(e,"joinSharedList e:$e")
                 if (e is UserMessageException) {
                     throw e
                 } else {
-                    throw UserMessageException(ResourceCode.UNKNOWN_ERROR)
+                    throw UserMessageException(ResourceCode.UNKNOWN_ERROR, "$e")
                 }
             }
         }
+    }
+
+    override suspend fun unfollow(userId: String, listId: String) {
+        val docRef = firestore.collection(collectionPath).document(listId)
+        docRef.update("membersIds", FieldValue.arrayRemove(userId)).await()
     }
 
     private fun ListItems.toRemoteModel(createdBy: String, docRefId: String): HashMap<String, Any> {

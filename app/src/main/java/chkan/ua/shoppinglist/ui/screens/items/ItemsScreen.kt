@@ -4,17 +4,21 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -39,11 +43,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.core.extensions.firstAsTitle
+import chkan.ua.core.models.ListRole
+import chkan.ua.core.models.isShared
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.objects.Editable
 import chkan.ua.shoppinglist.R
@@ -59,6 +66,8 @@ import chkan.ua.shoppinglist.ui.kit.empty_state.CenteredTextScreen
 import chkan.ua.shoppinglist.ui.kit.items.ItemItem
 import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
 import chkan.ua.shoppinglist.ui.kit.togglers.ToggleShowCompleted
+import chkan.ua.shoppinglist.ui.screens.items.ItemsIntent.*
+import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 import chkan.ua.shoppinglist.utils.AppEvent
 import chkan.ua.shoppinglist.utils.EventBus
@@ -69,21 +78,26 @@ import kotlinx.coroutines.launch
 fun ItemsScreen(
     args: ItemsRoute,
     sessionViewModel: SessionViewModel,
+    listsViewModel: ListsViewModel,
     itemsViewModel: ItemsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val navController = localNavController.current
     val listId = args.listId
     val listTitle = args.listTitle
-    val isShared = args.isShared
+    val role = args.role
+
+    //confirmShare
+    var showConfirmShareBottomSheet by remember { mutableStateOf(false) }
+    val confirmShareSheetState = rememberModalBottomSheetState()
 
     LaunchedEffect(Unit) {
-        if (isShared) {
+        if (role.isShared) {
             itemsViewModel.observeRemoteItems(listId)
         } else {
             itemsViewModel.observeItems(listId)
         }
-        itemsViewModel.saveLastOpenedList(listId, listTitle, isShared)
+        itemsViewModel.saveLastOpenedList(listId, listTitle, role)
     }
 
     val eventBus: EventBus = itemsViewModel.eventBus
@@ -96,6 +110,10 @@ fun ItemsScreen(
                     eventBus.consumeEvent()
                 }
 
+                AppEvent.GoToBackAfterUnfollow -> {
+                    eventBus.consumeEvent()
+                    navController.popBackStack()
+                }
                 null -> {}
             }
         }
@@ -103,6 +121,7 @@ fun ItemsScreen(
 
     val sessionState by sessionViewModel.sessionState.collectAsStateWithLifecycle()
     val uiState by itemsViewModel.state.collectAsStateWithLifecycle()
+    val isLoading by itemsViewModel.isLoading.collectAsStateWithLifecycle()
 
     val addItemBottomSheetState by itemsViewModel.addItemBottomSheetState
     val addItemSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -112,9 +131,14 @@ fun ItemsScreen(
     var editable by remember { mutableStateOf(Editable()) }
     val scope = rememberCoroutineScope()
 
+    //unfollow list
+    var showConfirmUnfollowList by remember { mutableStateOf(false) }
+    val confirmUnfollowListState = rememberModalBottomSheetState()
+
     ItemsScreenContent(
         title = listTitle,
         uiState = uiState,
+        isLoading = isLoading,
         sessionState = sessionState,
         context = context,
         handleAddItemSheet = { isShow ->
@@ -149,11 +173,16 @@ fun ItemsScreen(
                 )
             )
         },
-        onShareList = {
-            itemsViewModel.processIntent(ItemsIntent.ShareList(listId))
-        },
         onShowPaywall = {
             sessionViewModel.showPaywall()
+        },
+        onUnfollow = {
+            showConfirmUnfollowList = true
+            scope.launch { confirmUnfollowListState.show() }
+        },
+        onShowConfirmShare = {
+            showConfirmShareBottomSheet = true
+            scope.launch { confirmShareSheetState.show() }
         }
     )
 
@@ -184,8 +213,51 @@ fun ItemsScreen(
         EditBottomSheet(
             editSheetState,
             onDismiss = { showEditBottomSheet = false },
-            onEdit = { edited -> itemsViewModel.processIntent(ItemsIntent.EditItem(edited)) },
+            onEdit = { edited -> itemsViewModel.processIntent(EditItem(edited)) },
             editable = editable
+        )
+    }
+
+    if (showConfirmUnfollowList) {
+        ConfirmBottomSheet(
+            confirmUnfollowListState,
+            question = stringResource(id = R.string.sure_unfollow_list),
+            onConfirm = {
+                scope.launch {
+                    listsViewModel.onUnfollow(listId)
+                    confirmUnfollowListState.hide()
+                    showConfirmUnfollowList = false
+                }
+            },
+            onDismiss = {
+                scope.launch {
+                    confirmUnfollowListState.hide()
+                    showConfirmUnfollowList = false
+                }
+            }
+        )
+    }
+    if (showConfirmShareBottomSheet) {
+        ConfirmBottomSheet(
+            confirmShareSheetState,
+            question = stringResource(id = R.string.sure_share_list),
+            onConfirm = {
+                scope.launch {
+                    if (sessionState.isSubscribed == true) {
+                        itemsViewModel.processIntent(ShareList(listId))
+                        confirmShareSheetState.hide()
+                        showConfirmShareBottomSheet = false
+                    } else {
+                        sessionViewModel.showPaywall()
+                    }
+                }
+            },
+            onDismiss = {
+                scope.launch {
+                    confirmShareSheetState.hide()
+                    showConfirmShareBottomSheet = false
+                }
+            }
         )
     }
 }
@@ -204,13 +276,13 @@ fun ItemsScreenContent(
     clearReadyItems: () -> Unit,
     onEditItem: (Editable) -> Unit,
     onMoveToTop: (String, Int) -> Unit,
-    onShareList: () -> Unit,
     onShowPaywall: () -> Unit,
+    onUnfollow: () -> Unit,
+    onShowConfirmShare: () -> Unit,
+    isLoading: Boolean,
 ) {
     var showConfirmBottomSheet by remember { mutableStateOf(false) }
     val confirmSheetState = rememberModalBottomSheetState()
-    var showConfirmShareBottomSheet by remember { mutableStateOf(false) }
-    val confirmShareSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var isReadyShown by remember { mutableStateOf(false) }
@@ -226,29 +298,57 @@ fun ItemsScreenContent(
                     Text(
                         text = title,
                         color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            if (uiState.isShared) {
-                                if (sessionState.isSubscribed == true) {
-                                    showShareLink(context, uiState.listId)
-                                } else {
-                                    onShowPaywall()
-                                }
-                            } else {
-                                showConfirmShareBottomSheet = true
-                            }
-                        },
-                        modifier = Modifier.padding(end = dimensionResource(R.dimen.inner_padding))
-                    ) {
+                    if (uiState.role.isShared){
                         Icon(
-                            painterResource(R.drawable.ic_member_add),
-                            tint = MaterialTheme.colorScheme.onSurface,
+                            painterResource(R.drawable.ic_share),
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                             contentDescription = "Share list"
                         )
+                    }
+
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .padding(end = 20.dp)
+                                .size(24.dp),
+                        )
+                    } else {
+                        IconButton(
+                            onClick = {
+                                when (uiState.role) {
+                                    ListRole.SHARED_MEMBER -> {
+                                        onUnfollow()
+                                    }
+
+                                    ListRole.SHARED_OWNER -> {
+                                        if (sessionState.isSubscribed == true) {
+                                            showShareLink(context, uiState.listId)
+                                        } else {
+                                            onShowPaywall()
+                                        }
+                                    }
+
+                                    ListRole.LOCAL -> {
+                                        onShowConfirmShare()
+                                    }
+                                }
+                            },
+                            modifier = Modifier.padding(end = dimensionResource(R.dimen.inner_padding))
+                        ) {
+                            val resIcon =
+                                if (uiState.role == ListRole.SHARED_MEMBER) R.drawable.ic_unfollow else R.drawable.ic_member_add
+                            Icon(
+                                painterResource(resIcon),
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                contentDescription = "Share list"
+                            )
+                        }
                     }
                 },
                 navigationIcon = {
@@ -318,7 +418,7 @@ fun ItemsScreenContent(
                         },
                         onMoveToTop = { onMoveToTop(item.itemId, item.position) },
                         isFirst = index == 0,
-                        isShared = uiState.isShared
+                        isShared = uiState.role.isShared
                     )
                 }
 
@@ -372,30 +472,6 @@ fun ItemsScreenContent(
                 }
             )
         }
-
-        if (showConfirmShareBottomSheet) {
-            ConfirmBottomSheet(
-                confirmShareSheetState,
-                question = stringResource(id = R.string.sure_share_list),
-                onConfirm = {
-                    scope.launch {
-                        if (sessionState.isSubscribed == true) {
-                            onShareList()
-                            confirmShareSheetState.hide()
-                            showConfirmShareBottomSheet = false
-                        } else {
-                            onShowPaywall()
-                        }
-                    }
-                },
-                onDismiss = {
-                    scope.launch {
-                        confirmShareSheetState.hide()
-                        showConfirmShareBottomSheet = false
-                    }
-                }
-            )
-        }
     }
 }
 
@@ -434,6 +510,9 @@ fun ItemsScreenContentPreview() {
             {},
             { _, _ -> },
             {},
-            {})
+            {},
+            {},
+            isLoading = false
+        )
     }
 }

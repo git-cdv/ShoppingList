@@ -131,7 +131,7 @@ fun EditBottomSheet(
                 onValueChange = { newValue -> value = newValue },
                 roundedCornerRes = R.dimen.rounded_corner,
                 focusRequester = focusRequester,
-                maxLength = 50,
+                maxLength = if (isList) 105 else 50,
                 onDone = {
                     if (value.text != editable.title || textNote != editable.note){
                         onEdit.invoke(editable.copy(title = value.text, note = textNote))

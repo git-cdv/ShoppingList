@@ -1,18 +1,17 @@
 package chkan.ua.shoppinglist.session
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import chkan.ua.core.models.toListRole
 import chkan.ua.domain.Logger
 import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.auth.SignInAnonymouslyUseCase
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.IS_FIRST_LAUNCH
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
-import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_IS_SHARED
+import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ROLE
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_TITLE_STR
 import chkan.ua.shoppinglist.ui.screens.paywall.data.PaywallCollector
 import com.chkan.billing.service.SubscriptionState
@@ -45,9 +44,6 @@ class SessionViewModel @Inject constructor(
         checkFirstLaunch()
         observeIsSubscribed()
     }
-
-    private val _inviteCode = MutableStateFlow<String?>(null)
-    val inviteCode = _inviteCode.asStateFlow()
     var isFirstLaunch = false
 
     private val _isLoadReady = mutableStateOf(false)
@@ -75,7 +71,10 @@ class SessionViewModel @Inject constructor(
             subscriptionStateManager.subscriptionState.collect { state ->
                 logger.d("SESSION_VM","subscriptionState: $state")
                 when (state) {
-                    SubscriptionState.Active -> { _sessionState.update { it.copy(isSubscribed = true) } }
+                    SubscriptionState.Active -> {
+                        _sessionState.update { it.copy(isSubscribed = true) }
+                        _showPaywall.update { false }
+                    }
                     SubscriptionState.Inactive -> {
                         _sessionState.update { it.copy(isSubscribed = false) }
                         paywallCollector.init()
@@ -95,46 +94,18 @@ class SessionViewModel @Inject constructor(
     fun clearLastOpenedList() {
         spService.set(LAST_OPEN_LIST_ID_INT, 0)
         spService.set(LAST_OPEN_LIST_TITLE_STR, "")
-        spService.set(LAST_OPEN_LIST_IS_SHARED, false)
+        spService.set(LAST_OPEN_LIST_ROLE, "")
     }
 
     fun getLastOpenedList(): LastOpenedList? {
         return try {
             val id = spService.get(LAST_OPEN_LIST_ID_INT, String::class.java) ?: ""
             val title = spService.get(LAST_OPEN_LIST_TITLE_STR, String::class.java) ?: ""
-            val isShared = spService.get(LAST_OPEN_LIST_IS_SHARED, Boolean::class.java) ?: false
-            LastOpenedList(id, title, isShared)
+            val role = spService.get(LAST_OPEN_LIST_ROLE, String::class.java) ?: ""
+            LastOpenedList(id, title, role.toListRole())
         } catch (e: Exception) {
             null
         }
-    }
-
-    fun handleInviteDataIfNeed(intent: Intent) {
-        val appLinkIntent = intent
-        val appLinkData: Uri? = appLinkIntent.data
-
-        appLinkData?.let { uri ->
-            try {
-                val inviteCode = uri.getQueryParameter("code")
-                val listId = inviteCode?.drop(2)
-                _inviteCode.update { listId }
-            } catch (e: Exception) {
-                logger.e(e, "Error while parsing invite code: $uri")
-            }
-        }
-    }
-
-    fun clearInviteData() {
-        _inviteCode.update { null }
-    }
-
-    fun isLaunchWithInvite(): Boolean {
-        return _inviteCode.value != null
-    }
-
-    fun setInviteCode(code: String) {
-        logger.d("SESSION_VM","setInviteCode: $code")
-        _inviteCode.update { code.drop(2) }
     }
 
     fun showPaywall() {

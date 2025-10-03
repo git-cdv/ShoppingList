@@ -1,10 +1,10 @@
 package chkan.ua.shoppinglist.core.components
 
-import androidx.lifecycle.ViewModel
+import chkan.ua.shoppinglist.core.abstracts.BaseViewModel
 
 abstract class ComponentsViewModel(
     override val componentStore: ComponentStore = ComponentStore()
-): ViewModel(), ComponentStoreOwner {
+): BaseViewModel(), ComponentStoreOwner {
 
     override fun onCleared() {
         clearComponents()

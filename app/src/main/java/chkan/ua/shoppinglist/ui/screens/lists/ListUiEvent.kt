@@ -12,4 +12,5 @@ sealed interface ListUiEvent {
     data class OnStopSharing(val listId: String) : ListUiEvent
     data class OnStopFollowing(val listId: String) : ListUiEvent
     data class OnShareList(val listId: String) : ListUiEvent
+    data class OnAddShareMember(val listId: String): ListUiEvent
 }

@@ -37,4 +37,5 @@ class EventBus @Inject constructor() {
 
 sealed class AppEvent {
     data class SharedSuccess(val listId: String) : AppEvent()
+    data object GoToBackAfterUnfollow : AppEvent()
 }

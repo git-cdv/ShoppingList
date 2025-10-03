@@ -1,6 +1,7 @@
 package chkan.ua.domain.usecases.share
 
 import chkan.ua.core.interfaces.SuspendUseCase
+import chkan.ua.core.models.ListRole
 import chkan.ua.domain.Logger
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.models.ListProgress
@@ -41,8 +42,7 @@ private fun List<ListSummary>.toUiModels(): List<ListItemsUi> {
             count = it.totalItems,
             readyCount = it.readyItems,
             progress = ListProgress(it.totalItems, it.readyItems),
-            isShared = true,
-            isOwner = it.isOwner
+            role = if (it.isOwner) ListRole.SHARED_OWNER else ListRole.SHARED_MEMBER
         )
     }
 }
