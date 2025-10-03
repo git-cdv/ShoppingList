@@ -29,13 +29,11 @@ fun PaywallModalBottomSheet(
     paywallUiState: PaywallUiState,
     list:List<PaywallItem>,
     isReview: Boolean,
-    isInvited: Boolean,
     snackbarHostState: SnackbarHostState,
     onEvent: (PaywallUiEvent)->Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    AnalyticsScreenViewEffect("PaywallScreen")
     val context = LocalContext.current
     val activity = context as ComponentActivity
 
@@ -67,7 +65,7 @@ fun PaywallModalBottomSheet(
             snackbarHostState = snackbarHostState,
             list = list,
             onItemSelected = { onEvent(PaywallUiEvent.ProductSelected(it)) },
-            onSubscribe = { onEvent(PaywallUiEvent.Subscribe(activity, role = if (isInvited) "invited" else "common")) },
+            onSubscribe = { onEvent(PaywallUiEvent.Subscribe(activity)) },
             onSubscribeRestore = { onEvent(PaywallUiEvent.SubscribeRestore) }
         )
         if (paywallUiState.isLoading) {

@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import chkan.ua.core.models.toListRole
+import chkan.ua.domain.Analytics
 import chkan.ua.domain.Logger
 import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.auth.SignInAnonymouslyUseCase
@@ -33,7 +34,8 @@ class SessionViewModel @Inject constructor(
     private val subscriptionStateManager: SubscriptionStateManager,
     private val paywallCollector: PaywallCollector,
     private val isInvitedUseCase: IsInvitedUseCase,
-    private val logger: Logger
+    private val logger: Logger,
+    private val analytics: Analytics
 ) : ViewModel() {
 
     private val _sessionState = MutableStateFlow(SessionState())
@@ -73,17 +75,27 @@ class SessionViewModel @Inject constructor(
     private fun observeIsSubscribed() {
         viewModelScope.launch {
             subscriptionStateManager.subscriptionState.collect { state ->
-                logger.d("SESSION_VM","subscriptionState: $state")
+                logger.d("SESSION_VM", "subscriptionState: $state")
                 when (state) {
                     SubscriptionState.Active -> {
                         _sessionState.update { it.copy(isSubscribed = true) }
                         _showPaywall.update { false }
                     }
+
                     SubscriptionState.Inactive -> {
                         _sessionState.update { it.copy(isSubscribed = false) }
                         paywallCollector.init()
                     }
+
                     SubscriptionState.Loading -> {}
+                    is SubscriptionState.NewPurchase -> {
+                        _sessionState.update { it.copy(isSubscribed = true) }
+                        _showPaywall.update { false }
+                        analytics.logEvent(
+                            "purchase_subscription_purchased",
+                            mapOf("product_id" to state.productId, "role" to if(_sessionState.value.isInvited) "invited" else "user")
+                        )
+                    }
                 }
             }
         }
@@ -119,11 +131,10 @@ class SessionViewModel @Inject constructor(
     fun hidePaywall() {
         _showPaywall.value = false
     }
+
     private fun checkIsInvited() {
         viewModelScope.launch(Dispatchers.IO) {
             _sessionState.update { it.copy(isInvited = isInvitedUseCase.get()) }
         }
     }
-
-    fun isInvited() = _sessionState.value.isInvited
 }

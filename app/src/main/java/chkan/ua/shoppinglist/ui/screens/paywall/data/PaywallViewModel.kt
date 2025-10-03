@@ -15,6 +15,7 @@ import com.chkan.billing.domain.error.PurchasesError
 import com.chkan.billing.domain.error.PurchasesException
 import com.chkan.billing.domain.usecase.RestorePurchaseUseCase
 import com.chkan.billing.domain.usecase.SubscriptionPurchaseUseCase
+import com.chkan.billing.service.SubscriptionStateManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,10 +33,14 @@ class PaywallViewModel @Inject constructor(
     private val paywallCollector: PaywallCollector,
     private val purchaseUseCase: SubscriptionPurchaseUseCase,
     private val restoreUseCase: RestorePurchaseUseCase,
+    private val subscriptionStateManager: SubscriptionStateManager,
     private val errorHandler: ErrorHandler,
     private val analytics: Analytics
 ) : ViewModel() {
 
+    init {
+        observeSubscriptionErrorState()
+    }
     private val _paywallUiState = MutableStateFlow(PaywallUiState())
     val paywallUiState = _paywallUiState.asStateFlow()
 
@@ -48,37 +53,49 @@ class PaywallViewModel @Inject constructor(
     fun onUiEvent(event: PaywallUiEvent) {
         when (event) {
             is PaywallUiEvent.ProductSelected -> paywallCollector.selectItem(event.id)
-            is PaywallUiEvent.Subscribe -> onSubscribe(event.activity, event.role)
+            is PaywallUiEvent.Subscribe -> onSubscribe(event.activity)
             PaywallUiEvent.SubscribeRestore -> onSubscribeRestore()
             PaywallUiEvent.PaywallEventConsumed -> consumeEvent()
         }
     }
 
-    fun onSubscribe(activity: Activity, role: String) {
+    fun onSubscribe(activity: Activity) {
         val productId = paywallCollector.getSelectedId()
         analytics.logEvent("purchase_subscribe_clicked",mapOf("product_id" to productId))
 
         if (purchasesJob?.isActive == true) {
             return
         }
-        purchasesJob = applicationScope.launch(Dispatchers.IO) {
+        purchasesJob = applicationScope.launch {
             _paywallUiState.update { it.copy(isLoading = true) }
             try {
                 purchaseUseCase.purchase(activity, productId)
-                analytics.logEvent("purchase_subscription_purchased",mapOf("product_id" to productId, "role" to role))
             } catch (e: Throwable) {
                 Timber.e(e)
                 if (e is PurchasesException) {
                     handleError(e)
-                    _paywallUiState.update {
-                        it.copy(isLoading = false)
-                    }
+                    _paywallUiState.update { it.copy(isLoading = false) }
                     analytics.logEvent("purchase_error",mapOf("product_id" to productId,"error" to e.error.name))
                 } else {
                     val errorInfo = mapOf(
                         "product_id" to productId,
                         "error" to e.javaClass.simpleName,
                         "error_message" to (e.message?.take(100) ?: "No message")
+                    )
+                    analytics.logEvent("purchase_error", errorInfo)
+                }
+            }
+        }
+    }
+
+    private fun observeSubscriptionErrorState() {
+        viewModelScope.launch(Dispatchers.IO) {
+            subscriptionStateManager.subscriptionErrorState.collect { state ->
+                state?.let { t ->
+                    _paywallUiState.update { it.copy(isLoading = false) }
+                    val errorInfo = mapOf(
+                        "error" to t.javaClass.simpleName,
+                        "error_message" to (t.message?.take(100) ?: "No message")
                     )
                     analytics.logEvent("purchase_error", errorInfo)
                 }

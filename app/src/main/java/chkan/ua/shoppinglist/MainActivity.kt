@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
                         ErrorDialogHandler(listsViewModel)
                         InviteHandler(inviteViewModel,navController)
                         checkInstallReferrerIfNeed()
-                        PaywallHandler(sessionViewModel,paywallViewModel)
+                        PaywallHandler(sessionViewModel,paywallViewModel,analytics)
                     }
                 }
             }

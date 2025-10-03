@@ -2,10 +2,12 @@ package chkan.ua.shoppinglist.core.analytics
 
 import android.os.Bundle
 import chkan.ua.domain.Analytics
+import chkan.ua.domain.Logger
 import com.google.firebase.analytics.FirebaseAnalytics
 
 class FirebaseAnalyticsService(
-    private val firebaseAnalytics: FirebaseAnalytics
+    private val firebaseAnalytics: FirebaseAnalytics,
+    private val logger: Logger
 ) : Analytics {
 
     override fun logEvent(eventName: String, parameters: Map<String, Any>?) {
@@ -22,6 +24,7 @@ class FirebaseAnalyticsService(
             }
         }
         firebaseAnalytics.logEvent(eventName, bundle)
+        logger.d("Analytics", "Event: $eventName, Params: $parameters")
     }
 
     override fun setUserId(userId: String) {
@@ -38,5 +41,6 @@ class FirebaseAnalyticsService(
             screenClass?.let { putString(FirebaseAnalytics.Param.SCREEN_CLASS, it) }
         }
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, bundle)
+        logger.d("Analytics", "logScreenView: $screenName")
     }
 }

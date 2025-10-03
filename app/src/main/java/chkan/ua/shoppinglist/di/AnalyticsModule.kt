@@ -2,6 +2,7 @@ package chkan.ua.shoppinglist.di
 
 import android.content.Context
 import chkan.ua.domain.Analytics
+import chkan.ua.domain.Logger
 import chkan.ua.shoppinglist.core.analytics.FirebaseAnalyticsService
 import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.Module
@@ -24,8 +25,9 @@ object AnalyticsModule {
     @Provides
     @Singleton
     fun provideAnalyticsService(
-        firebaseAnalytics: FirebaseAnalytics
+        firebaseAnalytics: FirebaseAnalytics,
+        logger: Logger
     ): Analytics {
-        return FirebaseAnalyticsService(firebaseAnalytics)
+        return FirebaseAnalyticsService(firebaseAnalytics,logger)
     }
 }
