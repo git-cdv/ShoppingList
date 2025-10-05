@@ -29,10 +29,12 @@ class FirebaseAnalyticsService(
 
     override fun setUserId(userId: String) {
         firebaseAnalytics.setUserId(userId)
+        logger.d("Analytics", "setUserId: $userId")
     }
 
     override fun setUserProperty(name: String, value: String) {
         firebaseAnalytics.setUserProperty(name, value)
+        logger.d("Analytics", "setUserProperty: $name, $value")
     }
 
     override fun logScreenView(screenName: String, screenClass: String?) {

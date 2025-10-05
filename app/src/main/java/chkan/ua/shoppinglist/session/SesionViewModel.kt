@@ -10,6 +10,7 @@ import chkan.ua.domain.Logger
 import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.auth.SignInAnonymouslyUseCase
 import chkan.ua.domain.usecases.session.IsInvitedUseCase
+import chkan.ua.shoppinglist.core.analytics.AnalyticsUserRoleCollector
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.IS_FIRST_LAUNCH
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
@@ -43,6 +44,10 @@ class SessionViewModel @Inject constructor(
 
     private val _showPaywall = MutableStateFlow(false)
     val showPaywall = _showPaywall.asStateFlow()
+
+    private val userRoleCollector = AnalyticsUserRoleCollector{ role ->
+        analytics.setUserProperty("user_role",role)
+    }
 
     init {
         checkFirstLaunch()
@@ -80,11 +85,13 @@ class SessionViewModel @Inject constructor(
                     SubscriptionState.Active -> {
                         _sessionState.update { it.copy(isSubscribed = true) }
                         _showPaywall.update { false }
+                        userRoleCollector.onPaidStatus(true)
                     }
 
                     SubscriptionState.Inactive -> {
                         _sessionState.update { it.copy(isSubscribed = false) }
                         paywallCollector.init()
+                        userRoleCollector.onPaidStatus(false)
                     }
 
                     SubscriptionState.Loading -> {}
@@ -95,6 +102,7 @@ class SessionViewModel @Inject constructor(
                             "purchase_subscription_purchased",
                             mapOf("product_id" to state.productId, "role" to if(_sessionState.value.isInvited) "invited" else "user")
                         )
+                        userRoleCollector.onPaidStatus(true)
                     }
                 }
             }
@@ -134,7 +142,9 @@ class SessionViewModel @Inject constructor(
 
     private fun checkIsInvited() {
         viewModelScope.launch(Dispatchers.IO) {
-            _sessionState.update { it.copy(isInvited = isInvitedUseCase.get()) }
+            val isInvited = isInvitedUseCase.get()
+            userRoleCollector.onInviteStatus(isInvited)
+            _sessionState.update { it.copy(isInvited = isInvited) }
         }
     }
 }

@@ -180,6 +180,7 @@ fun ListsScreen(
             addItem = { text ->
                 listsViewModel.addList(text)
                 analytics.logEvent("lists_list_added", mapOf("list_name" to text))
+                analytics.setUserProperty("lists_count_local",(lists.size + 1).toString())
                 scope.launch { addListState.hide() }.invokeOnCompletion {
                     showAddList = false
                 }
@@ -205,6 +206,9 @@ fun ListsScreen(
             onConfirm = {
                 scope.launch {
                     listsViewModel.onDeleteList(argDeletedIdList)
+                    if (!argDeletedIdList.isShared) {
+                        analytics.setUserProperty("lists_count_local",(lists.size - 1).coerceAtLeast(0).toString())
+                    }
                     confirmDeleteListState.hide()
                     showConfirmDeleteList = false
                 }
