@@ -310,51 +310,50 @@ fun ItemsScreenContent(
                 },
                 actions = {
                     if (uiState.role.isShared){
-                        Icon(
-                            painterResource(R.drawable.ic_share),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                            contentDescription = "Share list"
-                        )
-                    }
-
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .padding(end = 20.dp)
-                                .size(24.dp),
-                        )
-                    } else {
-                        IconButton(
-                            onClick = {
-                                when (uiState.role) {
-                                    ListRole.SHARED_MEMBER -> {
-                                        onUnfollow()
-                                    }
-
-                                    ListRole.SHARED_OWNER -> {
-                                        if (sessionState.isSubscribed == true) {
-                                            showShareLink(context, uiState.listId)
-                                            analytics.logEvent("items_shown_share_link")
-                                        } else {
-                                            onShowPaywall()
-                                        }
-                                    }
-
-                                    ListRole.LOCAL -> {
-                                        onShowConfirmShare()
-                                    }
-                                }
-                            },
-                            modifier = Modifier.padding(end = dimensionResource(R.dimen.inner_padding))
-                        ) {
-                            val resIcon =
-                                if (uiState.role == ListRole.SHARED_MEMBER) R.drawable.ic_unfollow else R.drawable.ic_member_add
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .size(24.dp),
+                            )
+                        } else {
                             Icon(
-                                painterResource(resIcon),
-                                tint = MaterialTheme.colorScheme.onSurface,
+                                painterResource(R.drawable.ic_share),
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                                 contentDescription = "Share list"
                             )
                         }
+                    }
+
+                    IconButton(
+                        onClick = {
+                            when (uiState.role) {
+                                ListRole.SHARED_MEMBER -> {
+                                    onUnfollow()
+                                }
+
+                                ListRole.SHARED_OWNER -> {
+                                    if (sessionState.isSubscribed == true) {
+                                        showShareLink(context, uiState.listId)
+                                        analytics.logEvent("items_shown_share_link")
+                                    } else {
+                                        onShowPaywall()
+                                    }
+                                }
+
+                                ListRole.LOCAL -> {
+                                    onShowConfirmShare()
+                                }
+                            }
+                        },
+                        modifier = Modifier.padding(end = dimensionResource(R.dimen.inner_padding))
+                    ) {
+                        val resIcon =
+                            if (uiState.role == ListRole.SHARED_MEMBER) R.drawable.ic_unfollow else R.drawable.ic_member_add
+                        Icon(
+                            painterResource(resIcon),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            contentDescription = "Share list"
+                        )
                     }
                 },
                 navigationIcon = {
