@@ -1,5 +1,6 @@
 package chkan.ua.shoppinglist
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,6 +13,7 @@ import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import chkan.ua.domain.Logger
+import chkan.ua.domain.Analytics
 import chkan.ua.shoppinglist.ui.screens.invite.InviteHandler
 import chkan.ua.shoppinglist.navigation.NavigationContainer
 import chkan.ua.shoppinglist.session.SessionViewModel
@@ -36,6 +38,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var logger: Logger
 
+    @Inject
+    lateinit var analytics: Analytics
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,16 +57,23 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     if (sessionViewModel.isLoadReady.value) {
                         val navController = rememberNavController()
-                        NavigationContainer(navController, sessionViewModel, listsViewModel, inviteViewModel)
+                        NavigationContainer(navController, analytics, sessionViewModel, listsViewModel, inviteViewModel)
                         ErrorDialogHandler(listsViewModel)
                         InviteHandler(inviteViewModel,navController)
                         checkInstallReferrerIfNeed()
-                        PaywallHandler(sessionViewModel,paywallViewModel)
+                        PaywallHandler(sessionViewModel,paywallViewModel,analytics)
                     }
                 }
             }
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        inviteViewModel.handleInviteDataIfNeed(intent)
+    }
+
 
     private fun checkInstallReferrerIfNeed() {
         if(sessionViewModel.isFirstLaunch){

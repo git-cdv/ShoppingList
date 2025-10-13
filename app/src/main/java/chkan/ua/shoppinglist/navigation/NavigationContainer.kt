@@ -12,6 +12,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import chkan.ua.domain.Analytics
+import chkan.ua.shoppinglist.core.analytics.LocalAnalytics
 import chkan.ua.shoppinglist.session.SessionViewModel
 import chkan.ua.shoppinglist.ui.screens.first_list.FirstListScreen
 import chkan.ua.shoppinglist.ui.screens.invite.InviteViewModel
@@ -22,6 +24,7 @@ import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
 @Composable
 fun NavigationContainer(
     navController: NavHostController,
+    analytics: Analytics,
     sessionViewModel: SessionViewModel,
     listsViewModel: ListsViewModel,
     inviteViewModel: InviteViewModel
@@ -29,7 +32,8 @@ fun NavigationContainer(
     val startDestination: Any = if (sessionViewModel.isFirstLaunch) FirstListRoute else ListsRoute
 
     CompositionLocalProvider(
-        localNavController provides navController
+        LocalNavController provides navController,
+        LocalAnalytics provides analytics
     ) {
         NavHost(
             navController = navController,

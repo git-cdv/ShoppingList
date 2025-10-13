@@ -24,6 +24,7 @@ sealed class SubscriptionState {
     object Loading : SubscriptionState()
     data object Active : SubscriptionState()
     data object Inactive : SubscriptionState()
+    data class NewPurchase(val productId: String) : SubscriptionState()
 }
 
 
@@ -41,6 +42,9 @@ class SubscriptionStateManager @Inject constructor(
     )
     val subscriptionState = _subscriptionState.asStateFlow()
 
+    private val _subscriptionErrorState = MutableStateFlow<Throwable?>(null)
+    val subscriptionErrorState = _subscriptionErrorState.asStateFlow()
+
     init {
         loadCachedState()
         observeBillingUpdate()
@@ -57,14 +61,22 @@ class SubscriptionStateManager @Inject constructor(
             billingRepository.activeSubscriptionsFlow.collect { result ->
                 result
                     .onSuccess { activeSubscriptions ->
-                        val state = if (activeSubscriptions.isNotEmpty()) SubscriptionState.Active else SubscriptionState.Inactive
-                        if(_subscriptionState.value != state) {
-                            _subscriptionState.value = state
+                        val newState = if (activeSubscriptions.isNotEmpty()) SubscriptionState.Active else SubscriptionState.Inactive
+                        val oldState = _subscriptionState.value
+
+                        if(oldState != newState) {
                             val sp = context.getSharedPreferences(PREFS_NAME,Context.MODE_PRIVATE)
                             sp.edit { putBoolean(IS_SUBSCRIBED_KEY, activeSubscriptions.isNotEmpty()) }
+
+                            if (oldState != SubscriptionState.Loading && newState == SubscriptionState.Active) {
+                                _subscriptionState.value = SubscriptionState.NewPurchase(activeSubscriptions.firstOrNull()?.productId ?: "unknown")
+                            } else {
+                                _subscriptionState.value = newState
+                            }
                         }
                     }
                     .onFailure {
+                        _subscriptionErrorState.value = it
                         logger.e(it)
                     }
             }

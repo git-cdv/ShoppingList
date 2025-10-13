@@ -23,10 +23,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.constraintlayout.compose.ConstraintLayout
 import chkan.ua.core.services.DateProvider
 import chkan.ua.shoppinglist.R
+import chkan.ua.shoppinglist.core.analytics.AnalyticsScreenViewEffect
+import chkan.ua.shoppinglist.core.analytics.LocalAnalytics
 import chkan.ua.shoppinglist.core.services.SuggestionsProvider
 import chkan.ua.shoppinglist.navigation.FirstListRoute
 import chkan.ua.shoppinglist.navigation.ListsRoute
-import chkan.ua.shoppinglist.navigation.localNavController
+import chkan.ua.shoppinglist.navigation.LocalNavController
 import chkan.ua.shoppinglist.ui.kit.RoundedTextField
 import chkan.ua.shoppinglist.ui.kit.SuggestionsHorizontalList
 import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
@@ -35,25 +37,27 @@ import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 @Composable
 fun FirstListScreen(
     listsViewModel: ListsViewModel
-){
-    val navController = localNavController.current
+) {
+    AnalyticsScreenViewEffect("FirstListScreen")
+    val navController = LocalNavController.current
     val today = DateProvider().getTodayByPattern("dd.MM.yy")
-    val suggestions = SuggestionsProvider().withToday(today,LocalContext.current)
+    val suggestions = SuggestionsProvider().withToday(today, LocalContext.current)
 
-    FirstListContent(suggestions){ title ->
+    FirstListContent(suggestions) { title ->
         listsViewModel.addList(title)
-        navController.navigate(ListsRoute){
+        navController.navigate(ListsRoute) {
             popUpTo(FirstListRoute) { inclusive = true }
         }
     }
 }
 
 @Composable
-fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Unit){
+fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Unit) {
 
     var listNameText by rememberSaveable { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
+    val analytics = LocalAnalytics.current
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -69,7 +73,10 @@ fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Un
             roundedCornerRes = R.dimen.rounded_corner,
             placeholderTextRes = R.string.first_list_text_placeholder,
             focusRequester = focusRequester,
-            onDone = { addListWithTitle.invoke(listNameText) },
+            onDone = {
+                addListWithTitle.invoke(listNameText)
+                analytics.logEvent("first_list_added", mapOf("list_name" to listNameText))
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(focusRequester)
@@ -85,7 +92,10 @@ fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Un
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
-                .padding(horizontal = dimensionResource(id = R.dimen.root_padding), vertical = dimensionResource(id = R.dimen.root_padding))
+                .padding(
+                    horizontal = dimensionResource(id = R.dimen.root_padding),
+                    vertical = dimensionResource(id = R.dimen.root_padding)
+                )
                 .constrainAs(textTitle) {
                     bottom.linkTo(textField.top)
                     start.linkTo(parent.start)
@@ -97,7 +107,8 @@ fun FirstListContent(suggestions: List<String>, addListWithTitle: (String) -> Un
             onSuggestionChoose = { suggestion ->
                 focusManager.clearFocus()
                 addListWithTitle.invoke(suggestion)
-                                 },
+                analytics.logEvent("first_suggestion_used", mapOf("suggestion_name" to suggestion))
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = dimensionResource(id = R.dimen.inner_padding))

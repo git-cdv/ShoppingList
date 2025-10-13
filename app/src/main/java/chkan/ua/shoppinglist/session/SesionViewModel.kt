@@ -5,9 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import chkan.ua.core.models.toListRole
+import chkan.ua.domain.Analytics
 import chkan.ua.domain.Logger
 import chkan.ua.domain.objects.LastOpenedList
 import chkan.ua.domain.usecases.auth.SignInAnonymouslyUseCase
+import chkan.ua.domain.usecases.session.IsInvitedUseCase
+import chkan.ua.shoppinglist.core.analytics.AnalyticsUserRoleCollector
 import chkan.ua.shoppinglist.core.services.SharedPreferencesService
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.IS_FIRST_LAUNCH
 import chkan.ua.shoppinglist.core.services.SharedPreferencesServiceImpl.Companion.LAST_OPEN_LIST_ID_INT
@@ -31,7 +34,9 @@ class SessionViewModel @Inject constructor(
     private val spService: SharedPreferencesService,
     private val subscriptionStateManager: SubscriptionStateManager,
     private val paywallCollector: PaywallCollector,
-    private val logger: Logger
+    private val isInvitedUseCase: IsInvitedUseCase,
+    private val logger: Logger,
+    private val analytics: Analytics
 ) : ViewModel() {
 
     private val _sessionState = MutableStateFlow(SessionState())
@@ -40,10 +45,16 @@ class SessionViewModel @Inject constructor(
     private val _showPaywall = MutableStateFlow(false)
     val showPaywall = _showPaywall.asStateFlow()
 
+    private val userRoleCollector = AnalyticsUserRoleCollector{ role ->
+        analytics.setUserProperty("user_role",role)
+    }
+
     init {
         checkFirstLaunch()
         observeIsSubscribed()
+        checkIsInvited()
     }
+
     var isFirstLaunch = false
 
     private val _isLoadReady = mutableStateOf(false)
@@ -69,17 +80,30 @@ class SessionViewModel @Inject constructor(
     private fun observeIsSubscribed() {
         viewModelScope.launch {
             subscriptionStateManager.subscriptionState.collect { state ->
-                logger.d("SESSION_VM","subscriptionState: $state")
+                logger.d("SESSION_VM", "subscriptionState: $state")
                 when (state) {
                     SubscriptionState.Active -> {
                         _sessionState.update { it.copy(isSubscribed = true) }
                         _showPaywall.update { false }
+                        userRoleCollector.onPaidStatus(true)
                     }
+
                     SubscriptionState.Inactive -> {
                         _sessionState.update { it.copy(isSubscribed = false) }
                         paywallCollector.init()
+                        userRoleCollector.onPaidStatus(false)
                     }
+
                     SubscriptionState.Loading -> {}
+                    is SubscriptionState.NewPurchase -> {
+                        _sessionState.update { it.copy(isSubscribed = true) }
+                        _showPaywall.update { false }
+                        analytics.logEvent(
+                            "purchase_subscription_purchased",
+                            mapOf("product_id" to state.productId, "role" to if(_sessionState.value.isInvited) "invited" else "user")
+                        )
+                        userRoleCollector.onPaidStatus(true)
+                    }
                 }
             }
         }
@@ -114,5 +138,13 @@ class SessionViewModel @Inject constructor(
 
     fun hidePaywall() {
         _showPaywall.value = false
+    }
+
+    private fun checkIsInvited() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val isInvited = isInvitedUseCase.get()
+            userRoleCollector.onInviteStatus(isInvited)
+            _sessionState.update { it.copy(isInvited = isInvited) }
+        }
     }
 }

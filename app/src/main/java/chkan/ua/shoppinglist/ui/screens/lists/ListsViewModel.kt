@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import chkan.ua.core.exceptions.ResourceCode
 import chkan.ua.core.exceptions.UserMessageException
+import chkan.ua.domain.Analytics
 import chkan.ua.domain.Logger
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.objects.Deletable
@@ -16,7 +17,6 @@ import chkan.ua.domain.usecases.lists.MoveToTopUseCase
 import chkan.ua.domain.usecases.lists.MoveTop
 import chkan.ua.domain.usecases.share.GetSharedListsFlowUseCase
 import chkan.ua.domain.usecases.share.HasSharedListsUseCase
-import chkan.ua.domain.usecases.share.JoinListUseCase
 import chkan.ua.domain.usecases.share.ShareListUseCase
 import chkan.ua.domain.usecases.share.StopSharingUseCase
 import chkan.ua.domain.usecases.share.UnfollowUseCase
@@ -48,6 +48,7 @@ class ListsViewModel @Inject constructor(
     private val hasSharedListsUseCase: HasSharedListsUseCase,
     private val unfollow: UnfollowUseCase,
     val eventBus: EventBus,
+    private val analytics: Analytics,
 ) : ViewModel() {
 
     init {
@@ -60,6 +61,7 @@ class ListsViewModel @Inject constructor(
     val sharedListsFlow: StateFlow<List<ListItemsUi>> = _sharedListsFlow.asStateFlow()
 
     private var sharedObservationJob: Job? = null
+    private var isShareListsCountAnalyticsSent: Boolean = false
 
     private fun observeHasSharedLists() {
         viewModelScope.launch {
@@ -79,6 +81,7 @@ class ListsViewModel @Inject constructor(
             getSharedListsFlow(Unit).collect { lists ->
                 logger.d("LISTS_VM","shared lists size: ${lists.size}")
                 _sharedListsFlow.value = lists
+                sendSharedListSizeToAnalyticaIfNeed(lists.size)
             }
         }
     }
@@ -158,5 +161,11 @@ class ListsViewModel @Inject constructor(
                     errorHandler.handle(it, it.message)
                 }
         }
+    }
+
+    fun sendSharedListSizeToAnalyticaIfNeed(size: Int) {
+        if (isShareListsCountAnalyticsSent) return
+        isShareListsCountAnalyticsSent = true
+        analytics.setUserProperty("lists_count_shared",size.toString())
     }
 }
