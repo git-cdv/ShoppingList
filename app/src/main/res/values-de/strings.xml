@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Colistly</string>
-    <string name="first_list_text_placeholder">z. B. „To-do-Liste“ oder „Einkaufsliste“</string>
+    <string name="first_list_text_placeholder">z. B. „To-do-Liste“ oder „Ideen“</string>
     <string name="first_list_text_title">Wie möchtest du deine Liste nennen?</string>
     <string name="groceries">Einkaufsliste</string>
     <string name="delete">Löschen</string>
@@ -58,10 +58,10 @@
     <string name="month_small">Monat</string>
     <string name="year_small">Jahr</string>
     <string name="unlimited_access">Unbegrenzter Zugang</string>
-    <string name="best_value">Bestes Angebot</string>
+    <string name="best_value">"Bester Wert"</string>
     <string name="popular">Beliebt</string>
     <string name="by_continuing_i_agree_to_the">Durch Fortfahren stimme ich den </string>
-    <string name="privacy_policy">Datenschutzrichtlinien</string>
+    <string name="privacy_policy">Datenschutzerklärung</string>
     <string name="terms_of_use">Nutzungsbedingungen</string>
     <string name="ready_join">Du wurdest eingeladen</string>
     <string name="join">Beitreten</string>

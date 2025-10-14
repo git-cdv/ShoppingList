@@ -483,7 +483,7 @@ fun ItemsScreenContent(
 fun showShareLink(context: Context, listId: String) {
     val code = "${listId.first()}${listId.last()}$listId"
     val sharedLink =
-        "${context.getString(R.string.join_my_list)} https://colistly.web.app/?code=$code"
+        "${context.getString(R.string.join_my_list)} https://colistly.web.app/join?code=$code"
     shareLink(context, sharedLink)
 }
 

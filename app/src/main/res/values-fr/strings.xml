@@ -44,7 +44,7 @@
     <string name="year">Année</string>
     <string name="popular_caps">POPULAIRE</string>
     <string name="only">seulement</string>
-    <string name="weekly">Hebdomadaire</string>
+    <string name="weekly">Hebdo</string>
     <string name="plan">Abonnement</string>
     <string name="week">Semaine</string>
     <string name="monthly">Mensuel</string>
@@ -62,7 +62,7 @@
     <string name="popular">Populaire</string>
     <string name="by_continuing_i_agree_to_the">En continuant, j’accepte la </string>
     <string name="privacy_policy">Politique de confidentialité</string>
-    <string name="terms_of_use">Conditions d’utilisation</string>
+    <string name="terms_of_use">Conditions d\'utilisation</string>
     <string name="ready_join">Vous avez été invité</string>
     <string name="join">Rejoindre</string>
     <string name="error_list_not_found">Liste introuvable. Elle a peut-être été supprimée ou le lien a expiré.</string>
@@ -72,8 +72,8 @@
     <string name="error_restore_purchases_failed_message">Aucun achat à restaurer pour le moment.</string>
     <string name="error_create_sharing_list">Une erreur est survenue lors du partage de la liste. Veuillez réessayer plus tard.</string>
     <string name="error_stop_sharing">Une erreur est survenue lors de l’arrêt du partage. Veuillez réessayer plus tard.</string>
-    <string name="unlimited_lists">Listes illimitées</string>
-    <string name="сollab_lists">Listes collaboratives</string>
+    <string name="unlimited_lists">Listes\nillimitées</string>
+    <string name="сollab_lists">Listes\ncollaboratives</string>
     <string name="intelligent_suggestions">Suggestions\nintelligentes</string>
     <string name="join_describe">Rejoignez dès maintenant pour commencer à partager et modifier avec d’autres.</string>
     <string name="sure_unfollow_list">Voulez-vous vraiment ne plus suivre cette liste ?</string>

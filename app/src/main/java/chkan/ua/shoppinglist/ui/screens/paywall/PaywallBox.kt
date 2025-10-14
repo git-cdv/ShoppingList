@@ -216,7 +216,7 @@ fun PaywallBox(
                     modifier = Modifier.clickable {
                         goToWebUrl(
                             context,
-                            "https://"
+                            "https://colistly.web.app/terms/"
                         )
                     })
                 Text(
@@ -232,7 +232,7 @@ fun PaywallBox(
                     modifier = Modifier.clickable {
                         goToWebUrl(
                             context,
-                            "https://"
+                            "https://colistly.web.app/pp/"
                         )
                     })
             }

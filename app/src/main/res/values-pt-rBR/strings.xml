@@ -72,8 +72,8 @@
     <string name="error_restore_purchases_failed_message">Nenhum item disponível para restaurar no momento.</string>
     <string name="error_create_sharing_list">Ocorreu um erro ao compartilhar a lista. Tente novamente mais tarde.</string>
     <string name="error_stop_sharing">Ocorreu um erro ao parar o compartilhamento. Tente novamente mais tarde.</string>
-    <string name="unlimited_lists">Listas ilimitadas</string>
-    <string name="сollab_lists">Listas colaborativas</string>
+    <string name="unlimited_lists">Listas\nilimitadas</string>
+    <string name="сollab_lists">Listas\ncolaborativas</string>
     <string name="intelligent_suggestions">Sugestões\ninteligentes</string>
     <string name="join_describe">Entre agora para começar a compartilhar e editar com outras pessoas.</string>
     <string name="sure_unfollow_list">Tem certeza de que deseja deixar de seguir esta lista?</string>

@@ -62,7 +62,7 @@
     <string name="popular">Popular</string>
     <string name="by_continuing_i_agree_to_the">Al continuar, acepto la </string>
     <string name="privacy_policy">Política de privacidad</string>
-    <string name="terms_of_use">Términos de uso</string>
+    <string name="terms_of_use">Condiciones de uso</string>
     <string name="ready_join">Has sido invitado</string>
     <string name="join">Unirse</string>
     <string name="error_list_not_found">Lista no encontrada. Puede haber sido eliminada o el enlace ha expirado.</string>
@@ -72,8 +72,8 @@
     <string name="error_restore_purchases_failed_message">No hay elementos disponibles para restaurar.</string>
     <string name="error_create_sharing_list">Error al compartir la lista. Inténtalo más tarde.</string>
     <string name="error_stop_sharing">Error al dejar de compartir la lista. Inténtalo más tarde.</string>
-    <string name="unlimited_lists">Listas ilimitadas</string>
-    <string name="сollab_lists">Listas colaborativas</string>
+    <string name="unlimited_lists">Listas\nilimitadas</string>
+    <string name="сollab_lists">Listas\ncolaborativas</string>
     <string name="intelligent_suggestions">Sugerencias\ninteligentes</string>
     <string name="join_describe">Únete ahora para compartir y editar con otros.</string>
     <string name="sure_unfollow_list">¿Seguro que quieres dejar de seguir esta lista?</string>

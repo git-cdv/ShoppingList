@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,9 +36,13 @@ import chkan.ua.shoppinglist.ui.screens.paywall.data.PaywallItem
 import chkan.ua.shoppinglist.ui.screens.paywall.data.ProductType
 import chkan.ua.shoppinglist.ui.theme.LableExtraSmallTextStyle
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
+import chkan.ua.shoppinglist.utils.isCurrentLocale
 
 @Composable
 fun PaywallItemCardAfterReview(item: PaywallItem, onItemSelected: (PaywallItem) -> Unit) {
+
+    val locale = LocalConfiguration.current.locales[0]
+
     val heightCard = if (item.isSelected) {
         163.dp
     } else {
@@ -122,7 +127,7 @@ fun PaywallItemCardAfterReview(item: PaywallItem, onItemSelected: (PaywallItem) 
             ) {
                 Text(
                     text = item.topName,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = if (locale.isCurrentLocale(listOf("de","ru","uk"))) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium,
                     color = if (item.isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
                 )
 

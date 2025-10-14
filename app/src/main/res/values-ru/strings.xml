@@ -58,11 +58,11 @@
     <string name="month_small">месяц</string>
     <string name="year_small">год</string>
     <string name="unlimited_access">Безлимитный доступ</string>
-    <string name="best_value">Лучшее предложение</string>
+    <string name="best_value">Лучшее</string>
     <string name="popular">Популярно</string>
     <string name="by_continuing_i_agree_to_the">Продолжая, я соглашаюсь с </string>
-    <string name="privacy_policy">Политикой конфиденциальности</string>
-    <string name="terms_of_use">Условиями использования</string>
+    <string name="privacy_policy">Политика конфиденциальности</string>
+    <string name="terms_of_use">Условия использования</string>
     <string name="ready_join">Вас пригласили</string>
     <string name="join">Присоединиться</string>
     <string name="error_list_not_found">Список не найден. Возможно, он был удалён или ссылка устарела.</string>
@@ -73,7 +73,7 @@
     <string name="error_create_sharing_list">Ошибка при совместном использовании списка. Попробуйте позже.</string>
     <string name="error_stop_sharing">Ошибка при остановке совместного доступа. Попробуйте позже.</string>
     <string name="unlimited_lists">Безлимитные списки</string>
-    <string name="collab_lists">Совместные списки</string>
+    <string name="сollab_lists">Совместные списки</string>
     <string name="intelligent_suggestions">Умные\nпредложения</string>
     <string name="join_describe">Присоединяйтесь, чтобы делиться и редактировать списки вместе с другими.</string>
     <string name="sure_unfollow_list">Вы уверены, что хотите отписаться от этого списка?</string>
