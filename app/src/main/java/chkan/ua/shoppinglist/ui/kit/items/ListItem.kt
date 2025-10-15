@@ -213,7 +213,7 @@ fun ListItemPreview() {
     ShoppingListTheme {
         ListItem(ListItemsUi(
             id = "2138",
-            title = "Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 ",
+            title = "Item 12345 Item 12345 Item 12345 Item 12345 Item 12345 ",
             position = 2,
             count = 5,
             readyCount = 2,
