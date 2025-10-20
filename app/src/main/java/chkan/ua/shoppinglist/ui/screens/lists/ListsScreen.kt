@@ -1,6 +1,5 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
-import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -107,13 +106,17 @@ fun ListsScreen(
         onListEvent = { event ->
             when (event) {
                 is ListUiEvent.OnCardClick -> {
-                    navController.navigate(
-                        ItemsRoute(
-                            event.list.id,
-                            event.list.title,
-                            event.list.role
+                    if(sessionState.isSubscribed != true && event.list.role != ListRole.LOCAL){
+                        sessionViewModel.showPaywall()
+                    } else {
+                        navController.navigate(
+                            ItemsRoute(
+                                event.list.id,
+                                event.list.title,
+                                event.list.role
+                            )
                         )
-                    )
+                    }
                 }
 
                 ListUiEvent.OnCreateList -> {
