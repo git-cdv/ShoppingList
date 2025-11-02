@@ -132,12 +132,19 @@ fun AddItemContainer(
             Icon(
                 Icons.Filled.Add,
                 contentDescription = "Done",
-                tint = MaterialTheme.colorScheme.primary,
+                tint = if (itemText.isEmpty())
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                else
+                    MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .padding(start = 8.dp)
                     .size(28.dp)
                     .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
-                    .clickable { onDone.invoke() })
+                    .clickable {
+                        if (itemText.isEmpty()) return@clickable
+                        onDone.invoke()
+                    }
+            )
         }
     }
 }

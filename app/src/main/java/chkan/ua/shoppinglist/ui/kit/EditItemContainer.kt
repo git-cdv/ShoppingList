@@ -35,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import chkan.ua.shoppinglist.R
 import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
+import kotlin.text.isEmpty
 
 @Composable
 fun EditItemContainer(
@@ -146,19 +147,22 @@ fun EditItemContainer(
                 }
             )
 
-            if (itemText.text.isNotBlank()){
-                Icon(
-                    Icons.Filled.Done,
-                    contentDescription = "Done",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .size(28.dp)
-                        .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
-                        .clickable { onDone.invoke() })
-            } else {
-                Spacer(modifier = Modifier.height(28.dp))
-            }
+            Icon(
+                Icons.Filled.Done,
+                contentDescription = "Done",
+                tint = if (itemText.text.isEmpty())
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                else
+                    MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .size(28.dp)
+                    .clip(RoundedCornerShape(dimensionResource(id = R.dimen.rounded_corner)))
+                    .clickable {
+                        if (itemText.text.isEmpty()) return@clickable
+                        onDone.invoke()
+                    }
+            )
         }
     }
 }
