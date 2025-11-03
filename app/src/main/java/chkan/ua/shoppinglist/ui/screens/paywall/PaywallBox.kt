@@ -105,7 +105,7 @@ fun PaywallBox(
                         ),
                         BenefitsItem(
                             R.drawable.ic_share,
-                            stringResource(R.string.сollaborative_lists)
+                            stringResource(R.string.сollab_lists)
                         )
                     ),
                     Modifier.weight(1f)
@@ -216,7 +216,7 @@ fun PaywallBox(
                     modifier = Modifier.clickable {
                         goToWebUrl(
                             context,
-                            "https://"
+                            "https://colistly.web.app/terms/"
                         )
                     })
                 Text(
@@ -232,7 +232,7 @@ fun PaywallBox(
                     modifier = Modifier.clickable {
                         goToWebUrl(
                             context,
-                            "https://"
+                            "https://colistly.web.app/pp/"
                         )
                     })
             }

@@ -62,6 +62,7 @@ import chkan.ua.shoppinglist.ui.kit.bottom_sheets.AddItemBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.BottomSheetAction
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.ConfirmBottomSheet
 import chkan.ua.shoppinglist.ui.kit.bottom_sheets.EditBottomSheet
+import chkan.ua.shoppinglist.ui.kit.bottom_sheets.EditItemBottomSheet
 import chkan.ua.shoppinglist.ui.kit.empty_state.CenteredTextScreen
 import chkan.ua.shoppinglist.ui.kit.items.ItemItem
 import chkan.ua.shoppinglist.ui.kit.items.ReadyItem
@@ -152,17 +153,17 @@ fun ItemsScreen(
                 scope.launch { addItemSheetState.hide() }
             }
         },
-        onDeleteItem = { item -> itemsViewModel.processIntent(ItemsIntent.DeleteItem(item)) },
+        onDeleteItem = { item -> itemsViewModel.processIntent(DeleteItem(item)) },
         onMarkReady = { item, state ->
             itemsViewModel.processIntent(
-                ItemsIntent.MarkReady(
+                MarkReady(
                     item,
                     state
                 )
             )
         },
         goToBack = { navController.popBackStack() },
-        clearReadyItems = { itemsViewModel.processIntent(ItemsIntent.ClearReadyItems(listId)) },
+        clearReadyItems = { itemsViewModel.processIntent(ClearReadyItems(listId)) },
         onEditItem = { edited ->
             editable = edited
             showEditBottomSheet = true
@@ -170,7 +171,7 @@ fun ItemsScreen(
         },
         onMoveToTop = { id, position ->
             itemsViewModel.processIntent(
-                ItemsIntent.MoveToTop(
+                MoveToTop(
                     id,
                     position
                 )
@@ -202,18 +203,17 @@ fun ItemsScreen(
             },
             addItem = { addedItem ->
                 itemsViewModel.processIntent(
-                    ItemsIntent.AddItem(
+                    AddItem(
                         title = addedItem.content.firstAsTitle(),
                         note = addedItem.note
                     )
                 )
-            },
-            R.string.items_text_placeholder
+            }
         )
     }
 
     if (showEditBottomSheet) {
-        EditBottomSheet(
+        EditItemBottomSheet(
             editSheetState,
             onDismiss = { showEditBottomSheet = false },
             onEdit = { edited -> itemsViewModel.processIntent(EditItem(edited)) },
@@ -483,7 +483,7 @@ fun ItemsScreenContent(
 fun showShareLink(context: Context, listId: String) {
     val code = "${listId.first()}${listId.last()}$listId"
     val sharedLink =
-        "${context.getString(R.string.join_my_list)} https://colistly.web.app/?code=$code"
+        "${context.getString(R.string.join_my_list)} https://colistly.web.app/join?code=$code"
     shareLink(context, sharedLink)
 }
 

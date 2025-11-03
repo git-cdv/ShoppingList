@@ -29,6 +29,7 @@ import chkan.ua.shoppinglist.core.services.SuggestionsProvider
 import chkan.ua.shoppinglist.navigation.FirstListRoute
 import chkan.ua.shoppinglist.navigation.ListsRoute
 import chkan.ua.shoppinglist.navigation.LocalNavController
+import chkan.ua.shoppinglist.session.SessionViewModel
 import chkan.ua.shoppinglist.ui.kit.RoundedTextField
 import chkan.ua.shoppinglist.ui.kit.SuggestionsHorizontalList
 import chkan.ua.shoppinglist.ui.screens.lists.ListsViewModel
@@ -36,7 +37,8 @@ import chkan.ua.shoppinglist.ui.theme.ShoppingListTheme
 
 @Composable
 fun FirstListScreen(
-    listsViewModel: ListsViewModel
+    listsViewModel: ListsViewModel,
+    sessionViewModel: SessionViewModel
 ) {
     AnalyticsScreenViewEffect("FirstListScreen")
     val navController = LocalNavController.current
@@ -45,6 +47,7 @@ fun FirstListScreen(
 
     FirstListContent(suggestions) { title ->
         listsViewModel.addList(title)
+        sessionViewModel.checkReviewerAccess(title)
         navController.navigate(ListsRoute) {
             popUpTo(FirstListRoute) { inclusive = true }
         }

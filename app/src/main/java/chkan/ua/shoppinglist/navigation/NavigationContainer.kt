@@ -40,7 +40,7 @@ fun NavigationContainer(
             startDestination = startDestination,
             modifier = Modifier.fillMaxSize()
         ) {
-            composable<FirstListRoute> { FirstListScreen(listsViewModel) }
+            composable<FirstListRoute> { FirstListScreen(listsViewModel,sessionViewModel) }
             composable<ItemsRoute>(
                 enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },

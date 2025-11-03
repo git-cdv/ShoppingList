@@ -24,8 +24,8 @@ android {
         applicationId = "com.colistly.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 11
-        versionName = "0.1"
+        versionCode = 15
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -43,12 +43,16 @@ android {
     }
 
     buildTypes {
+        debug {
+            manifestPlaceholders["firebaseCrashlyticsCollectionEnabled"] = false
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            manifestPlaceholders["firebaseCrashlyticsCollectionEnabled"] = true
         }
         create("stage") {
             initWith(getByName("release"))

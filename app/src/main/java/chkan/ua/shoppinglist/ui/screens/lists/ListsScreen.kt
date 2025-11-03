@@ -1,6 +1,5 @@
 package chkan.ua.shoppinglist.ui.screens.lists
 
-import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.core.models.ListRole
+import chkan.ua.core.models.isShared
 import chkan.ua.domain.models.ListItemsUi
 import chkan.ua.domain.models.ListProgress
 import chkan.ua.domain.objects.Deletable
@@ -107,13 +107,27 @@ fun ListsScreen(
         onListEvent = { event ->
             when (event) {
                 is ListUiEvent.OnCardClick -> {
-                    navController.navigate(
-                        ItemsRoute(
-                            event.list.id,
-                            event.list.title,
-                            event.list.role
+                    if (event.list.role.isShared){
+                        if(sessionState.isSubscribed != true && event.list.role != ListRole.SHARED_MEMBER){
+                            sessionViewModel.showPaywall()
+                        } else {
+                            navController.navigate(
+                                ItemsRoute(
+                                    event.list.id,
+                                    event.list.title,
+                                    event.list.role
+                                )
+                            )
+                        }
+                    } else {
+                        navController.navigate(
+                            ItemsRoute(
+                                event.list.id,
+                                event.list.title,
+                                event.list.role
+                            )
                         )
-                    )
+                    }
                 }
 
                 ListUiEvent.OnCreateList -> {

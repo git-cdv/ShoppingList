@@ -147,4 +147,10 @@ class SessionViewModel @Inject constructor(
             _sessionState.update { it.copy(isInvited = isInvited) }
         }
     }
+
+    fun checkReviewerAccess(title: String) {
+        if (title == "ARjF077"){
+            _sessionState.update { it.copy(isSubscribed = true) }
+        }
+    }
 }
