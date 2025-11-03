@@ -43,9 +43,13 @@ class PaywallCollector @Inject constructor(
 ) {
 
     companion object {
-        const val WEEK_ID = "cl.week.7.99"
+        /*const val WEEK_ID = "cl.week.7.99"
         const val MONTH_ID = "cl.month.19.99"
-        const val YEAR_ID = "cl.year.59.99"
+        const val YEAR_ID = "cl.year.59.99"*/
+
+        const val WEEK_ID = "cl.week.1.49"
+        const val MONTH_ID = "cl.month.2.99"
+        const val YEAR_ID = "cl.year.14.99"
     }
 
     private var weeklyPrice: Double = 0.0
