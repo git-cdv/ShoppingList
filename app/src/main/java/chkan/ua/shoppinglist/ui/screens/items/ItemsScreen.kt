@@ -49,6 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chkan.ua.core.extensions.firstAsTitle
 import chkan.ua.core.models.ListRole
 import chkan.ua.core.models.isShared
+import chkan.ua.core.models.toListRole
 import chkan.ua.domain.models.Item
 import chkan.ua.domain.objects.Editable
 import chkan.ua.shoppinglist.R
@@ -88,7 +89,7 @@ fun ItemsScreen(
     val analytics = LocalAnalytics.current
     val listId = args.listId
     val listTitle = args.listTitle
-    val role = args.role
+    val role = args.role.toListRole()
 
     //confirmShare
     var showConfirmShareBottomSheet by remember { mutableStateOf(false) }

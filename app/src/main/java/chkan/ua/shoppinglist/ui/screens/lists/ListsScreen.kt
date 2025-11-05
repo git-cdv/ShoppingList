@@ -115,7 +115,7 @@ fun ListsScreen(
                                 ItemsRoute(
                                     event.list.id,
                                     event.list.title,
-                                    event.list.role
+                                    event.list.role.name
                                 )
                             )
                         }
@@ -124,7 +124,7 @@ fun ListsScreen(
                             ItemsRoute(
                                 event.list.id,
                                 event.list.title,
-                                event.list.role
+                                event.list.role.name
                             )
                         )
                     }

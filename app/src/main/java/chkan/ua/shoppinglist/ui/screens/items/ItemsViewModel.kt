@@ -8,6 +8,7 @@ import chkan.ua.core.exceptions.ResourceCode
 import chkan.ua.core.exceptions.UserMessageException
 import chkan.ua.core.models.ListRole
 import chkan.ua.core.models.isShared
+import chkan.ua.core.models.toListRole
 import chkan.ua.core.models.toPreferenceString
 import chkan.ua.domain.Logger
 import chkan.ua.domain.models.Item
@@ -82,7 +83,7 @@ class ItemsViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         ItemsState(
             listId = savedStateHandle.get<String>("listId") ?: "",
-            role = savedStateHandle.get<ListRole>("role") ?: ListRole.LOCAL
+            role = savedStateHandle.get<String>("role")?.toListRole() ?: ListRole.LOCAL
         )
     )
     val state: StateFlow<ItemsState> = _state.asStateFlow()
