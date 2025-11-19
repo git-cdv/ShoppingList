@@ -145,7 +145,6 @@ fun ItemsScreen(
         uiState = uiState,
         isLoading = isLoading,
         sessionState = sessionState,
-        context = context,
         handleAddItemSheet = { isShow ->
             itemsViewModel.processAddItemBottomSheetChange(BottomSheetAction.SetIsOpen(isShow))
             if (isShow) {
@@ -273,7 +272,6 @@ fun ItemsScreenContent(
     title: String,
     uiState: ItemsState,
     sessionState: SessionState,
-    context: Context,
     handleAddItemSheet: (Boolean) -> Unit,
     onMarkReady: (Item, Boolean) -> Unit,
     onDeleteItem: (Item) -> Unit,
@@ -292,6 +290,7 @@ fun ItemsScreenContent(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var isReadyShown by remember { mutableStateOf(false) }
     val analytics = LocalAnalytics.current
+    val context = LocalContext.current
 
     Scaffold(
         modifier = Modifier
@@ -406,7 +405,7 @@ fun ItemsScreenContent(
             ) {
                 itemsIndexed(
                     uiState.notReadyItems,
-                    key = { _, item -> item.itemId }) { index, item ->
+                    key = { _, item -> "nr${item.itemId}" }) { index, item ->
                     ItemItem(
                         text = item.content,
                         note = item.note,
@@ -448,7 +447,7 @@ fun ItemsScreenContent(
                 }
 
                 if (isReadyShown) {
-                    items(uiState.readyItems, key = { it.itemId }) { item ->
+                    items(uiState.readyItems, key = { "r${it.itemId}" }) { item ->
                         ReadyItem(
                             text = item.content,
                             modifier = Modifier.animateItem(),
@@ -507,7 +506,6 @@ fun ItemsScreenContentPreview() {
             "Title",
             uiState = ItemsState(),
             sessionState = SessionState(),
-            context = LocalContext.current,
             {},
             { _, _ -> },
             {},
