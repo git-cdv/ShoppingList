@@ -18,12 +18,12 @@ keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 
 android {
     namespace = "chkan.ua.shoppinglist"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.colistly.app"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 37
         versionCode = 16
         versionName = "1.0.2"
 
