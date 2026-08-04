@@ -45,5 +45,5 @@ interface ItemsDao {
     @Query("UPDATE items SET position = 0 WHERE itemId = :id")
     suspend fun moveItemToTop(id: String)
     @Query("DELETE FROM items WHERE listId = :listId")
-    fun deleteItemsOfList(listId: String)
+    suspend fun deleteItemsOfList(listId: String)
 }

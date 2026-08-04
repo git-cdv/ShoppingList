@@ -59,7 +59,7 @@ fun NavigationContainer(
         if (startDestination is ListsRoute && !inviteViewModel.isLaunchWithInvite()){
             val lastOpenedList = sessionViewModel.getLastOpenedList()
             if (lastOpenedList != null){
-                navController.navigate(ItemsRoute(lastOpenedList.id,lastOpenedList.title, lastOpenedList.role)){
+                navController.navigate(ItemsRoute(lastOpenedList.id,lastOpenedList.title, lastOpenedList.role.name)){
                     popUpTo(ListsRoute) { inclusive = false }
                 }
             }

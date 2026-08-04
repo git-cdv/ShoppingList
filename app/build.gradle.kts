@@ -18,14 +18,14 @@ keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 
 android {
     namespace = "chkan.ua.shoppinglist"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.colistly.app"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 15
-        versionName = "1.0.1"
+        targetSdk = 37
+        versionCode = 17
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -57,6 +57,7 @@ android {
         create("stage") {
             initWith(getByName("release"))
             signingConfig = signingConfigs.getByName("stage")
+            matchingFallbacks += listOf("release")
         }
     }
     compileOptions {

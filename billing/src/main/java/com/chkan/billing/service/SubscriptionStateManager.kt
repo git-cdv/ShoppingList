@@ -31,9 +31,9 @@ sealed class SubscriptionState {
 @Singleton
 class SubscriptionStateManager @Inject constructor(
     private val billingRepository: BillingRepository,
-    @ApplicationContext private val context: Context,
-    @Dispatcher(DispatcherType.IO) private val ioDispatcher: CoroutineDispatcher,
-    @ApplicationScope private val scope: CoroutineScope,
+    @param:ApplicationContext private val context: Context,
+    @param:Dispatcher(DispatcherType.IO) private val ioDispatcher: CoroutineDispatcher,
+    @param:ApplicationScope private val scope: CoroutineScope,
     private val logger: BillingLogger
 ) {
 
