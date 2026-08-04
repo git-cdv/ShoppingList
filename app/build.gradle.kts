@@ -57,6 +57,7 @@ android {
         create("stage") {
             initWith(getByName("release"))
             signingConfig = signingConfigs.getByName("stage")
+            matchingFallbacks += listOf("release")
         }
     }
     compileOptions {
