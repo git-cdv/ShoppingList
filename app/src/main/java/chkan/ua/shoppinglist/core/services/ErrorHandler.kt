@@ -25,7 +25,7 @@ interface ErrorHandler {
 @Singleton
 class ErrorHandlerImpl @Inject constructor(
     private val logger: Logger,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) : ErrorHandler {
 
     private val errorChannel = Channel<String>()

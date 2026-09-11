@@ -41,8 +41,8 @@ import kotlin.time.Duration.Companion.milliseconds
 @Singleton
 class SubscriptionBillingService @Inject constructor(
     private val context: Context,
-    @Dispatcher(DispatcherType.IO) private val ioDispatcher: CoroutineDispatcher,
-    @ApplicationScope private val scope: CoroutineScope,
+    @param:Dispatcher(DispatcherType.IO) private val ioDispatcher: CoroutineDispatcher,
+    @param:ApplicationScope private val scope: CoroutineScope,
     private val logger: BillingLogger
 ) : PurchasesUpdatedListener {
 
