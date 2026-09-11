@@ -18,12 +18,12 @@ keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 
 android {
     namespace = "chkan.ua.shoppinglist"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.colistly.app"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 37
         versionCode = 16
         versionName = "1.0.2"
 
@@ -60,11 +60,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "21"
         freeCompilerArgs += listOf(
             "-P",
             "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=${buildDir.absolutePath}/compose_reports",

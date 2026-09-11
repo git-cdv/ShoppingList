@@ -10,12 +10,16 @@ object SubscriptionMapper {
 
     fun ProductDetails.toDomainSubscription(): Subscription {
         val subscriptionOffer = subscriptionOfferDetails?.firstOrNull()
-        val pricingPhase = subscriptionOffer?.pricingPhases?.pricingPhaseList?.firstOrNull()
+        val pricingPhase = subscriptionOffer?.pricingPhases?.pricingPhaseList?.lastOrNull()
+        val oneTimePurchase = oneTimePurchaseOfferDetails
 
         return Subscription(
             productId = productId,
-            priceCurrencyCode = pricingPhase?.priceCurrencyCode ?: "",
-            price = (pricingPhase?.priceAmountMicros ?: 0L) / 1_000_000.0
+            priceCurrencyCode = pricingPhase?.priceCurrencyCode
+                ?: oneTimePurchase?.priceCurrencyCode ?: "",
+            price = (pricingPhase?.priceAmountMicros
+                ?: oneTimePurchase?.priceAmountMicros ?: 0L) / 1_000_000.0,
+            offerToken = subscriptionOffer?.offerToken
         )
     }
 

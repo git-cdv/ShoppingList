@@ -9,6 +9,7 @@ import com.chkan.billing.domain.BillingRepository
 import com.chkan.billing.domain.error.PurchasesError
 import com.chkan.billing.domain.error.PurchasesException
 import com.chkan.billing.domain.error.toPurchasesException
+import com.chkan.billing.domain.model.ProductType
 import com.chkan.billing.domain.model.Subscription
 import com.chkan.billing.domain.model.SubscriptionPurchase
 import com.chkan.billing.service.SubscriptionBillingService
@@ -33,9 +34,20 @@ class BillingRepositoryImpl @Inject constructor(
 
     override val billingConnectionState: Flow<Result<Boolean>> = billingService.connectionStateFlow
 
-    override suspend fun querySubscriptions(productIds: List<String>): Result<List<Subscription>> {
-        val (billingResult, productDetailsList) = billingService.querySubscriptionDetails(productIds)
-        logger.d(TAG,"Subscriptions: size ${productDetailsList?.size} with response code ${billingResult.responseCode}")
+    override suspend fun querySubscriptions(
+        productIds: List<String>,
+        productType: ProductType
+    ): Result<List<Subscription>> {
+        val billingProductType = when (productType) {
+            ProductType.SUBS -> BillingClient.ProductType.SUBS
+            ProductType.INAPP -> BillingClient.ProductType.INAPP
+        }
+
+        val (billingResult, productDetailsList) = billingService.queryProductDetails(
+            productIds, billingProductType
+        )
+        logger.d(TAG, "Products ($productType): size ${productDetailsList?.size} " +
+            "with response code ${billingResult.responseCode}")
 
         return if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList != null) {
             Result.success(productDetailsList.map { it.toDomainSubscription() })
@@ -48,10 +60,18 @@ class BillingRepositoryImpl @Inject constructor(
     override suspend fun launchSubscriptionPurchase(
         activity: Activity,
         productId: String,
+        productType: ProductType,
         offerToken: String?
     ) {
+        val billingProductType = when (productType) {
+            ProductType.SUBS -> BillingClient.ProductType.SUBS
+            ProductType.INAPP -> BillingClient.ProductType.INAPP
+        }
+
         val product = try {
-            val (_, productDetailsList) = billingService.querySubscriptionDetails(listOf(productId))
+            val (_, productDetailsList) = billingService.queryProductDetails(
+                listOf(productId), billingProductType
+            )
             productDetailsList?.firstOrNull() ?: throw PurchasesException(
                 PurchasesError.ProductNotAvailableForPurchaseError,
                 message = "Product $productId not found"
@@ -60,19 +80,20 @@ class BillingRepositoryImpl @Inject constructor(
             throw t.toPurchasesException()
         }
 
-        val selectedOfferToken = offerToken
-            ?: product.subscriptionOfferDetails?.firstOrNull()?.offerToken
-            ?: throw PurchasesException(
-            PurchasesError.ProductNotAvailableForPurchaseError,
-            message = "No offer token available: $productId"
-        )
+        val resolvedOfferToken = when (productType) {
+            ProductType.SUBS -> {
+                offerToken
+                    ?: product.subscriptionOfferDetails?.firstOrNull()?.offerToken
+                    ?: throw PurchasesException(
+                        PurchasesError.ProductNotAvailableForPurchaseError,
+                        message = "No offer token available: $productId"
+                    )
+            }
+            ProductType.INAPP -> null
+        }
 
         try {
-            billingService.launchSubscriptionFlow(
-                activity,
-                product,
-                selectedOfferToken
-            )
+            billingService.launchPurchaseFlow(activity, product, resolvedOfferToken)
         } catch (e: Exception) {
             logger.e(e, "Purchase flow failed for product $productId")
             throw e.toPurchasesException()
@@ -80,7 +101,6 @@ class BillingRepositoryImpl @Inject constructor(
     }
 
     override suspend fun restorePurchases() = billingService.restorePurchases()
-
 
     override fun startConnection() {
         billingService.startConnection()

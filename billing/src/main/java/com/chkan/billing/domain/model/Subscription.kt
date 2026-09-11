@@ -4,4 +4,5 @@ data class Subscription(
     val productId: String,
     val priceCurrencyCode: String,
     val price: Double,
+    val offerToken: String? = null,
 )
