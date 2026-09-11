@@ -7,14 +7,17 @@ import chkan.ua.shoppinglist.core.remoteconfigs.RemoteConfigManager
 import chkan.ua.shoppinglist.di.ApplicationScope
 import chkan.ua.shoppinglist.di.Dispatcher
 import chkan.ua.shoppinglist.di.DispatcherType
+import com.chkan.billing.domain.BillingRepository
 import com.chkan.billing.domain.usecase.GetSubscriptionsUseCase
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import java.text.NumberFormat
 import java.util.Currency
 import javax.inject.Inject
@@ -39,7 +42,8 @@ class PaywallCollector @Inject constructor(
     @param:ApplicationScope private val scope: CoroutineScope,
     private val logger: Logger,
     private val remoteConfig: RemoteConfigManager,
-    private val getSubscriptionsUseCase: GetSubscriptionsUseCase
+    private val getSubscriptionsUseCase: GetSubscriptionsUseCase,
+    private val billingRepository: BillingRepository
 ) {
 
     companion object {
@@ -66,6 +70,16 @@ class PaywallCollector @Inject constructor(
         observeRemoteConfig()
         scope.launch(ioDispatcher) {
             try {
+                val connected = withTimeoutOrNull(7000L) {
+                    billingRepository.billingConnectionState.first { it.isSuccess }
+                }
+
+                if (connected == null) {
+                    logger.e(Exception("Billing connection timeout"))
+                    _items.update { collectPaywallItems() }
+                    return@launch
+                }
+
                 selectedId = MONTH_ID
                 val result = getSubscriptionsUseCase(listOf(WEEK_ID, MONTH_ID, YEAR_ID))
                 result
